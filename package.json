@@ -1,0 +1,16 @@
+{
+  "name": "feedfusion",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Feed Fusion Tanzania — monorepo root. Only exists so Vercel installs the backend's runtime dependencies where api/[...path].ts can resolve them. The frontend and backend keep their own package.json/lockfile for local dev exactly as before.",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.15.0",
+    "pg": "^8.12.0"
+  }
+}
