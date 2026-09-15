@@ -6,7 +6,8 @@
         },
         "backend": {
             "root": "backend",
-            "entrypoint": "src/server.ts"
+            "entrypoint": "src/server.ts",
+            "installCommand": "npm install"
         }
     },
     "rewrites": [
