@@ -1,0 +1,222 @@
+/* Whole-app visual redesign (2026-09-12, CLAUDE.md #56) — Manrope
+   (display/headings/big numbers) + Inter (body/UI), the same pairing as the
+   approved dashboard artifact; loaded via a <link> in index.html rather
+   than an @import here (an @import blocks the rest of this stylesheet
+   until the font CSS round-trips, a <link> doesn't). Replaces Plus Jakarta
+   Sans. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased dark:bg-[#0c1310] dark:text-[#eef3ef];
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  @apply bg-green-200 text-green-900;
+}
+
+/* Thin, brand-tinted scrollbars — small touch, noticeable polish. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8ed3a4 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #8ed3a4;
+  border-radius: 8px;
+}
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #124a35;
+}
+.dark * {
+  scrollbar-color: #124a35 transparent;
+}
+
+/* Printing a receipt, a Reports tab, or a Quotation: hide everything except
+   the marked print area. Two variants exist — see the split below — chosen
+   per print surface for a real reason, not interchangeably:
+     .print-area        — ReportsPage.tsx, QuotationViewPage.tsx: rendered
+                           directly in the normal page flow (not inside a
+                           Modal). Stays in normal (static) flow so it can
+                           be arbitrarily long and paginate across as many
+                           printed pages as it needs.
+     .print-area-modal  — ReceiptView.tsx: always rendered inside the
+                           shared `Modal` component (ui/index.tsx), which
+                           sits in a `relative` dialog box with its own
+                           `max-h-[90vh]` + `overflow-y-auto`. A receipt is
+                           always short (one invoice), so it's fine for
+                           this variant to stay pinned to a single page —
+                           what it needs instead is to escape the modal's
+                           own scroll/height clipping (see below). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area *,
+  .print-area-modal, .print-area-modal * {
+    visibility: visible;
+  }
+  /* Force background colors/images to actually print (2026-09-12, fix) —
+     the invoice/quotation's green table header, dark-green totals bar, and
+     light-green Sold-To/paid banners are all CSS *background* colors, and
+     every browser skips printing background colors by default (to save
+     ink) unless the person printing manually checks "Background graphics"
+     under the print dialog's "More settings" — easy to miss, and off by
+     default on a fresh install. `print-color-adjust: exact` overrides that
+     default in code, so the branded colors print every time without
+     depending on a per-print-job checkbox. (Text colors, like the blue
+     "INVOICE" title, aren't affected by this setting either way — they
+     always print.) */
+  .print-area, .print-area *,
+  .print-area-modal, .print-area-modal * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Real bug fixed 2026-09-13 (CLAUDE.md #63) — a full Reports tab (stat
+     cards + daily chart + donuts + a transactions table, easily 2-3 pages)
+     was silently losing everything past page 1 when printed: "report
+     inakata taarifa" (the report cuts off information). `.print-area` used
+     to get the exact same `position: fixed` + collapse treatment as the
+     receipt (see `.print-area-modal` below) — necessary to escape the
+     modal's clipping there, but wrong here: a `position: fixed` element
+     doesn't reflow across printed pages the way normal in-flow content
+     does, so anything beyond one page's height was just gone, not merely
+     moved to page 2. Confirmed with a Playwright print-to-PDF repro before
+     and after this fix (tall content: 1 page + a silently missing tail vs.
+     2 correct pages with nothing missing; short content: still exactly 1
+     page either way, so this doesn't reintroduce the old extra-blank-page
+     bug). Fixed by keeping `.print-area` in normal static flow (browsers
+     paginate normal-flow content correctly on their own) and instead
+     hiding the two specific always-present layout elements that used to
+     require the collapse trick — the sidebar and topbar, via their own
+     `.app-sidebar`/`.app-topbar` hooks (AppShell.tsx) rather than `body`'s
+     children generically, since a Reports/Quotation page's own on-screen
+     toolbar and tab bar are small enough that leaving their (invisible)
+     layout space alone via the plain `visibility: hidden` above doesn't
+     produce a stray extra page. */
+  .print-area {
+    position: static;
+  }
+  .app-sidebar,
+  .app-topbar {
+    display: none !important;
+  }
+
+  /* `position: fixed`, not `absolute` (2026-09-12, fix — a real pagination
+     bug reported by the owner: printing the Sale Complete / View Receipt
+     modal produced 2-3 pages with the totals row cut off mid-page and a
+     duplicate header). `.print-area-modal` sits inside the shared `Modal`
+     component's `relative` dialog box with its own `max-h-[90vh]` +
+     `overflow-y-auto` scroll area, and `position: absolute` positions
+     *relative to that box*, inheriting its height cap and clipping.
+     `position: fixed`'s containing block is the page/viewport itself
+     (unless an ancestor has an active transform/filter, which none here
+     do by the time Print is clicked), so it escapes the modal's own
+     sizing entirely. */
+  .print-area-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  /* Collapse the rest of the app's layout height at print time, ONLY for
+     the modal/receipt path above (2026-09-12, fix — a real leftover bug
+     from the `position: fixed` change: the owner reported a
+     correctly-fitting page 1 followed by a near-blank "page 2 of 2").
+     `body *` above only hides the rest of the SPA (sidebar nav, the Sales
+     History table behind the modal, etc.) via `visibility: hidden` — that
+     preserves its normal-flow layout height, which can easily be several
+     screens tall. Chrome computes how many pages to paginate from that
+     full (invisible) document height, and under CSS Paged Media a
+     `position: fixed` element is pinned to page 1 regardless — so a tall
+     invisible page behind a short receipt produced a second, essentially
+     empty page. Forcing every direct child of `body` (in practice just the
+     React root div) to zero height with clipped overflow collapses that
+     invisible content to nothing; `position: fixed` descendants are
+     unaffected by an ancestor's `overflow: hidden` (their containing block
+     is the page, not that ancestor), so `.print-area-modal` still renders
+     in full. Scoped to only run when a `.print-area-modal` is actually on
+     the page — applying this unconditionally would also collapse
+     `.print-area`'s (Reports/Quotation) own ancestor chain and reintroduce
+     the exact truncation bug fixed above. */
+  body:has(.print-area-modal) > * {
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+
+  /* Real bug fixed 2026-09-13 (CLAUDE.md #63 follow-up) — once a Reports
+     tab could actually paginate across multiple pages (the fix above),
+     the owner's next print showed a card getting split BY the page break:
+     "Revenue by Staff Member"'s header rendered alone at the bottom of one
+     page, with its own donut chart only appearing at the top of the next.
+     `break-inside: avoid` keeps every `Card` (all share the `rounded-card`
+     utility, CLAUDE.md #56) as one atomic unit that moves to the next page
+     whole rather than splitting mid-card. Deliberately scoped to `.rounded-
+     card` inside a print area, not every `Card` app-wide, since this is a
+     print-pagination concern, not a screen layout one. The one exception:
+     `.print-allow-break` (Sales Transactions' own Card, ReportsPage.tsx) —
+     that table can legitimately run to dozens of rows, so forcing the
+     whole card to avoid a break would just push a table taller than one
+     page into an infinite loop of trying (and failing) to fit on a single
+     page; a table's own rows are meant to paginate normally. */
+  .print-area .rounded-card,
+  .print-area-modal .rounded-card {
+    break-inside: avoid;
+  }
+  .print-area .print-allow-break,
+  .print-area-modal .print-allow-break {
+    break-inside: auto;
+  }
+}
+
+/* A4 with real margins for every printed page (receipts, quotations,
+   Reports tabs) — previously unset, so the browser fell back to its own
+   default paper size/margins, which combined with the modal-clipping bug
+   above to produce extra near-blank pages. Matches docs/receipt-template.html's
+   own @page rule so the live app and the reference template agree. */
+@page {
+  size: A4;
+  margin: 18mm;
+}
+
+/* Companion to .print-area/.no-print above: a block that exists only to be
+   read on paper (a report's letterhead — business name, tab, date range,
+   "printed at" timestamp) and is never part of the on-screen layout. */
+.print-only {
+  display: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.18s ease-out;
+}

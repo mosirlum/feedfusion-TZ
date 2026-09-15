@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feed Fusion Tanzania</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Manrope (display/headings) + Inter (body/UI) — the whole-app visual
+         redesign, 2026-09-12 (CLAUDE.md #56). Replaces Plus Jakarta Sans. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Set the dark/light class before first paint so there's no flash of
+      // the wrong theme while React boots (ThemeContext.tsx owns the choice
+      // afterwards — this just reads the same localStorage key it writes).
+      // Fixed 2026-09-12 (CLAUDE.md #58) — this used to fall back to
+      // window.matchMedia('(prefers-color-scheme: dark)') when nothing was
+      // stored yet, so a visitor whose device/OS was set to dark mode landed
+      // on the dark theme on first visit without ever choosing it. Light is
+      // now the unconditional default; dark only applies once the user has
+      // actually picked it via the picker (ThemeContext.tsx has the same fix
+      // — keep both in sync, this script runs before React does).
+      // Updated 2026-09-12 (CLAUDE.md #61) — theme is now a 3-way choice
+      // (light/system/dark). Only 'dark' adds the `dark` class; 'system' is
+      // its own light-based look (different sidebar only, see AppShell.tsx)
+      // and must NOT get the `dark` class or every dark: utility would fire.
+      (function () {
+        try {
+          var stored = localStorage.getItem('feedfusion-theme');
+          var dark = stored === 'dark';
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!-- Feed Fusion Tanzania — sale invoice, A4 print template -->
+<!-- Backend renders this with real sale data (or, in the live app, the
+     equivalent React component — frontend/src/components/ReceiptView.tsx —
+     which this file mirrors). Placeholders like {{invoice_number}} show
+     where server data is injected. -->
+<!-- Layout agreed with the owner 2026-09-12 (CLAUDE.md #51), matching the
+     original QUOTATION Word template's visual language: logo top-left,
+     business header top-right, a big blue document title, a Sold To + meta
+     details row, a dark-green items table, a Bank Details + Notes/Terms
+     row, and a dark-green totals bar. Two deliberate differences from the
+     Quotation template, both explicitly confirmed with the owner: no VAT
+     column (a completed sale doesn't track VAT at all — CLAUDE.md #33 —
+     only a Quotation does), and no SWIFT line in Bank Details (dropped
+     from both documents — irrelevant for a domestic NMB transfer). Also
+     deliberately no "Prepared By / Approved By" signature lines — the
+     owner asked for those to be removed from the invoice entirely earlier
+     in this project ("ondoa kabisa") and that stands; only the Quotation
+     (a document the customer countersigns before the sale happens) keeps
+     them. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice {{invoice_number}}</title>
+<style>
+  @page { size: A4; margin: 18mm; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; font-size: 13px; }
+  .invoice { max-width: 720px; margin: 0 auto; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start;
+            border-bottom: 2px solid #185FA5; padding-bottom: 16px; margin-bottom: 8px; }
+  .header img { height: 64px; width: 64px; object-fit: contain; }
+  .biz { text-align: right; font-size: 12px; color: #555; }
+  .biz .name { font-size: 16px; font-weight: bold; color: #1a1a1a; margin: 0 0 2px; }
+  .biz p { margin: 1px 0; }
+  h1.title { text-align: right; color: #185FA5; font-size: 28px; margin: 8px 0 16px; }
+  .row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .sold-to .label, .meta .label, .box .label { font-size: 11px; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 0.4px; color: #94a3b8; margin: 0 0 4px; }
+  .sold-to .name { font-weight: 600; margin: 0; }
+  .sold-to p, .meta p, .box p { margin: 2px 0; font-size: 13px; }
+  .meta { min-width: 220px; background: #F6FAF1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; }
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  table.items thead tr { background: #3B6D11; color: #fff; }
+  table.items th { text-align: left; padding: 8px 10px; font-weight: 600; font-size: 12.5px; }
+  table.items th.num { text-align: right; }
+  table.items td { padding: 8px 10px; font-size: 12.5px; }
+  table.items td.num { text-align: right; }
+  table.items tbody tr:nth-child(even) { background: #F6FAF1; }
+  .discount-note { font-size: 11px; color: #185FA5; margin: 4px 0 0; }
+  .box { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; }
+  .box.bank { background: #F6FAF1; }
+  .box.bank .mm { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+  .totals { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); background: #27500A;
+            color: #fff; border-radius: 8px; text-align: center; }
+  .totals > div { padding: 12px 8px; }
+  .totals .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.8; margin: 0 0 4px; }
+  .totals .v { font-weight: 600; margin: 0; }
+  .paid-banner { margin-top: 16px; padding: 10px 12px; background: #EAF3DE; border-radius: 4px;
+                 display: flex; justify-content: space-between; font-weight: bold; color: #27500A; }
+  .payments { margin-top: 8px; font-size: 11px; color: #666; }
+  .payments .line { display: flex; justify-content: space-between; }
+  .payments .balance { font-weight: 600; color: #A32D2D; }
+  .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #ddd; color: #888; font-size: 11px; }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+  <div class="invoice">
+    <div class="header">
+      <!-- Replace with actual logo image: <img src="/logo.png"> -->
+      <img src="/logo.png" alt="">
+      <div class="biz">
+        <p class="name">{{business_name}}</p>
+        <p>{{business_address}}</p>
+        <p><strong>Tel:</strong> {{business_phone}}</p>
+        <p><strong>Email:</strong> {{business_email}}</p>
+        <p><strong>TIN:</strong> {{business_tin}}</p>
+      </div>
+    </div>
+
+    <h1 class="title">INVOICE</h1>
+
+    <div class="row">
+      <div class="sold-to">
+        <p class="label">Sold To</p>
+        <p class="name">{{customer_name_or_walkin}}</p>
+        <!-- Only rendered when phone/address were captured at the till
+             (2026-09-12, credit sales, CLAUDE.md #50) — otherwise just the
+             bare name above, same as a plain walk-in cash sale always
+             showed. -->
+        <p>{{customer_phone}}</p>
+        <p>{{customer_address}}</p>
+      </div>
+      <div class="meta">
+        <p><strong>Invoice No.:</strong> {{invoice_number}}</p>
+        <p><strong>Date:</strong> {{sale_date}}</p>
+        <p><strong>Served By:</strong> {{served_by_name}}</p>
+      </div>
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Item</th>
+          <th class="num">Qty</th>
+          <th class="num">Unit</th>
+          <th class="num">Unit Price</th>
+          <th class="num">Discount</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Repeat this row per sale_item -->
+        <tr>
+          <td>{{line_no}}</td>
+          <td>{{product_name}}</td>
+          <td class="num">{{quantity}}</td>
+          <td class="num">{{unit}}</td>
+          <td class="num">{{unit_price}}</td>
+          <td class="num">{{discount_pct}}</td>
+          <td class="num">{{line_subtotal}}</td>
+        </tr>
+        <!-- end repeat -->
+      </tbody>
+    </table>
+    <!-- Only rendered for lines that actually carried a discount reason
+         (BR-30 accountability) — a plain footnote list under the table,
+         not a table row. -->
+    <p class="discount-note">{{product_name}}: {{discount_reason}}</p>
+
+    <div class="row" style="margin-top: 20px;">
+      <div class="box bank">
+        <p class="label">Bank Details</p>
+        <p><strong>Account Name:</strong> {{bank_account_name}}</p>
+        <p><strong>Account Number:</strong> {{bank_account_number}}</p>
+        <p><strong>Bank Name:</strong> {{bank_name}}</p>
+        <p><strong>Branch:</strong> {{bank_branch}}</p>
+        <!-- Only rendered when at least one mobile money number is set in
+             Settings (2026-09-12, CLAUDE.md #50/#51). -->
+        <div class="mm">
+          <p><strong>{{mobile_money_1_label}}:</strong> {{mobile_money_1_number}}</p>
+          <p><strong>{{mobile_money_2_label}}:</strong> {{mobile_money_2_number}}</p>
+        </div>
+      </div>
+      <div class="box">
+        <p class="label">Notes / Terms</p>
+        <p>{{notes}}</p>
+      </div>
+    </div>
+
+    <!-- No VAT column here — sales don't track VAT at all (CLAUDE.md #33);
+         only the Quotation template does. -->
+    <div class="totals">
+      <div><p class="k">Subtotal</p><p class="v">TZS {{subtotal}}</p></div>
+      <div><p class="k">Discount</p><p class="v">TZS {{total_discount}}</p></div>
+      <div><p class="k">Grand Total</p><p class="v">TZS {{total}}</p></div>
+    </div>
+
+    <!-- payment_status is PAID or PARTIAL (2026-09-12, credit sales,
+         CLAUDE.md #50) — a PARTIAL sale shows the real balance owed
+         instead of a fabricated "PAID". -->
+    <div class="paid-banner">
+      <span>{{payment_status}}</span>
+      <span>TZS {{total}}</span>
+    </div>
+    <div class="payments">
+      <!-- Repeat per payment row -->
+      <div class="line"><span>Paid via {{payment_method}}</span><span>TZS {{payment_amount}}</span></div>
+      <!-- Only rendered when balance_due > 0 -->
+      <div class="line balance"><span>Balance Due</span><span>TZS {{balance_due}}</span></div>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for choosing Feed Fusion Tanzania!</p>
+    </div>
+  </div>
+</body>
+</html>

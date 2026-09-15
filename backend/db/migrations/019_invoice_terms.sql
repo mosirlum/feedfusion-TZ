@@ -1,0 +1,16 @@
+-- Standard invoice/quotation Terms text, set once in Business Settings
+-- (2026-09-12, CLAUDE.md #54) — the owner's own words: "nilidhani nayo
+-- itakuwa kwenye business info kama details nyingine" (I thought this too
+-- would be in business info, like the other details). Before this, the
+-- printed invoice's "Notes / Terms" box only ever showed a per-sale
+-- `sales.notes` value (CLAUDE.md #35/#52), which meant retyping the same
+-- boilerplate ("Payment is due in advance...") by hand on every single
+-- sale via Sales History's Edit Sale modal — exactly the kind of repeated
+-- manual entry Business Settings exists to avoid, same as Bank Details or
+-- the business phone number.
+--
+-- `sales.notes` and `quotations.notes` are UNCHANGED and still take
+-- priority when actually set — this is a fallback default, not a
+-- replacement, so a genuinely one-off note on a specific sale or
+-- quotation still works exactly as before.
+ALTER TABLE business_settings ADD COLUMN IF NOT EXISTS invoice_terms TEXT;

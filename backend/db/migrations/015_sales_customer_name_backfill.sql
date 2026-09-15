@@ -1,0 +1,22 @@
+-- Feed Fusion Tanzania — Migration 015 (2026-09-12)
+-- Fixes the real cause of "internal error" on every single sale completion,
+-- confirmed from the backend's own error log:
+--
+--   error: column "customer_name" of relation "sales" does not exist
+--
+-- Root cause: `sales.customer_name` was added by directly EDITING
+-- `004_sales.sql`'s CREATE TABLE statement after that migration had already
+-- been applied to this database (see CLAUDE.md's flagged judgment call #1 —
+-- "Added `sales.customer_name VARCHAR(160)` in migration `004_sales.sql`").
+-- The migration runner (`backend/db/migrate.ts`) tracks applied migrations
+-- by FILENAME in `schema_migrations`, not by content — so once
+-- "004_sales.sql" is recorded as applied, editing that file's contents
+-- later has no effect on a database where it already ran. Every backend
+-- code path that inserts a sale (POST /sales) has always assumed this
+-- column exists, so on a database where 004 ran before customer_name was
+-- added to it, every single sale completion fails.
+--
+-- `IF NOT EXISTS` makes this safe to run everywhere: a database where
+-- 004_sales.sql's current (already-fixed) version happened to run fresh
+-- already has this column, and this migration is then a harmless no-op.
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_name VARCHAR(160);
