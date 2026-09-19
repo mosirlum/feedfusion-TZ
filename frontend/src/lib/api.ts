@@ -254,7 +254,7 @@ export const productsApi = {
     http.get<Product[]>('/products', { params: includeUnpriced ? { include_unpriced: true, role: 'owner' } : {} }),
   search: (q: string) => http.get<Product[]>('/products/search', { params: { q } }),
   get: (id: number) => http.get<Product>(`/products/${id}`),
-  create: (input: { name: string; categoryId?: number | null; unit: string; minimumStock?: number }) =>
+  create: (input: { name: string; categoryId?: number | null; unit: string; minimumStock?: number; startingStock?: number }) =>
     http.post<Product>('/products', input),
   updateStatus: (id: number, status: 'active' | 'inactive') => http.patch<Product>(`/products/${id}`, { status }),
   update: (id: number, patch: { name?: string; categoryId?: number | null; unit?: string; minimumStock?: number }) =>

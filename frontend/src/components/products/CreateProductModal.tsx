@@ -25,6 +25,7 @@ export function CreateProductModal({
   const [categoryId, setCategoryId] = useState<string>('');
   const [unit, setUnit] = useState('kg');
   const [minimumStock, setMinimumStock] = useState('0');
+  const [startingStock, setStartingStock] = useState('0');
   const [submitting, setSubmitting] = useState(false);
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -36,6 +37,7 @@ export function CreateProductModal({
       setCategoryId('');
       setUnit('kg');
       setMinimumStock('0');
+      setStartingStock('0');
       setAddingCategory(false);
       setNewCategoryName('');
     }
@@ -68,6 +70,7 @@ export function CreateProductModal({
         categoryId: categoryId ? Number(categoryId) : null,
         unit: unit.trim(),
         minimumStock: Number(minimumStock) || 0,
+        startingStock: Number(startingStock) || 0,
       });
       toast.success('Product created. Set a selling price before it can be sold.');
       onCreated();
@@ -130,9 +133,20 @@ export function CreateProductModal({
             <Input type="number" min={0} value={minimumStock} onChange={(e) => setMinimumStock(e.target.value)} />
           </FormField>
         </div>
+        {/* Starting stock (2026-09-19, CLAUDE.md #70) — the owner's own
+            words: there was no way to say how much stock a new product
+            actually has except going to Stock Adjustments right after.
+            Optional, defaults to 0 (no change for anyone who skips it). */}
+        <FormField
+          label="Starting stock (optional)"
+          hint="Already have some in the shop? Enter it here instead of going to Stock Adjustments right after."
+        >
+          <Input type="number" min={0} value={startingStock} onChange={(e) => setStartingStock(e.target.value)} />
+        </FormField>
         <p className="text-xs text-slate-400 dark:text-[#77857c]">
           New products have no selling price yet — a price proposal must be approved before this product can be
-          sold (BR-27).
+          sold (BR-27). Starting stock has no purchase cost behind it, so it won't count toward inventory value
+          until a real purchase is recorded for this product.
         </p>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>

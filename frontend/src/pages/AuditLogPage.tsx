@@ -116,8 +116,11 @@ const ACTION_META: Record<string, { label: string; tone: 'green' | 'blue' | 'red
   PRICE_PROPOSED: { label: 'Price Proposed', tone: 'blue' },
   PRICE_APPROVED: { label: 'Price Proposal Approved', tone: 'green' },
   PRICE_REJECTED: { label: 'Price Proposal Rejected', tone: 'red' },
+  PRODUCT_CREATED: { label: 'Product Created', tone: 'green' },
   PRODUCT_ACTIVATED: { label: 'Product Activated', tone: 'green' },
   PRODUCT_DEACTIVATED: { label: 'Product Deactivated', tone: 'red' },
+  PRODUCT_UPDATED: { label: 'Product Updated', tone: 'blue' },
+  PRODUCT_DELETED: { label: 'Product Deleted', tone: 'red' },
   USER_PASSWORD_RESET: { label: 'Password Reset', tone: 'amber' },
   USER_PASSWORD_CHANGED: { label: 'Password Changed', tone: 'blue' },
   USER_PROFILE_UPDATED: { label: 'Profile Updated', tone: 'blue' },
@@ -174,9 +177,17 @@ function summarizeDetails(action: string, details: Record<string, unknown> | nul
     case 'PRICE_APPROVED':
     case 'PRICE_REJECTED':
       return d.to !== undefined ? `${money(d.from)} → ${money(d.to)}` : `Proposed: ${money(d.proposedPrice)}${d.notes ? ` · ${d.notes}` : ''}`;
+    case 'PRODUCT_CREATED':
+      return `${d.name ?? '—'}${d.startingStock ? ` · Starting stock: ${d.startingStock} ${d.unit ?? ''}`.trim() : ''}`;
     case 'PRODUCT_ACTIVATED':
     case 'PRODUCT_DEACTIVATED':
       return `${d.name ?? '—'}`;
+    case 'PRODUCT_UPDATED': {
+      const changed = d.after ? Object.keys(d.after).join(', ') : '—';
+      return `${d.before?.name ?? '—'} · Changed: ${changed}`;
+    }
+    case 'PRODUCT_DELETED':
+      return `${d.name ?? '—'}${d.unit ? ` (${d.unit})` : ''}`;
     default: {
       const parts = Object.entries(d)
         .filter(([k]) => !HIDDEN_KEYS.includes(k))

@@ -2,6 +2,7 @@ import * as productsRepo from '../db/productsRepo';
 import * as stockMovementsRepo from '../db/stockMovementsRepo';
 import { HttpError } from '../middleware/errorHandler';
 import { writeAuditLog } from '../db/auditRepo';
+import { withTransaction } from '../db/transaction';
 import { AuthenticatedUser, UserRole } from '../types/auth';
 
 /**
@@ -30,16 +31,77 @@ export function getStockLevels() {
   return stockMovementsRepo.getStockLevels();
 }
 
+/**
+ * Starting stock at creation (2026-09-19, CLAUDE.md #70) — the owner's own
+ * words: "tunaweka product then kweny add product tunaweka alert tu kuwa
+ * minimum alert isome ngapi but sina pa kuweka iko stock kias gani mpaka
+ * kweny adjustment" (we add a product, we can only set the minimum-stock
+ * alert, there's nowhere to say how much stock it actually has until Stock
+ * Adjustments). This is optional and defaults to 0 (no behavior change for
+ * anyone who leaves it blank) — when given, it posts a real stock_movements
+ * row rather than a raw column write (CLAUDE.md rule #1), the exact same
+ * ADJUSTMENT-typed, no-cost-basis pattern Stock Adjustments' own "Found"
+ * reason already uses (CLAUDE.md #38/#65) for stock that has no purchase
+ * behind it. Flagged, not silently glossed over: because there's no
+ * purchase line for this quantity, `inventoryRepo`'s cost/stock-value
+ * figures (which derive unit cost from the most recent purchase) will show
+ * no cost for it until a real purchase is recorded for this product — same
+ * pre-existing limitation a "Found" adjustment already has, not something
+ * new introduced here.
+ */
 export async function createProduct(input: {
   name: string;
   categoryId?: number | null;
   unit: string;
   minimumStock?: number;
+  startingStock?: number;
+  createdBy: AuthenticatedUser;
 }) {
   if (!input.name || !input.unit) {
     throw new HttpError(400, 'NAME_AND_UNIT_REQUIRED');
   }
-  return productsRepo.createProduct(input);
+  const startingStock = input.startingStock ?? 0;
+  if (!Number.isInteger(startingStock) || startingStock < 0) {
+    throw new HttpError(400, 'INVALID_STARTING_STOCK');
+  }
+
+  // Always in a transaction, and PRODUCT_CREATED is always logged — not
+  // just when startingStock > 0. An earlier draft skipped both the
+  // transaction and the audit log for the (far more common) zero-starting-
+  // stock case, which would have made the Products audit trail only ever
+  // show a product creation when the owner happened to key in a starting
+  // quantity. Caught before this was pushed; fixed so every product
+  // creation gets a consistent audit entry, and the stock movement is
+  // simply skipped (not the whole transaction) when there's nothing to post.
+  return withTransaction(async (client) => {
+    const product = await productsRepo.createProduct(input, client);
+
+    if (startingStock > 0) {
+      await stockMovementsRepo.insertStockMovement(
+        {
+          productId: product.id,
+          movementType: 'ADJUSTMENT',
+          quantity: startingStock,
+          referenceType: 'product_created',
+          createdBy: input.createdBy.id,
+        },
+        client
+      );
+    }
+
+    await writeAuditLog(
+      {
+        userId: input.createdBy.id,
+        action: 'PRODUCT_CREATED',
+        entityType: 'product',
+        entityId: product.id,
+        details: { name: product.name, unit: product.unit, startingStock },
+      },
+      client
+    );
+
+    return product;
+  });
 }
 
 export async function getProductById(id: number) {

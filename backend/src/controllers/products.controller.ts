@@ -31,8 +31,10 @@ export async function getStockLevelsHandler(_req: Request, res: Response, next: 
 
 export async function createProductHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    const { name, categoryId, unit, minimumStock } = req.body ?? {};
-    res.status(201).json(await productsService.createProduct({ name, categoryId, unit, minimumStock }));
+    const { name, categoryId, unit, minimumStock, startingStock } = req.body ?? {};
+    res
+      .status(201)
+      .json(await productsService.createProduct({ name, categoryId, unit, minimumStock, startingStock, createdBy: req.user! }));
   } catch (err) {
     next(err);
   }

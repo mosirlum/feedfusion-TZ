@@ -40,13 +40,16 @@ export async function findProductByIdForUpdate(id: number, client: PoolClient) {
   return rows[0] ?? null;
 }
 
-export async function createProduct(input: {
-  name: string;
-  categoryId?: number | null;
-  unit: string;
-  minimumStock?: number;
-}) {
-  const { rows } = await pool.query(
+export async function createProduct(
+  input: {
+    name: string;
+    categoryId?: number | null;
+    unit: string;
+    minimumStock?: number;
+  },
+  client: PoolClient | typeof pool = pool
+) {
+  const { rows } = await client.query(
     `INSERT INTO products (name, category_id, unit, minimum_stock)
      VALUES ($1, $2, $3, $4)
      RETURNING *`,
