@@ -79,7 +79,6 @@ const TABS = [
   { key: 'Sales', icon: BarChart3 },
   { key: 'Products', icon: Package },
   { key: 'Discounts', icon: Tag },
-  { key: 'Cash', icon: Wallet },
   { key: 'Purchases', icon: ShoppingCart },
   { key: 'Users', icon: UsersIcon },
   { key: 'Stock', icon: Database },
@@ -279,10 +278,9 @@ export default function ReportsPage() {
       </div>
 
       <div className="print-area">
-        {tab === 'Sales' && <SalesOverviewTab from={from} to={to} onViewCash={() => setTab('Cash')} />}
+        {tab === 'Sales' && <SalesOverviewTab from={from} to={to} />}
         {tab === 'Products' && <ProductsReport from={from} to={to} />}
         {tab === 'Discounts' && <DiscountsReport from={from} to={to} />}
-        {tab === 'Cash' && <CashReport from={from} to={to} />}
         {tab === 'Purchases' && <PurchaseCostsReportView from={from} to={to} />}
         {tab === 'Users' && <UsersReport from={from} to={to} />}
         {tab === 'Stock' && <StockReport low={false} />}
@@ -615,7 +613,7 @@ function StatCardWithSparkline({
       {sparklineData.length > 1 && (
         <div className="mt-2">
           <DailyChart
-            series={sparklineData.map((v, i) => ({ date: String(i), revenue: v, transactions: v, discount: v, voided: v }))}
+            series={sparklineData.map((v, i) => ({ date: String(i), revenue: v, transactions: v, discount: v, voided: v, grossProfit: v }))}
             valueKey="revenue"
             variant="line"
             color={sparklineColor}
@@ -628,7 +626,7 @@ function StatCardWithSparkline({
   );
 }
 
-function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; onViewCash: () => void }) {
+function SalesOverviewTab({ from, to }: { from: string; to: string }) {
   const toast = useToast();
   const { data, loading } = useReport(() => reportsApi.salesOverview(from, to).then((r) => r.data), [from, to]);
   const [txPage, setTxPage] = useState(1);
@@ -647,7 +645,7 @@ function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; 
   if (loading) return <FullPageSpinner />;
   if (!data) return null;
 
-  const { current, changePct, dailySeries, revenueByCategory, revenueByStaff, topProducts, totalQuantitySold, cashHistory, lowStockCount } = data;
+  const { current, changePct, dailySeries, revenueByCategory, revenueByStaff, topProducts, totalQuantitySold, lowStockCount } = data;
 
   const categoryTotal = revenueByCategory.reduce((s, c) => s + Number(c.revenue), 0);
   const categorySlices = buildDonutSlices(revenueByCategory.map((c) => ({ name: c.category_name, value: Number(c.revenue) })), categoryTotal);
@@ -732,7 +730,7 @@ function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; 
     <div>
       <ReportToolbar onDownload={downloadSalesExcel} showPrint={false} downloadLabel="Download Excel" />
       <PrintLetterhead title="Sales" from={from} to={to} />
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCardWithSparkline
           label="Total Transactions"
           value={current.transactionCount}
@@ -770,6 +768,17 @@ function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; 
           invert
           sparklineData={dailySeries.map((d) => d.voided)}
           sparklineColor="#A32D2D"
+        />
+        {/* Gross Profit stat card added 2026-09-19 (CLAUDE.md #69) — the
+            owner's own complaint: this report "gives only revenue". */}
+        <StatCardWithSparkline
+          label="Gross Profit"
+          value={tzs(current.grossProfit)}
+          icon={<TrendingUp size={18} />}
+          tone="blue"
+          changePct={changePct.grossProfit}
+          sparklineData={dailySeries.map((d) => d.grossProfit)}
+          sparklineColor="#3B6D11"
         />
       </div>
 
@@ -817,7 +826,7 @@ function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; 
         </Card>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div className="mb-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -883,36 +892,6 @@ function SalesOverviewTab({ from, to, onViewCash }: { from: string; to: string; 
           )}
         </Card>
 
-        <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <IconChip tone="green" size={26} icon={<Clock size={13} />} />
-              <p className="font-semibold text-slate-800">Cash Count History</p>
-            </div>
-            <button type="button" onClick={onViewCash} className="text-xs font-medium text-green-700 hover:underline">
-              View all
-            </button>
-          </div>
-          {cashHistory.length === 0 ? (
-            <EmptyState title="No cash counts in this range." />
-          ) : (
-            <div className="space-y-2">
-              {cashHistory.map((c) => (
-                <div key={c.id} className="flex items-center justify-between border-b border-slate-50 pb-2 text-xs last:border-0 last:pb-0">
-                  <span className="text-slate-500">{formatDate(c.count_date)}</span>
-                  <span
-                    className={clsx(
-                      'font-medium',
-                      Number(c.difference) === 0 ? 'text-slate-600' : Number(c.difference) < 0 ? 'text-danger-600' : 'text-blue-700'
-                    )}
-                  >
-                    {tzs(c.difference)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
@@ -1154,54 +1133,6 @@ function DiscountsReport({ from, to }: { from: string; to: string }) {
   );
 }
 
-function CashReport({ from, to }: { from: string; to: string }) {
-  const { data, loading } = useReport(() => reportsApi.cash(from, to).then((r) => r.data), [from, to]);
-  if (loading) return <FullPageSpinner />;
-  if (!data) return null;
-
-  function downloadCsvFile() {
-    downloadCsv(
-      `cash-report-${from}-to-${to}.csv`,
-      ['Date', 'Expected (TZS)', 'Actual (TZS)', 'Difference (TZS)', 'Counted By'],
-      data!.map((c) => [formatDate(c.count_date), c.expected_cash, c.actual_cash, c.difference, c.counted_by_name ?? ''])
-    );
-  }
-
-  return (
-    <div>
-      <ReportToolbar onDownload={downloadCsvFile} />
-      <PrintLetterhead title="Cash" from={from} to={to} />
-      <Card>
-      {data.length === 0 ? (
-        <EmptyState title="No cash counts in this range." />
-      ) : (
-        <Table>
-          <THead>
-            <tr>
-              <Th>Date</Th>
-              <Th className="text-right">Expected</Th>
-              <Th className="text-right">Actual</Th>
-              <Th className="text-right">Difference</Th>
-              <Th>Counted by</Th>
-            </tr>
-          </THead>
-          <tbody>
-            {data.map((c) => (
-              <Tr key={c.id}>
-                <Td>{formatDate(c.count_date)}</Td>
-                <Td className="text-right">{tzs(c.expected_cash)}</Td>
-                <Td className="text-right">{tzs(c.actual_cash)}</Td>
-                <Td className={`text-right font-medium ${Number(c.difference) === 0 ? 'text-slate-500' : 'text-danger-600'}`}>{tzs(c.difference)}</Td>
-                <Td>{c.counted_by_name}</Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-      </Card>
-    </div>
-  );
-}
 
 /**
  * Purchase Costs report (2026-09-12, CLAUDE.md #40) — the owner asked how to

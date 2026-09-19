@@ -7,7 +7,6 @@ import {
   stockReportHandler,
   lowStockReportHandler,
   discountsReportHandler,
-  cashReportHandler,
   usersReportHandler,
   purchaseCostsReportHandler,
   salesOverviewHandler,
@@ -30,7 +29,6 @@ router.get('/products', authenticate, requireRole('owner'), productsReportHandle
 router.get('/stock', authenticate, requireRole('owner'), stockReportHandler);
 router.get('/low-stock', authenticate, requireRole('owner'), lowStockReportHandler);
 router.get('/discounts', authenticate, requireRole('owner'), discountsReportHandler);
-router.get('/cash', authenticate, requireRole('owner'), cashReportHandler);
 router.get('/users', authenticate, requireRole('owner'), usersReportHandler);
 router.get('/purchase-costs', authenticate, requireRole('owner'), purchaseCostsReportHandler);
 

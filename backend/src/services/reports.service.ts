@@ -1,7 +1,7 @@
 import { HttpError } from '../middleware/errorHandler';
 import * as reportsRepo from '../db/reportsRepo';
 import * as inventoryService from './inventory.service';
-import * as cashCountsService from './cashCounts.service';
+import * as salesRepo from '../db/salesRepo';
 import { previousPeriodRange, pctChange } from '../utils/period';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -39,11 +39,6 @@ export async function getDiscountsReport(fromRaw?: string, toRaw?: string, userI
   return reportsRepo.discountsReport(from, to, userId);
 }
 
-export function getCashReport(from?: string, to?: string) {
-  // cashCounts.service already tolerates missing from/to (returns everything, capped).
-  return cashCountsService.listCashCounts({ from, to });
-}
-
 export async function getUsersReport(fromRaw?: string, toRaw?: string) {
   const { from, to } = requireDateRange(fromRaw, toRaw);
   return reportsRepo.usersActivityReport(from, to);
@@ -53,26 +48,34 @@ export async function getUsersReport(fromRaw?: string, toRaw?: string) {
  * Reports "Sales" tab redesign (2026-09-12, CLAUDE.md #41) — one aggregator
  * endpoint backing the stat cards (with real "vs previous period of equal
  * length" trends, same helper as Sales History's — CLAUDE.md #34), the
- * daily chart, the two donuts, the Top 5 list, a Cash Count History
- * preview, and the raw numbers the frontend turns into "Quick Insights"
- * text. Kept as one endpoint rather than five separate ones since every
- * piece here shares the same `from`/`to` and is meant to render together on
- * one screen.
+ * daily chart, the two donuts, the Top 5 list, and the raw numbers the
+ * frontend turns into "Quick Insights" text. Kept as one endpoint rather
+ * than five separate ones since every piece here shares the same
+ * `from`/`to` and is meant to render together on one screen.
+ *
+ * Cash Count History card removed (2026-09-19, CLAUDE.md #69) along with
+ * the rest of Cash Control. Gross Profit added the same day — the owner's
+ * complaint that this report "gives only revenue" — reusing
+ * salesRepo.getSalesAggregate (built for Sales History's stat cards)
+ * rather than a new query; ownerView is always true here since this
+ * endpoint is owner-only (see reports.routes.ts).
  */
-export async function getSalesOverview(fromRaw?: string, toRaw?: string) {
+export async function getSalesOverview(fromRaw?: string, toRaw?: string, requesterId?: number) {
   const { from, to } = requireDateRange(fromRaw, toRaw);
   const { prevFrom, prevTo } = previousPeriodRange(from, to);
 
-  const [current, previous, dailyRows, revenueByCategory, revenueByStaff, topProductsAll, cashHistoryAll, lowStock] =
+  const [current, previous, dailyRows, profitDailyRows, revenueByCategory, revenueByStaff, topProductsAll, lowStock, profitAggregate, prevProfitAggregate] =
     await Promise.all([
       reportsRepo.salesTotals(from, to),
       reportsRepo.salesTotals(prevFrom, prevTo),
       reportsRepo.salesDailySeries(from, to),
+      reportsRepo.profitDailySeries(from, to),
       reportsRepo.revenueByCategory(from, to),
       reportsRepo.revenueByStaff(from, to),
       reportsRepo.productSalesReport(from, to),
-      cashCountsService.listCashCounts({ from, to }),
       inventoryService.getLowStock(),
+      salesRepo.getSalesAggregate({ from, to, ownerView: true, requesterId: requesterId ?? 0 }),
+      salesRepo.getSalesAggregate({ from: prevFrom, to: prevTo, ownerView: true, requesterId: requesterId ?? 0 }),
     ]);
 
   // Fill gaps so a quiet day shows as zero, not a missing point that would
@@ -87,7 +90,11 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string) {
       voided: Number(r.voided),
     });
   }
-  const dailySeries: Array<{ date: string; revenue: number; transactions: number; discount: number; voided: number }> = [];
+  const profitByDate = new Map<string, number>();
+  for (const r of profitDailyRows) {
+    profitByDate.set(new Date(r.date).toISOString().slice(0, 10), Number(r.gross_profit));
+  }
+  const dailySeries: Array<{ date: string; revenue: number; transactions: number; discount: number; voided: number; grossProfit: number }> = [];
   for (let d = new Date(`${from}T00:00:00Z`); d <= new Date(`${to}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 1)) {
     const key = d.toISOString().slice(0, 10);
     const entry = byDate.get(key);
@@ -97,6 +104,7 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string) {
       transactions: entry?.transactions ?? 0,
       discount: entry?.discount ?? 0,
       voided: entry?.voided ?? 0,
+      grossProfit: profitByDate.get(key) ?? 0,
     });
   }
 
@@ -104,22 +112,23 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string) {
   const transactionCount = Number(current.transaction_count);
   const totalDiscount = Number(current.total_discount);
   const voidedCount = Number(current.voided_count);
+  const grossProfit = Number(profitAggregate.gross_profit);
   const totalQuantitySold = topProductsAll.reduce((sum: number, p: { quantity_sold: string }) => sum + Number(p.quantity_sold), 0);
 
   return {
-    current: { totalRevenue, transactionCount, totalDiscount, voidedCount },
+    current: { totalRevenue, transactionCount, totalDiscount, voidedCount, grossProfit },
     changePct: {
       totalRevenue: pctChange(totalRevenue, Number(previous.total_revenue)),
       transactionCount: pctChange(transactionCount, Number(previous.transaction_count)),
       totalDiscount: pctChange(totalDiscount, Number(previous.total_discount)),
       voidedCount: pctChange(voidedCount, Number(previous.voided_count)),
+      grossProfit: pctChange(grossProfit, Number(prevProfitAggregate.gross_profit)),
     },
     dailySeries,
     revenueByCategory,
     revenueByStaff,
     topProducts: topProductsAll.slice(0, 5),
     totalQuantitySold,
-    cashHistory: cashHistoryAll.slice(0, 5),
     lowStockCount: lowStock.length,
   };
 }

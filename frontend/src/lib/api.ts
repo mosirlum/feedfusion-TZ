@@ -10,8 +10,6 @@ import type {
   RecentActivityItem,
   AuditLogListResponse,
   BusinessSettings,
-  CashCount,
-  CashControlSummary,
   Category,
   Customer,
   DashboardToday,
@@ -194,6 +192,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   CANNOT_DELETE_SELF: "You can't delete your own account.",
   USER_HAS_RELATED_RECORDS:
     'This user has recorded activity in the system (sales, purchases, stock records, audit history, etc.) and cannot be deleted. Deactivate the account instead.',
+  // Products — delete (2026-09-19, CLAUDE.md #69)
+  PRODUCT_HAS_HISTORY:
+    'This product has recorded activity in the system (sales, purchases, stock records, etc.) and cannot be deleted. Deactivate it instead.',
   // Password reset/change + profile self-service (2026-09-12, CLAUDE.md #47)
   PASSWORD_TOO_SHORT: 'Password must be at least 6 characters.',
   CURRENT_PASSWORD_INCORRECT: 'Your current password is incorrect.',
@@ -256,6 +257,9 @@ export const productsApi = {
   create: (input: { name: string; categoryId?: number | null; unit: string; minimumStock?: number }) =>
     http.post<Product>('/products', input),
   updateStatus: (id: number, status: 'active' | 'inactive') => http.patch<Product>(`/products/${id}`, { status }),
+  update: (id: number, patch: { name?: string; categoryId?: number | null; unit?: string; minimumStock?: number }) =>
+    http.patch<Product>(`/products/${id}`, patch),
+  remove: (id: number) => http.delete<void>(`/products/${id}`),
   stockHistory: (id: number) => http.get<{ product: Product; movements: StockMovement[] }>(`/products/${id}/stock-history`),
   submitProposal: (id: number, input: { proposedPrice: number; notes?: string }) =>
     http.post<PriceProposal>(`/products/${id}/price-proposals`, input),
@@ -443,14 +447,6 @@ export const expensesApi = {
   }) => http.post<Expense>('/expenses', input),
 };
 
-export const cashCountsApi = {
-  record: (input: { countDate?: string; actualCash: number; notes?: string }) =>
-    http.post<CashCount>('/cash-counts', input),
-  list: (params: { from?: string; to?: string } = {}) => http.get<CashCount[]>('/cash-counts', { params }),
-  // Cash Control Center redesign (2026-09-12, CLAUDE.md #39).
-  summary: () => http.get<CashControlSummary>('/cash-counts/summary'),
-};
-
 // ---------------------------------------------------------------------------
 // Dashboard, Reports, Audit
 // ---------------------------------------------------------------------------
@@ -468,7 +464,6 @@ export const reportsApi = {
   lowStock: () => http.get<InventoryRow[]>('/reports/low-stock'),
   discounts: (from: string, to: string, userId?: number) =>
     http.get('/reports/discounts', { params: { from, to, user_id: userId } }),
-  cash: (from?: string, to?: string) => http.get<CashCount[]>('/reports/cash', { params: { from, to } }),
   users: (from: string, to: string) => http.get('/reports/users', { params: { from, to } }),
   // Purchase Costs report (2026-09-12, CLAUDE.md #40).
   purchaseCosts: (from: string, to: string) =>

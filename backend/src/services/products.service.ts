@@ -76,3 +76,87 @@ export async function updateProductStatus(id: number, status: string, updatedBy:
 
   return updated;
 }
+
+/**
+ * Edit Product (2026-09-19, CLAUDE.md #69) — added because there was no way
+ * for the owner to fix a product's own data after creation (only
+ * create + activate/deactivate existed). Root cause of a real complaint:
+ * products created with a plain number typed into "Unit" instead of a unit
+ * label (e.g. "14" instead of "kg") had no way to be corrected, so the
+ * wrong value kept printing on every invoice. Every field is optional —
+ * only what's actually sent gets changed (see productsRepo.updateProductDetails).
+ */
+/**
+ * Permanent Delete Product (2026-09-19, CLAUDE.md #69) — the owner asked
+ * for a real delete (not just Deactivate) "with a warning to make sure
+ * it's not deleted by accident." The warning itself lives in the frontend
+ * confirmation modal; this mirrors the exact pattern already used for
+ * deleting a user (users.service.ts's deleteUser/isForeignKeyViolation):
+ * attempt the delete, and if Postgres rejects it with a foreign-key
+ * violation (23503) — meaning this product has ever been sold, purchased,
+ * counted, adjusted, proposed a price for, or quoted — translate that into
+ * a clear message rather than a raw database error. Only a product with
+ * zero references anywhere (created by mistake, never actually used) can
+ * be deleted this way; everything else stays on Deactivate, unchanged.
+ */
+export async function deleteProduct(id: number, deletedBy: AuthenticatedUser) {
+  const product = await getProductById(id);
+
+  try {
+    await productsRepo.deleteProduct(id);
+  } catch (err) {
+    if (isForeignKeyViolation(err)) {
+      throw new HttpError(
+        409,
+        'PRODUCT_HAS_HISTORY',
+        'This product has recorded activity in the system (sales, purchases, stock records, etc.) and cannot be deleted. Deactivate it instead.'
+      );
+    }
+    throw err;
+  }
+
+  await writeAuditLog({
+    userId: deletedBy.id,
+    action: 'PRODUCT_DELETED',
+    entityType: 'product',
+    entityId: id,
+    details: { name: product.name, unit: product.unit },
+  });
+}
+
+function isForeignKeyViolation(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23503';
+}
+
+export async function updateProductDetails(
+  id: number,
+  patch: { name?: string; categoryId?: number | null; unit?: string; minimumStock?: number },
+  updatedBy: AuthenticatedUser
+) {
+  const product = await getProductById(id);
+
+  if (patch.name !== undefined && !patch.name.trim()) {
+    throw new HttpError(400, 'NAME_REQUIRED');
+  }
+  if (patch.unit !== undefined && !patch.unit.trim()) {
+    throw new HttpError(400, 'UNIT_REQUIRED');
+  }
+  if (patch.minimumStock !== undefined && (!Number.isFinite(patch.minimumStock) || patch.minimumStock < 0)) {
+    throw new HttpError(400, 'INVALID_MINIMUM_STOCK');
+  }
+
+  const updated = await productsRepo.updateProductDetails(id, patch);
+
+  await writeAuditLog({
+    userId: updatedBy.id,
+    action: 'PRODUCT_UPDATED',
+    entityType: 'product',
+    entityId: id,
+    details: {
+      before: { name: product.name, unit: product.unit, categoryId: product.category_id, minimumStock: product.minimum_stock },
+      after: patch,
+    },
+  });
+
+  return updated;
+}

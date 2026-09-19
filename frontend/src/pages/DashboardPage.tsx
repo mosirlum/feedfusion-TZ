@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -101,32 +102,8 @@ export default function DashboardPage() {
     <div>
       <PageHeader title="Today's Overview" subtitle={formatDate(data.date)} />
 
-      {(data.lowStockAlert || !data.cashCounted || data.cashDiscrepancyAlert) && (
+      {data.lowStockAlert && (
         <div className="mb-6 flex flex-col gap-2">
-          {!data.cashCounted && (
-            <AlertBanner
-              icon={<Wallet size={16} />}
-              tone="amber"
-              text="Cash hasn't been counted yet today."
-              action={
-                <Link to="/cash-control" className="font-semibold underline underline-offset-2">
-                  Count now
-                </Link>
-              }
-            />
-          )}
-          {data.cashDiscrepancyAlert && (
-            <AlertBanner
-              icon={<AlertTriangle size={16} />}
-              tone="red"
-              text="Today's cash count shows a discrepancy between expected and actual cash."
-              action={
-                <Link to="/cash-control" className="font-semibold underline underline-offset-2">
-                  Review
-                </Link>
-              }
-            />
-          )}
           {data.lowStockAlert && (
             <AlertBanner
               icon={<PackageX size={16} />}
@@ -176,6 +153,58 @@ export default function DashboardPage() {
           tone={data.estimatedNet >= 0 ? 'green' : 'red'}
           delta={deltaProp(data.deltas.estimatedNet)}
         />
+      </div>
+
+      {/* Profit & Loss at a glance (2026-09-19, CLAUDE.md #69) — the stat
+          cards above are all "today"; the owner's own words were that he
+          (and customers asking him) wants "jana nilipata faida kiasi gani"
+          (yesterday's profit) and "wiki iliyopita" (last week's) without
+          leaving the dashboard. Two compact panels rather than more stat
+          cards, since each carries three related numbers (gross, expenses,
+          net) that read better grouped than spread across the grid. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Card className="p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <IconChip tone="blue" size={26} icon={<Wallet size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Yesterday&apos;s Profit</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
+            </div>
+          </div>
+          <p
+            className={clsx(
+              'font-display text-2xl font-extrabold',
+              data.profitAndLoss.yesterday.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+            )}
+          >
+            {tzs(data.profitAndLoss.yesterday.netProfit)}
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.grossProfit)}</b></span>
+            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.expenses)}</b></span>
+          </div>
+        </Card>
+        <Card className="p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <IconChip tone="green" size={26} icon={<BarChart3 size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Last 7 Days&apos; Profit</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
+            </div>
+          </div>
+          <p
+            className={clsx(
+              'font-display text-2xl font-extrabold',
+              data.profitAndLoss.last7Days.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+            )}
+          >
+            {tzs(data.profitAndLoss.last7Days.netProfit)}
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.grossProfit)}</b></span>
+            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.expenses)}</b></span>
+          </div>
+        </Card>
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr_1fr]">

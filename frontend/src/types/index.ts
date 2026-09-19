@@ -492,6 +492,7 @@ export interface DailySalesPoint {
   transactions: number;
   discount: number;
   voided: number;
+  grossProfit: number;
 }
 
 export interface RevenueByCategoryRow {
@@ -508,38 +509,20 @@ export interface RevenueByStaffRow {
 }
 
 export interface SalesOverviewReport {
-  current: { totalRevenue: number; transactionCount: number; totalDiscount: number; voidedCount: number };
+  current: { totalRevenue: number; transactionCount: number; totalDiscount: number; voidedCount: number; grossProfit: number };
   changePct: {
     totalRevenue: number | null;
     transactionCount: number | null;
     totalDiscount: number | null;
     voidedCount: number | null;
+    grossProfit: number | null;
   };
   dailySeries: DailySalesPoint[];
   revenueByCategory: RevenueByCategoryRow[];
   revenueByStaff: RevenueByStaffRow[];
   topProducts: ProductSalesRow[];
   totalQuantitySold: number;
-  cashHistory: CashCount[];
   lowStockCount: number;
-}
-
-export interface CashCount {
-  id: number;
-  count_date: string;
-  expected_cash: string;
-  actual_cash: string;
-  difference: string;
-  notes: string | null;
-  counted_by_name?: string;
-  created_at?: string;
-}
-
-export interface CashControlSummary {
-  expectedCashToday: number;
-  latestCount: CashCount | null;
-  countsThisWeek: number;
-  pendingToday: number;
 }
 
 export interface DashboardToday {
@@ -550,10 +533,6 @@ export interface DashboardToday {
   grossProfit: number;
   expenses: number;
   estimatedNet: number;
-  expectedCash: number;
-  cashCounted: boolean;
-  cashCount: CashCount | null;
-  cashDiscrepancyAlert: boolean;
   lowStockAlert: boolean;
   lowStockCount: number;
   lowStockProducts: InventoryRow[];
@@ -573,6 +552,12 @@ export interface DashboardToday {
     expenses: number | null;
     estimatedNet: number | null;
     totalPurchases: number | null;
+  };
+
+  // Profit & Loss at a glance (2026-09-19, CLAUDE.md #69).
+  profitAndLoss: {
+    yesterday: { grossProfit: number; expenses: number; netProfit: number };
+    last7Days: { grossProfit: number; expenses: number; netProfit: number };
   };
 }
 
