@@ -5,6 +5,9 @@ import * as salesRepo from '../db/salesRepo';
 import * as purchasesRepo from '../db/purchasesRepo';
 import { pool } from '../db/pool';
 import { pctChange } from '../utils/period';
+import { HttpError } from '../middleware/errorHandler';
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -184,5 +187,37 @@ export async function getTodayDashboard(requesterId: number) {
         netProfit: last7DaysNet,
       },
     },
+  };
+}
+
+/**
+ * Custom-range Profit & Loss (2026-09-19, CLAUDE.md #69 follow-up) — the
+ * owner liked the fixed Yesterday/Last 7 Days cards but also wants an
+ * occasional custom period, without a date picker sitting on the
+ * dashboard permanently ("iwe hidden ... isije ikaharibu UI" — kept
+ * behind a button on the frontend; this endpoint is what that button
+ * calls). Same reuse as the fixed cards: salesRepo.getSalesAggregate for
+ * gross profit, expensesRepo.sumExpensesForRange for expenses.
+ */
+export async function getProfitAndLossForRange(fromRaw: string | undefined, toRaw: string | undefined, requesterId: number) {
+  if (!fromRaw || !toRaw || !DATE_RE.test(fromRaw) || !DATE_RE.test(toRaw)) {
+    throw new HttpError(400, 'FROM_AND_TO_DATES_REQUIRED');
+  }
+  if (fromRaw > toRaw) {
+    throw new HttpError(400, 'FROM_MUST_NOT_BE_AFTER_TO');
+  }
+
+  const [aggregate, expenses] = await Promise.all([
+    salesRepo.getSalesAggregate({ from: fromRaw, to: toRaw, ownerView: true, requesterId }),
+    expensesRepo.sumExpensesForRange(fromRaw, toRaw),
+  ]);
+  const grossProfit = Number(aggregate.gross_profit);
+
+  return {
+    from: fromRaw,
+    to: toRaw,
+    grossProfit,
+    expenses,
+    netProfit: grossProfit - expenses,
   };
 }

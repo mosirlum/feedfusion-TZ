@@ -19,6 +19,8 @@ import {
   Layers,
   Tag,
   Boxes,
+  Calendar,
+  X,
 } from 'lucide-react';
 import { dashboardApi, apiErrorMessage } from '../lib/api';
 import { DashboardToday } from '../types';
@@ -32,6 +34,7 @@ import {
   EmptyState,
   FullPageSpinner,
   IconChip,
+  Input,
   PageHeader,
   StatCard,
   Table,
@@ -41,6 +44,19 @@ import {
   Tr,
 } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
+
+// Local-date helpers (mirrors SalesHistoryPage.tsx's own localIso/todayLocalIso,
+// CLAUDE.md #34) — todayIso()/isoDaysAgo() in lib/format.ts convert through
+// UTC, which can shift the reported calendar date back a day for a browser
+// timezone ahead of UTC (Tanzania is UTC+3). The custom-range picker below
+// only needs a "today" default, so it uses these local-date-only helpers
+// instead, same fix already applied on Sales History.
+function localIso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function todayLocalIso(): string {
+  return localIso(new Date());
+}
 
 // Dashboard visual redesign, round 2 (2026-09-12, CLAUDE.md #56/#57) — the
 // owner saw the approved mockup again after round 1 shipped and said plainly
@@ -57,6 +73,35 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardToday | null>(null);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
+
+  // Custom-range Profit & Loss (2026-09-19, CLAUDE.md #69 follow-up) — the
+  // owner liked the Yesterday/Last-7-Days cards but asked for a "customize"
+  // option too, kept hidden by default so it doesn't clutter the dashboard:
+  // "tuwek customize also ila iwe hidden... it can just be a button not a
+  // calendar sitting there." So this starts collapsed behind a plain toggle
+  // button, not a permanently-visible date picker.
+  const [showCustomRange, setShowCustomRange] = useState(false);
+  const [customFrom, setCustomFrom] = useState(todayLocalIso());
+  const [customTo, setCustomTo] = useState(todayLocalIso());
+  const [customResult, setCustomResult] = useState<{ from: string; to: string; grossProfit: number; expenses: number; netProfit: number } | null>(null);
+  const [customLoading, setCustomLoading] = useState(false);
+
+  async function fetchCustomRange() {
+    if (!customFrom || !customTo) return;
+    if (customFrom > customTo) {
+      toast.error('"From" date must not be after "To" date.');
+      return;
+    }
+    setCustomLoading(true);
+    try {
+      const res = await dashboardApi.profitAndLoss(customFrom, customTo);
+      setCustomResult(res.data);
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Could not load profit for that range.'));
+    } finally {
+      setCustomLoading(false);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -205,6 +250,56 @@ export default function DashboardPage() {
             <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.expenses)}</b></span>
           </div>
         </Card>
+      </div>
+
+      {/* Custom-range Profit & Loss — hidden behind a plain toggle button by
+          default (owner's own request, see the state comment above), so it
+          protects the dashboard's clean layout until it's actually needed. */}
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={() => setShowCustomRange((v) => !v)}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+        >
+          {showCustomRange ? <X size={13} /> : <Calendar size={13} />}
+          {showCustomRange ? 'Hide custom range' : 'Custom range'}
+        </button>
+        {showCustomRange && (
+          <Card className="mt-2 p-4">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+                <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} max={customTo} className="w-auto" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+                <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} min={customFrom} max={todayLocalIso()} className="w-auto" />
+              </div>
+              <Button size="sm" loading={customLoading} onClick={fetchCustomRange}>
+                Show
+              </Button>
+            </div>
+            {customResult && (
+              <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/10">
+                <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                  {formatDate(customResult.from)} – {formatDate(customResult.to)}
+                </p>
+                <p
+                  className={clsx(
+                    'font-display text-2xl font-extrabold',
+                    customResult.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+                  )}
+                >
+                  {tzs(customResult.netProfit)}
+                </p>
+                <div className="mt-1 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+                  <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.grossProfit)}</b></span>
+                  <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.expenses)}</b></span>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr_1fr]">

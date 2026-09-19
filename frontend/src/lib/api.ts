@@ -452,6 +452,13 @@ export const expensesApi = {
 // ---------------------------------------------------------------------------
 export const dashboardApi = {
   today: () => http.get<DashboardToday>('/dashboard/today'),
+  // Custom-range Profit & Loss (2026-09-19, CLAUDE.md #69 follow-up) — the
+  // dashboard's hidden-by-default "Custom range" button.
+  profitAndLoss: (from: string, to: string) =>
+    http.get<{ from: string; to: string; grossProfit: number; expenses: number; netProfit: number }>(
+      '/dashboard/profit-and-loss',
+      { params: { from, to } }
+    ),
 };
 
 export const reportsApi = {
