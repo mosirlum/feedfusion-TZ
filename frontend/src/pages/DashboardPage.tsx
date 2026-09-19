@@ -21,6 +21,7 @@ import {
   Boxes,
   Calendar,
   X,
+  HandCoins,
 } from 'lucide-react';
 import { dashboardApi, apiErrorMessage } from '../lib/api';
 import { DashboardToday } from '../types';
@@ -251,6 +252,75 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* Outstanding Customer Debt (2026-09-19, CLAUDE.md #69 follow-up) —
+          "Total Sales" above reflects the full invoiced amount of every
+          completed sale, credit sales included (CLAUDE.md #50), so it can
+          read stronger than the cash actually in hand. This surfaces what's
+          still owed: every COMPLETED sale with payment_status PARTIAL and a
+          real balance left, oldest first (see salesRepo.getOutstandingBalances
+          for why oldest-first was picked over largest-first — flagged as a
+          judgment call, not a spelled-out requirement). */}
+      <Card className="mt-4 p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <IconChip tone="amber" size={26} icon={<HandCoins size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Outstanding Customer Debt</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Money owed to the shop from credit sales</p>
+            </div>
+          </div>
+          <Link to="/sales" className="text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
+            View in Sales History
+          </Link>
+        </div>
+        {data.outstandingDebt.debtorCount === 0 ? (
+          <EmptyState title="No outstanding customer debt right now." />
+        ) : (
+          <>
+            <div className="mb-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+              <p className="font-display text-2xl font-extrabold text-amber-600 dark:text-amber-300">
+                {tzs(data.outstandingDebt.totalOutstanding)}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+                across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
+              </p>
+            </div>
+            <Table>
+              <THead>
+                <tr>
+                  <Th>Date</Th>
+                  <Th>Customer</Th>
+                  <Th>Invoice</Th>
+                  <Th className="text-right">Total</Th>
+                  <Th className="text-right">Balance Due</Th>
+                </tr>
+              </THead>
+              <tbody>
+                {data.outstandingDebt.topDebtors.map((d) => (
+                  <Tr key={d.id}>
+                    <Td className="whitespace-nowrap text-slate-500 dark:text-[#97a49b]">{formatDate(d.sale_date)}</Td>
+                    <Td className="font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      {d.customer_name || 'Walk-in'}
+                      {d.customer_phone && (
+                        <span className="ml-1.5 font-normal text-slate-400 dark:text-[#77857c]">{d.customer_phone}</span>
+                      )}
+                    </Td>
+                    <Td className="text-slate-500 dark:text-[#97a49b]">{d.invoice_number}</Td>
+                    <Td className="text-right">{tzs(d.total)}</Td>
+                    <Td className="text-right font-bold text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+            {data.outstandingDebt.debtorCount > data.outstandingDebt.topDebtors.length && (
+              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
+                Showing the {data.outstandingDebt.topDebtors.length} oldest of {data.outstandingDebt.debtorCount} unpaid sales.
+              </p>
+            )}
+          </>
+        )}
+      </Card>
 
       {/* Custom-range Profit & Loss — hidden behind a plain toggle button by
           default (owner's own request, see the state comment above), so it

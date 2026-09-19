@@ -559,6 +559,25 @@ export interface DashboardToday {
     yesterday: { grossProfit: number; expenses: number; netProfit: number };
     last7Days: { grossProfit: number; expenses: number; netProfit: number };
   };
+
+  // Outstanding Customer Debt (2026-09-19, CLAUDE.md #69 follow-up) — every
+  // COMPLETED sale still carrying a balance (credit sales, CLAUDE.md #50),
+  // oldest first. topDebtors is capped (currently 10); debtorCount is the
+  // real total count of unpaid sales, which can be larger than the list.
+  outstandingDebt: {
+    totalOutstanding: number;
+    debtorCount: number;
+    topDebtors: Array<{
+      id: number;
+      invoice_number: string;
+      sale_date: string;
+      customer_name: string | null;
+      customer_phone: string | null;
+      total: number;
+      amount_paid: number;
+      balance_due: number;
+    }>;
+  };
 }
 
 export interface AuditLog {

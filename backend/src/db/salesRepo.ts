@@ -449,3 +449,58 @@ export async function getLatestUnitCost(productId: number, client: PoolClient): 
   );
   return rows[0]?.last_unit_cost !== undefined && rows[0]?.last_unit_cost !== null ? Number(rows[0].last_unit_cost) : 0;
 }
+
+// Outstanding Customer Debt (2026-09-19, CLAUDE.md #69 follow-up) — the
+// Dashboard's "Total Sales" reflects the full invoiced amount of every
+// COMPLETED sale regardless of how much cash actually came in (credit
+// sales, CLAUDE.md #50), so a shop that's extended a lot of credit could
+// look healthier on the Dashboard than it really is with cash still owed
+// to it. This surfaces that gap: every COMPLETED sale still carrying a
+// balance (payment_status = 'PARTIAL' and balance_due > 0 — PAID sales are
+// never included, since by definition they owe nothing).
+//
+// Per-sale, not per-customer: `customer_id` (migration 016/018) is optional
+// — a credit sale rung up for a walk-in customer often has only a
+// customer_name typed in, no linked Customers record — so grouping by
+// customer_id would silently miss those, and grouping by name/phone risks
+// merging two different people who happen to share one. Listing each
+// unresolved sale on its own is the honest, unambiguous option.
+//
+// Ordered oldest-first (sale_date ASC) — a judgment call, not spelled out
+// anywhere in the docs: the oldest unpaid balance is usually the one most
+// worth chasing first, but "largest balance first" is an equally
+// defensible reading. Flagging this rather than silently picking one.
+export async function getOutstandingBalances(): Promise<{
+  totalOutstanding: number;
+  debtorCount: number;
+  topDebtors: Array<{
+    id: number;
+    invoice_number: string;
+    sale_date: string;
+    customer_name: string | null;
+    customer_phone: string | null;
+    total: number;
+    amount_paid: number;
+    balance_due: number;
+  }>;
+}> {
+  const { rows } = await pool.query(
+    `SELECT sa.id, sa.invoice_number, sa.sale_date, sa.customer_name, sa.customer_phone,
+            sa.total::float AS total,
+            COALESCE(pay.paid, 0)::float AS amount_paid,
+            (sa.total - COALESCE(pay.paid, 0))::float AS balance_due
+     FROM sales sa
+     LEFT JOIN (SELECT sale_id, SUM(amount) AS paid FROM payments GROUP BY sale_id) pay
+       ON pay.sale_id = sa.id
+     WHERE sa.status = 'COMPLETED' AND sa.payment_status = 'PARTIAL'
+       AND (sa.total - COALESCE(pay.paid, 0)) > 0
+     ORDER BY sa.sale_date ASC`
+  );
+
+  const totalOutstanding = rows.reduce((sum, r) => sum + Number(r.balance_due), 0);
+  return {
+    totalOutstanding,
+    debtorCount: rows.length,
+    topDebtors: rows.slice(0, 10),
+  };
+}

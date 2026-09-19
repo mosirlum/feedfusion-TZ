@@ -87,6 +87,7 @@ export async function getTodayDashboard(requesterId: number) {
     recentPurchases,
     last7DaysAggregate,
     last7DaysExpenses,
+    outstandingDebt,
   ] = await Promise.all([
     reportsRepo.todaySummary(date),
     reportsRepo.todaySummary(yesterday),
@@ -101,6 +102,7 @@ export async function getTodayDashboard(requesterId: number) {
     purchasesRepo.listPurchases(5),
     salesRepo.getSalesAggregate({ from: sevenDaysAgo, to: date, ownerView: true, requesterId }),
     expensesRepo.sumExpensesForRange(sevenDaysAgo, date),
+    salesRepo.getOutstandingBalances(),
   ]);
 
   const estimatedNet = summary.grossProfit - expensesToday;
@@ -187,6 +189,11 @@ export async function getTodayDashboard(requesterId: number) {
         netProfit: last7DaysNet,
       },
     },
+
+    // Outstanding Customer Debt (CLAUDE.md #69 follow-up) — see
+    // salesRepo.getOutstandingBalances for why this is per-sale, oldest-
+    // first, rather than grouped by customer.
+    outstandingDebt,
   };
 }
 
