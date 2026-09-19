@@ -165,7 +165,18 @@ export async function deleteProduct(id: number, deletedBy: AuthenticatedUser) {
   const product = await getProductById(id);
 
   try {
-    await productsRepo.deleteProduct(id);
+    // A product whose only recorded activity is its own starting-stock
+    // movement from creation (CLAUDE.md #70) is still safe to hard-delete —
+    // see productsRepo.hasOnlyStartingStockActivity for why. Anything else
+    // (a sale, purchase, later adjustment, price proposal, quotation line,
+    // stock count) falls through to the plain delete below, which still
+    // hits the real foreign-key violation and the same friendly message.
+    const onlyStartingStock = await productsRepo.hasOnlyStartingStockActivity(id);
+    if (onlyStartingStock) {
+      await withTransaction((client) => productsRepo.deleteProductCleaningStartingStock(id, client));
+    } else {
+      await productsRepo.deleteProduct(id);
+    }
   } catch (err) {
     if (isForeignKeyViolation(err)) {
       throw new HttpError(
