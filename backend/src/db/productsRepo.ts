@@ -120,40 +120,38 @@ export async function deleteProduct(id: number): Promise<boolean> {
   return (rowCount ?? 0) > 0;
 }
 
-// Starting stock at creation (2026-09-19, CLAUDE.md #70) posts a real
-// stock_movements row (BR-01) even though nothing else has touched the
-// product yet — so the exhaustive FK check above blocked Delete Product
-// for a product with only a starting quantity, even seconds after it was
-// created by mistake (owner's own report: created "KBC 35" with a
-// starting quantity, tried to delete it right away, got "has recorded
-// activity"). This checks whether the ONLY thing referencing the product
-// anywhere is that one starting-stock movement (reference_type
-// 'product_created') — real activity (a sale, a purchase, a later manual
-// Stock Adjustment, a price proposal, a quotation line, or a stock count)
-// still blocks delete exactly as before; only the bookkeeping entry from
-// creation itself is exempted.
-export async function hasOnlyStartingStockActivity(id: number): Promise<boolean> {
+// Generalized 2026-09-19, same day as the starting-stock fix above — the
+// owner's own follow-up: a Stock Adjustment entered by mistake for a
+// product that was never actually sold or purchased needs the same
+// escape hatch, not just a starting-stock-at-creation entry. Reasoning:
+// stock_movements and stock_adjustments are both inventory BOOKKEEPING —
+// neither one is itself a record of a real transaction (a real sale or
+// purchase always also writes to sale_items/purchase_items, which stay
+// hard blockers below). So neither table blocks delete on its own
+// anymore; what still permanently blocks it is an actual sale, purchase,
+// price decision, quotation line, or a formal (approval-driven) stock
+// count — the same as before, minus stock_movements/stock_adjustments.
+export async function hasOnlyStockRecordActivity(id: number): Promise<boolean> {
   const { rows } = await pool.query(
     `SELECT NOT EXISTS (
        SELECT 1 FROM price_proposals WHERE product_id = $1
        UNION ALL SELECT 1 FROM purchase_items WHERE product_id = $1
        UNION ALL SELECT 1 FROM sale_items WHERE product_id = $1
        UNION ALL SELECT 1 FROM stock_counts WHERE product_id = $1
-       UNION ALL SELECT 1 FROM stock_adjustments WHERE product_id = $1
        UNION ALL SELECT 1 FROM quotation_items WHERE product_id = $1
-       UNION ALL SELECT 1 FROM stock_movements
-         WHERE product_id = $1 AND reference_type IS DISTINCT FROM 'product_created'
      ) AS safe`,
     [id]
   );
   return rows[0].safe;
 }
 
-// Removes the starting-stock movement(s) and the product together, in the
-// caller's transaction — only ever called after hasOnlyStartingStockActivity
-// confirms nothing else references this product, so every remaining
-// stock_movements row here is a 'product_created' one.
-export async function deleteProductCleaningStartingStock(id: number, client: PoolClient): Promise<boolean> {
+// Removes every stock_adjustments and stock_movements row for this
+// product along with the product itself, in the caller's transaction —
+// only ever called after hasOnlyStockRecordActivity confirms nothing
+// else (no sale, purchase, price decision, quotation, or stock count)
+// references this product.
+export async function deleteProductCleaningStockRecords(id: number, client: PoolClient): Promise<boolean> {
+  await client.query('DELETE FROM stock_adjustments WHERE product_id = $1', [id]);
   await client.query('DELETE FROM stock_movements WHERE product_id = $1', [id]);
   const { rowCount } = await client.query('DELETE FROM products WHERE id = $1', [id]);
   return (rowCount ?? 0) > 0;

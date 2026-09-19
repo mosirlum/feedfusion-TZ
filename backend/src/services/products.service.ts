@@ -165,15 +165,16 @@ export async function deleteProduct(id: number, deletedBy: AuthenticatedUser) {
   const product = await getProductById(id);
 
   try {
-    // A product whose only recorded activity is its own starting-stock
-    // movement from creation (CLAUDE.md #70) is still safe to hard-delete —
-    // see productsRepo.hasOnlyStartingStockActivity for why. Anything else
-    // (a sale, purchase, later adjustment, price proposal, quotation line,
-    // stock count) falls through to the plain delete below, which still
-    // hits the real foreign-key violation and the same friendly message.
-    const onlyStartingStock = await productsRepo.hasOnlyStartingStockActivity(id);
-    if (onlyStartingStock) {
-      await withTransaction((client) => productsRepo.deleteProductCleaningStartingStock(id, client));
+    // A product whose only recorded activity is stock bookkeeping (its own
+    // starting-stock entry from creation, and/or a Stock Adjustment — see
+    // productsRepo.hasOnlyStockRecordActivity for why neither blocks delete
+    // on its own) is still safe to hard-delete. Anything else — a real
+    // sale, purchase, price decision, quotation line, or formal stock
+    // count — falls through to the plain delete below, which still hits
+    // the real foreign-key violation and the same friendly message.
+    const onlyStockRecords = await productsRepo.hasOnlyStockRecordActivity(id);
+    if (onlyStockRecords) {
+      await withTransaction((client) => productsRepo.deleteProductCleaningStockRecords(id, client));
     } else {
       await productsRepo.deleteProduct(id);
     }
