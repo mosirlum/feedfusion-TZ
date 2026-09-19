@@ -51,14 +51,6 @@ export async function discountsReportHandler(req: Request, res: Response, next: 
   }
 }
 
-export async function cashReportHandler(req: Request, res: Response, next: NextFunction) {
-  try {
-    res.status(200).json(await reportsService.getCashReport(q(req, 'from'), q(req, 'to')));
-  } catch (err) {
-    next(err);
-  }
-}
-
 export async function usersReportHandler(req: Request, res: Response, next: NextFunction) {
   try {
     res.status(200).json(await reportsService.getUsersReport(q(req, 'from'), q(req, 'to')));
@@ -69,7 +61,7 @@ export async function usersReportHandler(req: Request, res: Response, next: Next
 
 export async function salesOverviewHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    res.status(200).json(await reportsService.getSalesOverview(q(req, 'from'), q(req, 'to')));
+    res.status(200).json(await reportsService.getSalesOverview(q(req, 'from'), q(req, 'to'), req.user!.id));
   } catch (err) {
     next(err);
   }

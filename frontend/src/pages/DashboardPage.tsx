@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -18,6 +19,9 @@ import {
   Layers,
   Tag,
   Boxes,
+  Calendar,
+  X,
+  HandCoins,
 } from 'lucide-react';
 import { dashboardApi, apiErrorMessage } from '../lib/api';
 import { DashboardToday } from '../types';
@@ -31,6 +35,7 @@ import {
   EmptyState,
   FullPageSpinner,
   IconChip,
+  Input,
   PageHeader,
   StatCard,
   Table,
@@ -40,6 +45,19 @@ import {
   Tr,
 } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
+
+// Local-date helpers (mirrors SalesHistoryPage.tsx's own localIso/todayLocalIso,
+// CLAUDE.md #34) — todayIso()/isoDaysAgo() in lib/format.ts convert through
+// UTC, which can shift the reported calendar date back a day for a browser
+// timezone ahead of UTC (Tanzania is UTC+3). The custom-range picker below
+// only needs a "today" default, so it uses these local-date-only helpers
+// instead, same fix already applied on Sales History.
+function localIso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function todayLocalIso(): string {
+  return localIso(new Date());
+}
 
 // Dashboard visual redesign, round 2 (2026-09-12, CLAUDE.md #56/#57) — the
 // owner saw the approved mockup again after round 1 shipped and said plainly
@@ -56,6 +74,35 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardToday | null>(null);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
+
+  // Custom-range Profit & Loss (2026-09-19, CLAUDE.md #69 follow-up) — the
+  // owner liked the Yesterday/Last-7-Days cards but asked for a "customize"
+  // option too, kept hidden by default so it doesn't clutter the dashboard:
+  // "tuwek customize also ila iwe hidden... it can just be a button not a
+  // calendar sitting there." So this starts collapsed behind a plain toggle
+  // button, not a permanently-visible date picker.
+  const [showCustomRange, setShowCustomRange] = useState(false);
+  const [customFrom, setCustomFrom] = useState(todayLocalIso());
+  const [customTo, setCustomTo] = useState(todayLocalIso());
+  const [customResult, setCustomResult] = useState<{ from: string; to: string; grossProfit: number; expenses: number; netProfit: number } | null>(null);
+  const [customLoading, setCustomLoading] = useState(false);
+
+  async function fetchCustomRange() {
+    if (!customFrom || !customTo) return;
+    if (customFrom > customTo) {
+      toast.error('"From" date must not be after "To" date.');
+      return;
+    }
+    setCustomLoading(true);
+    try {
+      const res = await dashboardApi.profitAndLoss(customFrom, customTo);
+      setCustomResult(res.data);
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Could not load profit for that range.'));
+    } finally {
+      setCustomLoading(false);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -101,32 +148,8 @@ export default function DashboardPage() {
     <div>
       <PageHeader title="Today's Overview" subtitle={formatDate(data.date)} />
 
-      {(data.lowStockAlert || !data.cashCounted || data.cashDiscrepancyAlert) && (
+      {data.lowStockAlert && (
         <div className="mb-6 flex flex-col gap-2">
-          {!data.cashCounted && (
-            <AlertBanner
-              icon={<Wallet size={16} />}
-              tone="amber"
-              text="Cash hasn't been counted yet today."
-              action={
-                <Link to="/cash-control" className="font-semibold underline underline-offset-2">
-                  Count now
-                </Link>
-              }
-            />
-          )}
-          {data.cashDiscrepancyAlert && (
-            <AlertBanner
-              icon={<AlertTriangle size={16} />}
-              tone="red"
-              text="Today's cash count shows a discrepancy between expected and actual cash."
-              action={
-                <Link to="/cash-control" className="font-semibold underline underline-offset-2">
-                  Review
-                </Link>
-              }
-            />
-          )}
           {data.lowStockAlert && (
             <AlertBanner
               icon={<PackageX size={16} />}
@@ -176,6 +199,177 @@ export default function DashboardPage() {
           tone={data.estimatedNet >= 0 ? 'green' : 'red'}
           delta={deltaProp(data.deltas.estimatedNet)}
         />
+      </div>
+
+      {/* Profit & Loss at a glance (2026-09-19, CLAUDE.md #69) — the stat
+          cards above are all "today"; the owner's own words were that he
+          (and customers asking him) wants "jana nilipata faida kiasi gani"
+          (yesterday's profit) and "wiki iliyopita" (last week's) without
+          leaving the dashboard. Two compact panels rather than more stat
+          cards, since each carries three related numbers (gross, expenses,
+          net) that read better grouped than spread across the grid. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Card className="p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <IconChip tone="blue" size={26} icon={<Wallet size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Yesterday&apos;s Profit</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
+            </div>
+          </div>
+          <p
+            className={clsx(
+              'font-display text-2xl font-extrabold',
+              data.profitAndLoss.yesterday.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+            )}
+          >
+            {tzs(data.profitAndLoss.yesterday.netProfit)}
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.grossProfit)}</b></span>
+            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.expenses)}</b></span>
+          </div>
+        </Card>
+        <Card className="p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <IconChip tone="green" size={26} icon={<BarChart3 size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Last 7 Days&apos; Profit</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
+            </div>
+          </div>
+          <p
+            className={clsx(
+              'font-display text-2xl font-extrabold',
+              data.profitAndLoss.last7Days.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+            )}
+          >
+            {tzs(data.profitAndLoss.last7Days.netProfit)}
+          </p>
+          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.grossProfit)}</b></span>
+            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.expenses)}</b></span>
+          </div>
+        </Card>
+      </div>
+
+      {/* Outstanding Customer Debt (2026-09-19, CLAUDE.md #69 follow-up) —
+          "Total Sales" above reflects the full invoiced amount of every
+          completed sale, credit sales included (CLAUDE.md #50), so it can
+          read stronger than the cash actually in hand. This surfaces what's
+          still owed: every COMPLETED sale with payment_status PARTIAL and a
+          real balance left, oldest first (see salesRepo.getOutstandingBalances
+          for why oldest-first was picked over largest-first — flagged as a
+          judgment call, not a spelled-out requirement). */}
+      <Card className="mt-4 p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <IconChip tone="amber" size={26} icon={<HandCoins size={13} />} />
+            <div>
+              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Outstanding Customer Debt</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Money owed to the shop from credit sales</p>
+            </div>
+          </div>
+          <Link to="/sales-history" className="text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
+            View in Sales History
+          </Link>
+        </div>
+        {data.outstandingDebt.debtorCount === 0 ? (
+          <EmptyState title="No outstanding customer debt right now." />
+        ) : (
+          <>
+            <div className="mb-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+              <p className="font-display text-2xl font-extrabold text-amber-600 dark:text-amber-300">
+                {tzs(data.outstandingDebt.totalOutstanding)}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+                across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
+              </p>
+            </div>
+            <Table>
+              <THead>
+                <tr>
+                  <Th>Date</Th>
+                  <Th>Customer</Th>
+                  <Th>Invoice</Th>
+                  <Th className="text-right">Total</Th>
+                  <Th className="text-right">Balance Due</Th>
+                </tr>
+              </THead>
+              <tbody>
+                {data.outstandingDebt.topDebtors.map((d) => (
+                  <Tr key={d.id}>
+                    <Td className="whitespace-nowrap text-slate-500 dark:text-[#97a49b]">{formatDate(d.sale_date)}</Td>
+                    <Td className="font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      {d.customer_name || 'Walk-in'}
+                      {d.customer_phone && (
+                        <span className="ml-1.5 font-normal text-slate-400 dark:text-[#77857c]">{d.customer_phone}</span>
+                      )}
+                    </Td>
+                    <Td className="text-slate-500 dark:text-[#97a49b]">{d.invoice_number}</Td>
+                    <Td className="text-right">{tzs(d.total)}</Td>
+                    <Td className="text-right font-bold text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+            {data.outstandingDebt.debtorCount > data.outstandingDebt.topDebtors.length && (
+              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
+                Showing the {data.outstandingDebt.topDebtors.length} oldest of {data.outstandingDebt.debtorCount} unpaid sales.
+              </p>
+            )}
+          </>
+        )}
+      </Card>
+
+      {/* Custom-range Profit & Loss — hidden behind a plain toggle button by
+          default (owner's own request, see the state comment above), so it
+          protects the dashboard's clean layout until it's actually needed. */}
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={() => setShowCustomRange((v) => !v)}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+        >
+          {showCustomRange ? <X size={13} /> : <Calendar size={13} />}
+          {showCustomRange ? 'Hide custom range' : 'Custom range'}
+        </button>
+        {showCustomRange && (
+          <Card className="mt-2 p-4">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+                <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} max={customTo} className="w-auto" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+                <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} min={customFrom} max={todayLocalIso()} className="w-auto" />
+              </div>
+              <Button size="sm" loading={customLoading} onClick={fetchCustomRange}>
+                Show
+              </Button>
+            </div>
+            {customResult && (
+              <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/10">
+                <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                  {formatDate(customResult.from)} – {formatDate(customResult.to)}
+                </p>
+                <p
+                  className={clsx(
+                    'font-display text-2xl font-extrabold',
+                    customResult.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
+                  )}
+                >
+                  {tzs(customResult.netProfit)}
+                </p>
+                <div className="mt-1 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
+                  <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.grossProfit)}</b></span>
+                  <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.expenses)}</b></span>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr_1fr]">

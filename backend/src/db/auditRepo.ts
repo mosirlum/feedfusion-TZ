@@ -53,7 +53,7 @@ const FEATURE_ACTIONS: Record<string, string[]> = {
   Cash: ['CASH_COUNT_RECORDED'],
   Expenses: ['EXPENSE_RECORDED'],
   'Price Proposals': ['PRICE_PROPOSED', 'PRICE_APPROVED', 'PRICE_REJECTED'],
-  Products: ['PRODUCT_ACTIVATED', 'PRODUCT_DEACTIVATED'],
+  Products: ['PRODUCT_CREATED', 'PRODUCT_ACTIVATED', 'PRODUCT_DEACTIVATED', 'PRODUCT_UPDATED', 'PRODUCT_DELETED'],
   // Password reset/change + profile self-service (2026-09-12, CLAUDE.md #47).
   Users: ['USER_PASSWORD_RESET', 'USER_PASSWORD_CHANGED', 'USER_PROFILE_UPDATED'],
   // Customers + Quotations (2026-09-12, CLAUDE.md #49).

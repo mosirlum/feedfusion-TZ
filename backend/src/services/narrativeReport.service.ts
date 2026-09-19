@@ -278,27 +278,6 @@ function buildStaffSection(rows: Array<{ user_name: string; transaction_count: n
   };
 }
 
-function buildCashSection(rows: Array<{ count_date: string | Date; expected_cash: string; actual_cash: string; difference: string; counted_by_name: string }>): NarrativeSection {
-  if (rows.length === 0) {
-    return { key: 'cash', heading: 'Cash Control', paragraphs: ['No cash counts were recorded during this period.'] };
-  }
-  const withDiff = rows.filter((r) => Number(r.difference) !== 0);
-  const paras = [
-    `${rows.length} cash count${rows.length === 1 ? ' was' : 's were'} recorded in this period` +
-      (withDiff.length > 0
-        ? `, of which ${withDiff.length} showed a variance between expected and actual cash.`
-        : ', all matching the expected cash exactly.'),
-  ];
-  if (withDiff.length > 0) {
-    const worst = [...withDiff].sort((a, b) => Math.abs(Number(b.difference)) - Math.abs(Number(a.difference)))[0];
-    const diff = Number(worst.difference);
-    paras.push(
-      `The largest variance was ${tzs(Math.abs(diff))} ${diff < 0 ? 'short' : 'over'} on ${fmtDate(worst.count_date)}, counted by ${worst.counted_by_name}.`
-    );
-  }
-  return { key: 'cash', heading: 'Cash Control', paragraphs: paras };
-}
-
 function buildLowStockSection(
   lowStock: Array<{ name: string; unit: string | null; current_stock: number; minimum_stock: number; status: string }>
 ): NarrativeSection {
@@ -423,7 +402,6 @@ export async function buildNarrativeReport(fromRaw?: string, toRaw?: string): Pr
     buildCategorySection(overview.revenueByCategory),
     buildTopProductsSection(overview.topProducts, overview.totalQuantitySold),
     buildStaffSection(overview.revenueByStaff),
-    buildCashSection(overview.cashHistory),
     buildLowStockSection(lowStock),
   ];
 

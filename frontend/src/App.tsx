@@ -17,7 +17,6 @@ import StockCountPage from './pages/StockCountPage';
 import StockAdjustmentsPage from './pages/StockAdjustmentsPage';
 import PurchasesPage from './pages/PurchasesPage';
 import SuppliersPage from './pages/SuppliersPage';
-import CashControlPage from './pages/CashControlPage';
 import ExpensesPage from './pages/ExpensesPage';
 import ReportsPage from './pages/ReportsPage';
 import AuditLogPage from './pages/AuditLogPage';
@@ -110,14 +109,6 @@ export default function App() {
           element={
             <RequireAuth roles={['owner']}>
               <SuppliersPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/cash-control"
-          element={
-            <RequireAuth roles={['owner']}>
-              <CashControlPage />
             </RequireAuth>
           }
         />

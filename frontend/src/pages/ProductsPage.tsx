@@ -13,11 +13,15 @@ import {
   Award,
   TrendingUp,
   Boxes,
+  Pencil,
+  Trash2,
+  TriangleAlert,
 } from 'lucide-react';
 import { productsApi, categoriesApi, inventoryApi, reportsApi, apiErrorMessage } from '../lib/api';
 import { Product, Category, InventoryRow, ProductSalesRow } from '../types';
 import { tzs, initials, todayIso, pageWindow } from '../lib/format';
 import { CreateProductModal } from '../components/products/CreateProductModal';
+import { EditProductModal } from '../components/products/EditProductModal';
 import { ProposePriceModal } from '../components/products/ProposePriceModal';
 import {
   Badge,
@@ -27,6 +31,7 @@ import {
   FullPageSpinner,
   IconChip,
   Input,
+  Modal,
   PageHeader,
   Select,
   StatCard,
@@ -62,6 +67,9 @@ export default function ProductsPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [proposeProduct, setProposeProduct] = useState<Product | null>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   const [search, setSearch] = useState('');
@@ -110,6 +118,24 @@ export default function ProductsPage() {
       toast.error(apiErrorMessage(err, 'Could not update this product.'));
     } finally {
       setUpdatingId(null);
+    }
+  }
+
+  // Permanent Delete Product (2026-09-19, CLAUDE.md #69) — same
+  // confirm-modal + block-on-history pattern already used for deleting a
+  // user (UsersPage.tsx's deleteTarget/confirmDelete).
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
+    try {
+      await productsApi.remove(deleteTarget.id);
+      toast.success(`${deleteTarget.name} was deleted.`);
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Could not delete this product.'));
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -307,6 +333,22 @@ export default function ProductsPage() {
                               <Tag size={13} /> {isOwner ? 'Set price' : 'Propose'}
                             </button>
                             {isOwner && (
+                              <button
+                                onClick={() => setEditProduct(p)}
+                                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#97a49b]"
+                              >
+                                <Pencil size={13} /> Edit
+                              </button>
+                            )}
+                            {isOwner && (
+                              <button
+                                onClick={() => setDeleteTarget(p)}
+                                className="flex items-center gap-1 text-xs font-medium text-danger-600 hover:underline"
+                              >
+                                <Trash2 size={13} /> Delete
+                              </button>
+                            )}
+                            {isOwner && (
                               <Button
                                 size="sm"
                                 variant={p.status === 'active' ? 'outline' : 'primary'}
@@ -358,6 +400,22 @@ export default function ProductsPage() {
                         >
                           <Tag size={13} /> {isOwner ? 'Set price' : 'Propose'}
                         </button>
+                        {isOwner && (
+                          <button
+                            onClick={() => setEditProduct(p)}
+                            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#97a49b]"
+                          >
+                            <Pencil size={13} /> Edit
+                          </button>
+                        )}
+                        {isOwner && (
+                          <button
+                            onClick={() => setDeleteTarget(p)}
+                            className="flex items-center gap-1 text-xs font-medium text-danger-600 hover:underline"
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        )}
                         {isOwner && (
                           <Button
                             size="sm"
@@ -527,6 +585,17 @@ export default function ProductsPage() {
         onCategoryCreated={(cat) => setCategories((prev) => [...prev, cat])}
       />
 
+      <EditProductModal
+        open={editProduct !== null}
+        product={editProduct}
+        categories={categories}
+        onClose={() => setEditProduct(null)}
+        onUpdated={() => {
+          setEditProduct(null);
+          load();
+        }}
+      />
+
       <ProposePriceModal
         product={proposeProduct}
         isOwner={isOwner}
@@ -536,6 +605,41 @@ export default function ProductsPage() {
           load();
         }}
       />
+
+      <Modal
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete product"
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" loading={deletingId === deleteTarget?.id} onClick={confirmDelete}>
+              Delete Product
+            </Button>
+          </>
+        }
+      >
+        {deleteTarget && (
+          <div className="flex gap-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-danger-50 text-danger-600">
+              <TriangleAlert size={18} />
+            </div>
+            <div className="text-sm text-slate-600 dark:text-[#b6c2ba]">
+              <p>
+                Delete <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{deleteTarget.name}</span>? This permanently removes
+                the product and cannot be undone.
+              </p>
+              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
+                This only works if the product has no recorded activity yet (no sales, purchases, stock records, etc.). If it does, delete
+                will be blocked — deactivate the product instead.
+              </p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

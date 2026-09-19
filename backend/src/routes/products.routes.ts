@@ -7,6 +7,7 @@ import {
   createProductHandler,
   getProductHandler,
   updateProductHandler,
+  deleteProductHandler,
   getStockLevelsHandler,
 } from '../controllers/products.controller';
 import { submitProposalHandler } from '../controllers/priceProposals.controller';
@@ -25,5 +26,6 @@ router.get('/', authenticate, listProductsHandler);
 router.post('/', authenticate, createProductHandler);
 router.get('/:id', authenticate, getProductHandler);
 router.patch('/:id', authenticate, requireRole('owner'), updateProductHandler);
+router.delete('/:id', authenticate, requireRole('owner'), deleteProductHandler);
 
 export default router;

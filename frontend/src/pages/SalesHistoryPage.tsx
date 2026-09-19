@@ -321,12 +321,29 @@ export default function SalesHistoryPage() {
         )}
       </div>
 
-      <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Calendar size={15} className="text-slate-400 dark:text-[#77857c]" />
-          <Input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className="w-auto" />
-          <ArrowRight size={13} className="text-slate-300" />
-          <Input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} className="w-auto" />
+      {/* Date range + filters (2026-09-19) — relabeled with explicit From/To
+          captions, same convention the Dashboard's own custom-range picker
+          uses, and split onto its own row from the search/product/status
+          filters below it. The unlabeled icon+date+arrow+date pair read as
+          cramped and unclear at a glance (owner's own words: "imekaa
+          vibaya" after seeing it) — this is purely a layout/legibility
+          fix, the date range still drives the same stat cards above and
+          the same table below. */}
+      <Card className="mb-5 flex flex-col gap-4 p-4">
+        <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 pb-4 dark:border-white/10">
+          <div className="flex items-center gap-1.5 pb-2 text-slate-400 dark:text-[#77857c]">
+            <Calendar size={15} />
+            <span className="text-xs font-semibold uppercase tracking-wide">Date range</span>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+            <Input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className="w-auto" />
+          </div>
+          <ArrowRight size={13} className="mb-2.5 self-end text-slate-300" />
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+            <Input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} className="w-auto" />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative">

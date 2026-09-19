@@ -9,7 +9,6 @@ import {
   Building2,
   ClipboardList,
   SlidersHorizontal,
-  Wallet,
   Receipt,
   BarChart3,
   ScrollText,
@@ -77,7 +76,6 @@ export const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: 'Money',
     items: [
-      { to: '/cash-control', label: 'Cash Control', icon: Wallet, roles: ['owner'] },
       { to: '/expenses', label: 'Expenses', icon: Receipt, roles: ['owner'] },
       { to: '/reports', label: 'Reports', icon: BarChart3, roles: ['owner'] },
     ],

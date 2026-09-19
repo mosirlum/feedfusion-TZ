@@ -24,7 +24,7 @@ export interface PurchaseItemInput {
  * purchase — a reasonable, standard method, but the docs don't spell it out
  * for the multi-line case, so it's flagged as a judgment call.
  */
-function allocateCosts<T extends { unitCost: number; quantity: number; id: number; productId: number; oldQuantity: number }>(items: T[], additionalCosts: number) {
+function allocateCosts<T extends { unitCost: number; quantity: number }>(items: T[], additionalCosts: number) {
   const subtotals = items.map((item) => item.unitCost * item.quantity);
   const totalSubtotal = subtotals.reduce((sum, s) => sum + s, 0);
 

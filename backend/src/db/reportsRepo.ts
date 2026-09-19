@@ -59,6 +59,25 @@ export async function salesDailySeries(from: string, to: string) {
   return rows;
 }
 
+// Per-day gross profit (2026-09-19, CLAUDE.md #69) — separate query from
+// salesDailySeries above because profit needs a join into sale_items for
+// unit_cost_snapshot, which would multiply/duplicate the sales-table rows
+// if merged into that one query (same reason getSalesAggregate keeps its
+// scalar subqueries separate rather than one joined query).
+export async function profitDailySeries(from: string, to: string) {
+  const { rows } = await pool.query(
+    `SELECT sa.sale_date::date AS date,
+            COALESCE(SUM(si.line_total - si.unit_cost_snapshot * si.quantity), 0) AS gross_profit
+     FROM sale_items si
+     JOIN sales sa ON sa.id = si.sale_id
+     WHERE sa.sale_date::date BETWEEN $1 AND $2 AND sa.status = 'COMPLETED'
+     GROUP BY sa.sale_date::date
+     ORDER BY sa.sale_date::date ASC`,
+    [from, to]
+  );
+  return rows;
+}
+
 // LEFT JOIN categories — a product with no category still counts, grouped
 // under NULL/"Uncategorized" rather than silently dropped from the total.
 export async function revenueByCategory(from: string, to: string) {
