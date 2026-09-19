@@ -270,7 +270,7 @@ export default function DashboardPage() {
               <p className="text-xs text-slate-400 dark:text-[#77857c]">Money owed to the shop from credit sales</p>
             </div>
           </div>
-          <Link to="/sales" className="text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
+          <Link to="/sales-history" className="text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
             View in Sales History
           </Link>
         </div>
