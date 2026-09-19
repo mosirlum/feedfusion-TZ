@@ -97,7 +97,7 @@ export function ReceiptView({ saleId }: { saleId: number }) {
   return (
     <div className="print-area-modal mx-auto max-w-3xl bg-white p-6 text-[13px] text-[#1a1a1a]">
       <div className="flex items-start justify-between border-b-2 border-[#185FA5] pb-4">
-        <img src="/logo.png" className="h-16 w-16 object-contain" alt="" />
+        <img src="/logo.png" className="h-24 w-24 object-contain" alt="" />
         <div className="text-right text-[12px] text-slate-500">
           <p className="text-base font-bold text-slate-800">{data.business_name}</p>
           {data.business_address && <p>{data.business_address}</p>}
