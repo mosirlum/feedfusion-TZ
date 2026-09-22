@@ -4,3 +4,8 @@ dist
 .env.local
 *.local
 *.tsbuildinfo
+# tsc -b (via npm run build) emits a compiled JS twin of vite.config.ts
+# next to it (TS project-reference builds always emit) — never the file
+# Vite actually loads, so it never belongs in git.
+vite.config.js
+vite.config.d.ts
