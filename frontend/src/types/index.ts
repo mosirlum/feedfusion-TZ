@@ -243,6 +243,11 @@ export interface Sale {
   payment_status: 'PAID' | 'PARTIAL';
   amount_paid: string;
   balance_due: string;
+  // "Give on Credit" due date + backdated sale entry (2026-09-25,
+  // migration 021). due_date is never auto-computed; is_overdue only
+  // appears on the Dashboard's Outstanding Customer Debt list below, not
+  // here, since that's the only place it's currently derived.
+  due_date?: string | null;
   // POST /sales only (2026-09-13, CLAUDE.md #66) — lines whose discount
   // exceeded the shop's limit; the sale still completed (no more owner-PIN
   // gate), this is just what the POS shows the cashier as a heads-up.
@@ -567,6 +572,10 @@ export interface DashboardToday {
   outstandingDebt: {
     totalOutstanding: number;
     debtorCount: number;
+    // Overdue (2026-09-25, migration 021) — a due date was agreed and it's
+    // already passed. Not a subset the owner has to compute themselves —
+    // counted server-side so the dashboard can flag it plainly.
+    overdueCount: number;
     topDebtors: Array<{
       id: number;
       invoice_number: string;
@@ -576,6 +585,8 @@ export interface DashboardToday {
       total: number;
       amount_paid: number;
       balance_due: number;
+      due_date: string | null;
+      is_overdue: boolean;
     }>;
   };
 }

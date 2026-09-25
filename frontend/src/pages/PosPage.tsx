@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { productsApi, salesApi, quotationsApi, customersApi, apiErrorMessage } from '../lib/api';
 import { CartLine, Customer, PaymentMethod, Product, StockLevel } from '../types';
-import { tzs, formatDateTime, initials } from '../lib/format';
+import { tzs, formatDateTime, initials, todayIso } from '../lib/format';
 import { Badge, Button, Card, FormField, IconChip, Input, Label, Modal, PageHeader, Select, Textarea } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
@@ -118,6 +118,15 @@ export default function PosPage() {
   // works exactly as before; it just means the auto-fill has been
   // overridden for the rest of this sale.
   const [paymentAmountTouched, setPaymentAmountTouched] = useState(false);
+  // Backdated sale entry (2026-09-25, owner's request) — "YYYY-MM-DD",
+  // defaults to today; editable back to an earlier real day when the
+  // cashier is entering a sale that actually happened before now.
+  const [saleDate, setSaleDate] = useState(todayIso());
+  // "Give on Credit" (2026-09-25, owner's request, migration 021) — TZS 0
+  // collected right now, tracked as a real debt with a due date. Requires
+  // a saved customer (customerId), never just a typed walk-in name.
+  const [isCreditSale, setIsCreditSale] = useState(false);
+  const [dueDate, setDueDate] = useState('');
   const [discountModalIndex, setDiscountModalIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [completedSaleId, setCompletedSaleId] = useState<number | null>(null);
@@ -326,6 +335,9 @@ export default function PosPage() {
     setPaymentAmount('');
     setPaymentAmountTouched(false);
     setPaymentMethod('CASH');
+    setSaleDate(todayIso());
+    setIsCreditSale(false);
+    setDueDate('');
     setCompletedSaleId(null);
     pendingQuotationIdRef.current = null;
     refresh(); // quietly picks up the next-invoice-number preview and stock levels
@@ -340,9 +352,23 @@ export default function PosPage() {
       toast.error('One or more items exceed available stock — adjust the quantity first.');
       return;
     }
-    const amount = Number(paymentAmount);
-    if (!amount || amount <= 0) {
+    // "Give on Credit" (2026-09-25) — TZS 0 is the deliberate, only-allowed
+    // amount here; skip the "enter an amount" check that applies to every
+    // other sale, and instead require a saved customer + a due date before
+    // this ever reaches the API (the service enforces the same thing, but
+    // catching it here avoids a round-trip for the common slip of
+    // forgetting to pick a saved customer).
+    const amount = isCreditSale ? 0 : Number(paymentAmount);
+    if (!isCreditSale && (!amount || amount <= 0)) {
       toast.error('Enter the amount collected from the customer.');
+      return;
+    }
+    if (isCreditSale && !customerId) {
+      toast.error('Select a saved customer (not just a typed name) before giving this sale on credit.');
+      return;
+    }
+    if (isCreditSale && !dueDate) {
+      toast.error('Set a due date before giving this sale on credit.');
       return;
     }
 
@@ -363,8 +389,15 @@ export default function PosPage() {
         customer_phone: customerPhone.trim() || null,
         customer_address: customerAddress.trim() || null,
         customer_id: customerId,
+        sale_date: saleDate !== todayIso() ? saleDate : null,
+        due_date: isCreditSale ? dueDate : null,
       });
-      if (res.data.payment_status === 'PARTIAL') {
+      if (isCreditSale) {
+        toast.show(
+          `Sale completed on credit — invoice ${res.data.invoice_number}. ${tzs(res.data.balance_due)} owed, due ${dueDate}.`,
+          'info'
+        );
+      } else if (res.data.payment_status === 'PARTIAL') {
         toast.show(
           `Sale completed — invoice ${res.data.invoice_number}. Balance of ${tzs(res.data.balance_due)} still owed.`,
           'info'
@@ -802,57 +835,109 @@ export default function PosPage() {
               <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Payment Details</h3>
             </div>
 
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Payment Method</p>
-            <div className="mb-4 grid grid-cols-3 gap-2">
-              {(
-                [
-                  { value: 'CASH' as const, label: 'Cash', icon: Wallet },
-                  { value: 'BANK_TRANSFER' as const, label: 'Bank', icon: Landmark },
-                  { value: 'MOBILE_MONEY' as const, label: 'Mobile Money', icon: Smartphone },
-                ]
-              ).map((m) => (
-                <button
-                  key={m.value}
-                  type="button"
-                  onClick={() => setPaymentMethod(m.value)}
-                  className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 text-center transition-colors ${
-                    paymentMethod === m.value ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:border-slate-300'
-                  }`}
-                >
-                  <m.icon size={17} />
-                  <span className="text-[11.5px] font-semibold leading-tight">{m.label}</span>
-                </button>
-              ))}
-            </div>
+            {/* Backdated sale entry (2026-09-25, owner's request) —
+                entering today a sale that actually happened on an earlier
+                real day. Reports/history use this date; the stock itself
+                still leaves right now, at the moment this sale completes. */}
+            <Label>Sale Date</Label>
+            <Input
+              type="date"
+              max={todayIso()}
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
+              className="mb-4"
+            />
 
-            <Label>Amount Collected Now</Label>
-            <div className="relative mb-1">
-              <Input
-                type="number"
-                min={0}
-                placeholder={total > 0 ? String(total) : '0'}
-                value={paymentAmount}
-                onChange={(e) => {
-                  setPaymentAmountTouched(true);
-                  setPaymentAmount(e.target.value);
-                }}
-                className="pr-9 text-lg font-bold"
+            {/* "Give on Credit" (2026-09-25, owner's request, migration
+                021) — TZS 0 collected right now, tracked as a real debt.
+                Requires a saved customer, never just a typed walk-in name,
+                since there'd be nobody to actually chase for the debt. */}
+            <label className="mb-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 px-3.5 py-2.5">
+              <span>
+                <span className="block text-sm font-semibold text-amber-800">Kwa Deni (Give on Credit)</span>
+                <span className="block text-xs text-amber-600">Customer takes the goods now, pays TZS 0 today.</span>
+              </span>
+              <input
+                type="checkbox"
+                checked={isCreditSale}
+                onChange={(e) => setIsCreditSale(e.target.checked)}
+                className="h-5 w-5 accent-amber-600"
               />
-              {amountCoversTotal && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600" />}
-            </div>
-            {/* Credit sales (2026-09-12, CLAUDE.md #50) — collecting less
-                than the total is allowed; the shortfall shows as a balance
-                owed instead of "Change", so it's obvious this will be a
-                PARTIAL sale before completing it. */}
-            {balanceDue > 0 && amountReceived > 0 ? (
+            </label>
+            {isCreditSale && (
+              <div className="mb-4 space-y-2">
+                <Label>Due Date</Label>
+                <Input type="date" min={todayIso()} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                {!customerId && (
+                  <p className="text-xs font-medium text-danger-600">
+                    Select a saved customer above (tap "Customer" and pick one from the search) — a typed walk-in name isn't enough for credit.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {!isCreditSale && (
+              <>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Payment Method</p>
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      { value: 'CASH' as const, label: 'Cash', icon: Wallet },
+                      { value: 'BANK_TRANSFER' as const, label: 'Bank', icon: Landmark },
+                      { value: 'MOBILE_MONEY' as const, label: 'Mobile Money', icon: Smartphone },
+                    ]
+                  ).map((m) => (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.value)}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 text-center transition-colors ${
+                        paymentMethod === m.value ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:border-slate-300'
+                      }`}
+                    >
+                      <m.icon size={17} />
+                      <span className="text-[11.5px] font-semibold leading-tight">{m.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <Label>Amount Collected Now</Label>
+                <div className="relative mb-1">
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder={total > 0 ? String(total) : '0'}
+                    value={paymentAmount}
+                    onChange={(e) => {
+                      setPaymentAmountTouched(true);
+                      setPaymentAmount(e.target.value);
+                    }}
+                    className="pr-9 text-lg font-bold"
+                  />
+                  {amountCoversTotal && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600" />}
+                </div>
+                {/* Credit sales (2026-09-12, CLAUDE.md #50) — collecting less
+                    than the total is allowed; the shortfall shows as a balance
+                    owed instead of "Change", so it's obvious this will be a
+                    PARTIAL sale before completing it. */}
+                {balanceDue > 0 && amountReceived > 0 ? (
+                  <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm">
+                    <span className="font-medium text-amber-700">Balance Due (owed after this sale)</span>
+                    <span className="font-bold text-amber-800">{tzs(balanceDue)}</span>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex items-center justify-between text-sm">
+                    <span className="text-slate-400 dark:text-[#77857c]">Change</span>
+                    <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{tzs(change)}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {isCreditSale && (
               <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm">
                 <span className="font-medium text-amber-700">Balance Due (owed after this sale)</span>
-                <span className="font-bold text-amber-800">{tzs(balanceDue)}</span>
-              </div>
-            ) : (
-              <div className="mb-4 flex items-center justify-between text-sm">
-                <span className="text-slate-400 dark:text-[#77857c]">Change</span>
-                <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{tzs(change)}</span>
+                <span className="font-bold text-amber-800">{tzs(total)}</span>
               </div>
             )}
 
@@ -862,7 +947,7 @@ export default function PosPage() {
               icon={<CheckCircle2 size={17} />}
               loading={submitting}
               onClick={() => submitSale()}
-              disabled={cart.length === 0 || shortages.length > 0}
+              disabled={cart.length === 0 || shortages.length > 0 || (isCreditSale && (!customerId || !dueDate))}
             >
               Complete Sale
             </Button>
