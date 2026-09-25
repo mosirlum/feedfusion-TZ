@@ -285,6 +285,15 @@ export default function DashboardPage() {
               <p className="text-xs text-slate-500 dark:text-[#97a49b]">
                 across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
               </p>
+              {/* Overdue (2026-09-25, migration 021) — "ila alert ifanye":
+                  the owner asked to skip external SMS/WhatsApp notifications
+                  for now but wants the in-app alert to actually work. This
+                  is that alert — a due date was agreed and it's passed. */}
+              {data.outstandingDebt.overdueCount > 0 && (
+                <p className="flex items-center gap-1 text-xs font-bold text-danger-600">
+                  <AlertTriangle size={13} /> {data.outstandingDebt.overdueCount} overdue
+                </p>
+              )}
             </div>
             <Table>
               <THead>
@@ -292,6 +301,7 @@ export default function DashboardPage() {
                   <Th>Date</Th>
                   <Th>Customer</Th>
                   <Th>Invoice</Th>
+                  <Th>Due</Th>
                   <Th className="text-right">Total</Th>
                   <Th className="text-right">Balance Due</Th>
                 </tr>
@@ -307,6 +317,16 @@ export default function DashboardPage() {
                       )}
                     </Td>
                     <Td className="text-slate-500 dark:text-[#97a49b]">{d.invoice_number}</Td>
+                    <Td className="whitespace-nowrap">
+                      {d.due_date ? (
+                        <span className={d.is_overdue ? 'font-bold text-danger-600' : 'text-slate-500 dark:text-[#97a49b]'}>
+                          {formatDate(d.due_date)}
+                          {d.is_overdue && ' — overdue'}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300 dark:text-[#4a5650]">—</span>
+                      )}
+                    </Td>
                     <Td className="text-right">{tzs(d.total)}</Td>
                     <Td className="text-right font-bold text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</Td>
                   </Tr>
