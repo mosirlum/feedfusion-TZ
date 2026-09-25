@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { salesApi, productsApi, apiErrorMessage } from '../lib/api';
 import { Sale, SalesStats, Product, PaymentMethod } from '../types';
-import { tzs, formatDateTime, pageWindow } from '../lib/format';
+import { tzs, formatDateTime, formatDate, pageWindow } from '../lib/format';
 import {
   Badge,
   Button,
@@ -422,6 +422,15 @@ export default function SalesHistoryPage() {
                       {s.status === 'COMPLETED' && s.payment_status === 'PARTIAL' && (
                         <span className="text-[10.5px] font-medium text-amber-600">Balance: {tzs(s.balance_due)}</span>
                       )}
+                      {/* Overdue (2026-09-25, migration 021) — "ila alert
+                          ifanye": a due date was agreed for this sale's
+                          balance and it's already passed. */}
+                      {s.status === 'COMPLETED' &&
+                        s.payment_status === 'PARTIAL' &&
+                        s.due_date &&
+                        new Date(s.due_date) < new Date(new Date().toDateString()) && (
+                          <span className="text-[10.5px] font-bold text-danger-600">Overdue since {formatDate(s.due_date)}</span>
+                        )}
                       {s.status === 'COMPLETED' && <PrintedIndicator sale={s} />}
                     </div>
                   </Td>

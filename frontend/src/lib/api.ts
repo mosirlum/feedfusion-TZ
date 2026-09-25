@@ -148,6 +148,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   // Credit sales (2026-09-12, CLAUDE.md #50)
   PAYMENT_AMOUNT_MUST_BE_POSITIVE: 'Enter an amount greater than zero.',
   PAYMENT_EXCEEDS_BALANCE: 'That amount is more than the remaining balance on this sale.',
+  // "Give on Credit" + backdated sale entry (2026-09-25, migration 021)
+  CREDIT_SALE_REQUIRES_CUSTOMER: 'Select a saved customer before giving this sale on credit.',
+  CREDIT_SALE_REQUIRES_DUE_DATE: 'Set a due date before giving this sale on credit.',
+  INVALID_SALE_DATE: 'Enter a valid sale date.',
+  SALE_DATE_CANNOT_BE_IN_FUTURE: 'The sale date cannot be in the future.',
   AMOUNT_REQUIRED: 'Enter an amount.',
   PENDING_PROPOSAL_ALREADY_EXISTS: 'A price proposal is already pending for this product.',
   PROPOSAL_ALREADY_REVIEWED: 'This price proposal has already been reviewed.',
@@ -360,6 +365,10 @@ export const salesApi = {
     customer_phone?: string | null;
     customer_address?: string | null;
     customer_id?: number | null;
+    // Backdated sale entry + "Give on Credit" due date (2026-09-25,
+    // owner's request, migration 021) — both optional "YYYY-MM-DD".
+    sale_date?: string | null;
+    due_date?: string | null;
   }) => http.post<Sale>('/sales', input),
   // Top up a PARTIAL sale's remaining balance later (2026-09-12, CLAUDE.md
   // #50) — "mzigo unatoka sasa, malipo yanakuja baadaye."
