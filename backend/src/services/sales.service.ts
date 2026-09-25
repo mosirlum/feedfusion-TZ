@@ -32,18 +32,6 @@ export interface CompleteSaleInput {
   customerPhone?: string | null;
   customerAddress?: string | null;
   customerId?: number | null;
-  // Backdated sale entry (2026-09-25, owner's request) — "YYYY-MM-DD" for a
-  // sale that actually happened on an earlier real day but is only being
-  // entered into the system now. Optional; never in the future. Only the
-  // reporting-facing sales.sale_date is backdated — every stock_movements
-  // row this sale creates still gets its own real "now" as its
-  // created_at, so the running stock-balance ledger (balance_after,
-  // computed at insert time) never needs recalculating.
-  saleDate?: string | null;
-  // "Give on Credit" due date (2026-09-25, migration 021) — "YYYY-MM-DD".
-  // Required whenever paymentAmount is exactly 0 (see the credit-sale
-  // check below); optional on an ordinary PARTIAL sale.
-  dueDate?: string | null;
   servedBy: AuthenticatedUser;
 }
 
@@ -88,46 +76,6 @@ export async function previewNextInvoiceNumber(): Promise<string> {
  * application-level check-then-write without the DB lock has a race
  * condition, per architecture.md's explicit warning.
  */
-/**
- * Backdated sale entry (2026-09-25, owner's request) — validates a
- * caller-supplied "YYYY-MM-DD" sale date and combines it with the CURRENT
- * time-of-day, so a sale entered right now for "last Saturday" gets a
- * `sale_date` of last Saturday at this actual moment rather than midnight
- * (which would otherwise cluster every backdated sale of the same day at
- * exactly 00:00:00 and scramble their relative order in reports). Returns
- * `now` unchanged when no date was supplied — that's the pre-existing
- * behavior, just made explicit here instead of left to the DB's
- * `DEFAULT now()`.
- */
-function resolveSaleDate(saleDate: string | null | undefined): Date {
-  const now = new Date();
-  if (!saleDate) return now;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(saleDate);
-  if (!match) {
-    throw new HttpError(400, 'INVALID_SALE_DATE');
-  }
-  const [, y, m, d] = match;
-  const combined = new Date(
-    Number(y),
-    Number(m) - 1,
-    Number(d),
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds(),
-    now.getMilliseconds()
-  );
-  if (Number.isNaN(combined.getTime())) {
-    throw new HttpError(400, 'INVALID_SALE_DATE');
-  }
-  // A minute of slack for clock/rounding noise — the real intent this
-  // guards against is a date days/months in the future, not a few seconds
-  // of drift between the browser and this server.
-  if (combined.getTime() > now.getTime() + 60_000) {
-    throw new HttpError(400, 'SALE_DATE_CANNOT_BE_IN_FUTURE');
-  }
-  return combined;
-}
-
 export async function completeSale(input: CompleteSaleInput) {
   if (!input.items || input.items.length === 0) {
     throw new HttpError(400, 'AT_LEAST_ONE_ITEM_REQUIRED'); // BR-03
@@ -259,31 +207,11 @@ export async function completeSale(input: CompleteSaleInput) {
     // than the total in cash, the excess is change handed back, not a
     // payment the shop keeps — exactly how the pre-credit-sales code always
     // recorded `payments.amount = total` regardless of what was tendered.
-    // "Give on Credit" (2026-09-25, owner's request, migration 021) — a
-    // deliberate second gate alongside BR-04 above, not a relaxation of
-    // it: TZS 0 collected right now is allowed ONLY through this explicit
-    // path, which requires a real linked customer (customerId — a typed
-    // walk-in name is not enough, since there'd be nobody to actually
-    // chase for the debt) and an agreed due date. Every other sale — any
-    // paymentAmount that isn't exactly 0 — still goes through the original
-    // BR-04 check unchanged.
-    const isCreditSale = input.paymentAmount === 0;
-    if (isCreditSale) {
-      if (!input.customerId) {
-        throw new HttpError(400, 'CREDIT_SALE_REQUIRES_CUSTOMER', undefined, { total });
-      }
-      if (!input.dueDate) {
-        throw new HttpError(400, 'CREDIT_SALE_REQUIRES_DUE_DATE', undefined, { total });
-      }
-    } else if (!(input.paymentAmount > 0)) {
+    if (!(input.paymentAmount > 0)) {
       throw new HttpError(400, 'PAYMENT_AMOUNT_MUST_BE_POSITIVE', undefined, { total });
     }
     const amountCollected = Math.min(input.paymentAmount, total);
     const paymentStatus: 'PAID' | 'PARTIAL' = amountCollected >= total - 0.01 ? 'PAID' : 'PARTIAL';
-    const saleDate = resolveSaleDate(input.saleDate);
-    // A due date can accompany any PARTIAL sale, not only a TZS-0 credit
-    // sale — but it's REQUIRED for one (checked above).
-    const dueDate = input.dueDate?.trim() || null;
 
     let sale;
     try {
@@ -299,8 +227,6 @@ export async function completeSale(input: CompleteSaleInput) {
           customerAddress: input.customerAddress?.trim() || null,
           customerId: input.customerId ?? null,
           paymentStatus,
-          saleDate,
-          dueDate,
         },
         client
       );
@@ -354,12 +280,6 @@ export async function completeSale(input: CompleteSaleInput) {
           paymentStatus,
           amountCollected,
           balanceDue: Math.max(0, total - amountCollected),
-          // "Give on Credit" + backdating (2026-09-25) — visible on the
-          // Audit Log so "who gave this out on credit, and was it entered
-          // backdated" is answerable without opening the sale itself.
-          isCreditSale,
-          dueDate,
-          backdated: !!input.saleDate,
         },
       },
       client

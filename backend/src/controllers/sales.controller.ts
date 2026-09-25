@@ -31,11 +31,6 @@ export async function completeSaleHandler(req: Request, res: Response, next: Nex
       customer_phone,
       customer_address,
       customer_id,
-      // Backdated sale entry + "Give on Credit" due date (2026-09-25,
-      // owner's request, migration 021) — both optional "YYYY-MM-DD"
-      // strings; validated in the service layer.
-      sale_date,
-      due_date,
     } = req.body ?? {};
     if (!Array.isArray(items) || typeof payment_amount !== 'number') {
       throw new HttpError(400, 'ITEMS_AND_PAYMENT_AMOUNT_REQUIRED');
@@ -55,8 +50,6 @@ export async function completeSaleHandler(req: Request, res: Response, next: Nex
       customerPhone: customer_phone,
       customerAddress: customer_address,
       customerId: typeof customer_id === 'number' ? customer_id : null,
-      saleDate: typeof sale_date === 'string' ? sale_date : null,
-      dueDate: typeof due_date === 'string' ? due_date : null,
       servedBy: req.user!,
     });
     res.status(201).json(sale);

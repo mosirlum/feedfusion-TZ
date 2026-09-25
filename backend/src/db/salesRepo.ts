@@ -17,30 +17,14 @@ export async function insertSale(
     customerAddress: string | null;
     customerId: number | null;
     paymentStatus: 'PAID' | 'PARTIAL';
-    // Backdated sale entry (2026-09-25, owner's request) — the cashier can
-    // record a sale on a later real day than it actually happened
-    // (Monday, for last Saturday's sales) and set the reporting-facing
-    // date back to when it truly happened. This is ALWAYS set by the
-    // service layer, never left to the DB's `DEFAULT now()` — either the
-    // caller-supplied backdated moment, or "now" when no backdate was
-    // requested — so the actual point-in-time the stock left (every
-    // stock_movements row below still uses its own real `created_at`) is
-    // never confused with this reporting date. See sales.service.ts
-    // completeSale for the validation (never in the future) and the
-    // combine-date-with-current-time-of-day logic.
-    saleDate: Date;
-    // "Give on Credit" due date (2026-09-25, migration 021) — required by
-    // the service layer whenever this is a TZS-0 credit sale, optional
-    // otherwise (a PARTIAL sale may or may not carry an agreed date).
-    dueDate: string | null;
   },
   client: PoolClient
 ) {
   const { rows } = await client.query(
     `INSERT INTO sales
        (invoice_number, subtotal, total_discount, total, served_by, customer_name,
-        customer_phone, customer_address, customer_id, payment_status, sale_date, due_date)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        customer_phone, customer_address, customer_id, payment_status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING *`,
     [
       input.invoiceNumber,
@@ -53,8 +37,6 @@ export async function insertSale(
       input.customerAddress,
       input.customerId,
       input.paymentStatus,
-      input.saleDate,
-      input.dueDate,
     ]
   );
   return rows[0];
@@ -491,7 +473,6 @@ export async function getLatestUnitCost(productId: number, client: PoolClient): 
 export async function getOutstandingBalances(): Promise<{
   totalOutstanding: number;
   debtorCount: number;
-  overdueCount: number;
   topDebtors: Array<{
     id: number;
     invoice_number: string;
@@ -501,36 +482,25 @@ export async function getOutstandingBalances(): Promise<{
     total: number;
     amount_paid: number;
     balance_due: number;
-    due_date: string | null;
-    is_overdue: boolean;
   }>;
 }> {
   const { rows } = await pool.query(
     `SELECT sa.id, sa.invoice_number, sa.sale_date, sa.customer_name, sa.customer_phone,
-            sa.due_date,
             sa.total::float AS total,
             COALESCE(pay.paid, 0)::float AS amount_paid,
-            (sa.total - COALESCE(pay.paid, 0))::float AS balance_due,
-            -- Overdue (2026-09-25, migration 021) — never stored, derived
-            -- the same way balance_due is: a due date was agreed and it's
-            -- already in the past. Ordered overdue-first below so the
-            -- "ila alert ifanye" ask actually surfaces on the dashboard
-            -- rather than getting buried under sales with no due date yet.
-            (sa.due_date IS NOT NULL AND sa.due_date < CURRENT_DATE) AS is_overdue
+            (sa.total - COALESCE(pay.paid, 0))::float AS balance_due
      FROM sales sa
      LEFT JOIN (SELECT sale_id, SUM(amount) AS paid FROM payments GROUP BY sale_id) pay
        ON pay.sale_id = sa.id
      WHERE sa.status = 'COMPLETED' AND sa.payment_status = 'PARTIAL'
        AND (sa.total - COALESCE(pay.paid, 0)) > 0
-     ORDER BY (sa.due_date IS NOT NULL AND sa.due_date < CURRENT_DATE) DESC, sa.sale_date ASC`
+     ORDER BY sa.sale_date ASC`
   );
 
   const totalOutstanding = rows.reduce((sum, r) => sum + Number(r.balance_due), 0);
-  const overdueCount = rows.filter((r) => r.is_overdue).length;
   return {
     totalOutstanding,
     debtorCount: rows.length,
-    overdueCount,
     topDebtors: rows.slice(0, 10),
   };
 }
