@@ -29,7 +29,6 @@ export default function SettingsPage() {
   const [bankName, setBankName] = useState('');
   const [bankSwift, setBankSwift] = useState('');
   const [bankBranch, setBankBranch] = useState('');
-  const [vatRatePct, setVatRatePct] = useState('');
   const [quotationValidityDays, setQuotationValidityDays] = useState('');
   const [mobileMoney1Number, setMobileMoney1Number] = useState('');
   const [mobileMoney1Label, setMobileMoney1Label] = useState('');
@@ -56,7 +55,6 @@ export default function SettingsPage() {
         setBankName(s.bank_name ?? '');
         setBankSwift(s.bank_swift ?? '');
         setBankBranch(s.bank_branch ?? '');
-        setVatRatePct(String(s.vat_rate_pct ?? ''));
         setQuotationValidityDays(String(s.quotation_validity_days ?? ''));
         setMobileMoney1Number(s.mobile_money_1_number ?? '');
         setMobileMoney1Label(s.mobile_money_1_label ?? '');
@@ -85,7 +83,6 @@ export default function SettingsPage() {
         bankName: bankName.trim() || undefined,
         bankSwift: bankSwift.trim() || undefined,
         bankBranch: bankBranch.trim() || undefined,
-        vatRatePct: vatRatePct ? Number(vatRatePct) : undefined,
         quotationValidityDays: quotationValidityDays ? Number(quotationValidityDays) : undefined,
         mobileMoney1Number: mobileMoney1Number.trim() || undefined,
         mobileMoney1Label: mobileMoney1Label.trim() || undefined,
@@ -210,12 +207,11 @@ export default function SettingsPage() {
             <IconChip tone="amber" size={30} icon={<Percent size={14} />} />
             <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Sales Defaults</h3>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* VAT Rate % field removed (2026-09-25, owner's request) — Quotations
+              no longer charge VAT at all, so this setting had nothing left to drive. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField label="Max Discount % (sales role limit)">
               <Input type="number" min={0} max={100} step="0.01" value={defaultMaxDiscountPct} onChange={(e) => setDefaultMaxDiscountPct(e.target.value)} />
-            </FormField>
-            <FormField label="VAT Rate %" hint="Used on Quotations.">
-              <Input type="number" min={0} max={100} step="0.01" value={vatRatePct} onChange={(e) => setVatRatePct(e.target.value)} />
             </FormField>
             <FormField label="Quotation Validity (days)" hint="Default 'Valid Until' offset.">
               <Input type="number" min={1} value={quotationValidityDays} onChange={(e) => setQuotationValidityDays(e.target.value)} />

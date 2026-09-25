@@ -140,9 +140,8 @@ export default function QuotationFormPage() {
     [items]
   );
   const netSubtotal = subtotal - totalDiscount;
-  const vatRatePct = Number(settings?.vat_rate_pct ?? 0);
-  const vatAmount = netSubtotal * (vatRatePct / 100);
-  const total = netSubtotal + vatAmount;
+  // VAT removed from Quotations entirely (2026-09-25, owner's request).
+  const total = netSubtotal;
 
   async function handleSubmit() {
     if (!customerName.trim()) {
@@ -417,10 +416,6 @@ export default function QuotationFormPage() {
               <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
                 <span>Discount</span>
                 <span className={totalDiscount > 0 ? 'text-danger-600' : ''}>{totalDiscount > 0 ? `-${tzs(totalDiscount)}` : tzs(0)}</span>
-              </div>
-              <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
-                <span>VAT ({vatRatePct}%)</span>
-                <span>{tzs(vatAmount)}</span>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-2.5 text-base font-bold text-slate-800 dark:text-[#eef3ef]">
                 <span>Grand Total</span>

@@ -236,7 +236,12 @@ export default function QuotationViewPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-4 divide-x divide-white/20 rounded-lg bg-[#27500A] text-center text-white">
+        {/* VAT cell dropped (2026-09-25, owner's request — Quotations no
+            longer charge VAT at all). A quotation created before this
+            change may still carry a real vat_amount in the database; that
+            historical value is simply not re-surfaced here anymore, exactly
+            like `bank_swift` above. */}
+        <div className="mt-5 grid grid-cols-3 divide-x divide-white/20 rounded-lg bg-[#27500A] text-center text-white">
           <div className="px-2 py-3">
             <p className="text-[11px] uppercase tracking-wide opacity-80">Subtotal</p>
             <p className="font-semibold">{tzs(quotation.subtotal)}</p>
@@ -244,10 +249,6 @@ export default function QuotationViewPage() {
           <div className="px-2 py-3">
             <p className="text-[11px] uppercase tracking-wide opacity-80">Discount</p>
             <p className="font-semibold">{tzs(quotation.total_discount)}</p>
-          </div>
-          <div className="px-2 py-3">
-            <p className="text-[11px] uppercase tracking-wide opacity-80">VAT ({quotation.vat_rate_pct}%)</p>
-            <p className="font-semibold">{tzs(quotation.vat_amount)}</p>
           </div>
           <div className="px-2 py-3">
             <p className="text-[11px] uppercase tracking-wide opacity-80">Grand Total</p>

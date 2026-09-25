@@ -67,7 +67,15 @@ export async function createQuotation(input: CreateQuotationLineInput, actor: Au
   }
 
   const settings = await getBusinessSettings();
-  const vatRatePct = Number(settings.vat_rate_pct);
+  // VAT removed from Quotations entirely (2026-09-25, owner's request —
+  // this revisits an incomplete instruction from 2026-09-12/CLAUDE.md #51,
+  // "ondoa VAT na swift pia", which only removed SWIFT at the time). Always
+  // 0 regardless of business_settings.vat_rate_pct, which is no longer
+  // surfaced in Settings either. The column stays on `quotations` (no
+  // migration) so historical quotations that DID carry real VAT keep their
+  // original stored numbers — this only stops charging/showing it on new
+  // ones.
+  const vatRatePct = 0;
 
   const resolvedItems: quotationsRepo.QuotationItemInput[] = [];
   let subtotal = 0;
