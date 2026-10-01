@@ -456,6 +456,21 @@ export function streamNarrativePdf(report: NarrativeReport, res: Response) {
     { label: 'Voided Sales', value: String(report.kpis.voidedCount), changeText: voidTrend.text, changeGood: voidTrend.good },
   ]);
 
+  // Second tile row (2026-09-30) — Gross Profit, Expenses, Net Profit.
+  // Kept as a SEPARATE row rather than cramming 7 tiles into one: at A4
+  // width, 7 tiles leaves ~62pt each, too narrow for "TZS 23,747,000" at
+  // this font size without wrapping/clipping. drawKpiTiles already
+  // advances doc.y after drawing, so calling it again just stacks this
+  // row directly beneath the first one.
+  const grossTrend = pctLabel(report.kpis.grossProfitChangePct, true);
+  const expTrend = pctLabel(report.kpis.expensesChangePct, false);
+  const netTrend = pctLabel(report.kpis.netProfitChangePct, true);
+  drawKpiTiles(doc, [
+    { label: 'Gross Profit', value: tzs(report.kpis.grossProfit), changeText: grossTrend.text, changeGood: grossTrend.good },
+    { label: 'Expenses', value: tzs(report.kpis.expenses), changeText: expTrend.text, changeGood: expTrend.good },
+    { label: 'Net Profit', value: tzs(report.kpis.netProfit), changeText: netTrend.text, changeGood: netTrend.good },
+  ]);
+
   if (report.charts.dailyRevenue.length > 0) {
     sectionHeading(doc, 'Revenue Trend');
     drawLineChart(doc, report.charts.dailyRevenue);

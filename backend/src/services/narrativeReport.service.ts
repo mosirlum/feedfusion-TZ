@@ -83,6 +83,19 @@ export interface NarrativeReport {
     totalDiscountChangePct: number | null;
     voidedCount: number;
     voidedCountChangePct: number | null;
+    // Added 2026-09-30 alongside the on-screen Sales tab's own Gross
+    // Profit (2026-09-19) and Expenses/Net Profit (2026-09-30) cards —
+    // this PDF's KPI strip had drifted behind the web page, never
+    // showing profit at all. Same figures, same source
+    // (reportsService.getSalesOverview), just rendered as a second tile
+    // row (see pdfReport.service.ts) rather than squeezing 7 tiles into
+    // one row.
+    grossProfit: number;
+    grossProfitChangePct: number | null;
+    expenses: number;
+    expensesChangePct: number | null;
+    netProfit: number;
+    netProfitChangePct: number | null;
   };
   sections: NarrativeSection[];
   insights: string[];
@@ -427,6 +440,12 @@ export async function buildNarrativeReport(fromRaw?: string, toRaw?: string): Pr
       totalDiscountChangePct: overview.changePct.totalDiscount,
       voidedCount: overview.current.voidedCount,
       voidedCountChangePct: overview.changePct.voidedCount,
+      grossProfit: overview.current.grossProfit,
+      grossProfitChangePct: overview.changePct.grossProfit,
+      expenses: overview.current.expenses,
+      expensesChangePct: overview.changePct.expenses,
+      netProfit: overview.current.netProfit,
+      netProfitChangePct: overview.changePct.netProfit,
     },
     sections,
     insights: buildInsights(overview, activeDays, totalDays, busiest, lowStock, overview.revenueByCategory, overview.revenueByStaff),
