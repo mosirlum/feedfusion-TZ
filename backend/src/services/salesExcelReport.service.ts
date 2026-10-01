@@ -83,9 +83,22 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
   // than re-querying the DB directly, so this file can never drift from
   // what the owner sees on screen, and date-range validation (throws
   // HttpError on a missing/invalid from/to) doesn't need re-implementing.
-  const { sales } = (await reportsService.getSalesReport(fromRaw, toRaw)) as { sales: SaleRow[] };
-  // getSalesReport throws HttpError above if from/to are missing/invalid, so
-  // by this point both are guaranteed real ISO date strings.
+  const [{ sales }, overview] = await Promise.all([
+    reportsService.getSalesReport(fromRaw, toRaw) as Promise<{ sales: SaleRow[] }>,
+    reportsService.getSalesOverview(fromRaw, toRaw),
+  ]);
+  // getSalesReport/getSalesOverview throw HttpError above if from/to are
+  // missing/invalid, so by this point both are guaranteed real ISO date
+  // strings. Gross Profit / Expenses / Net Profit (added 2026-10-01, per the
+  // owner's "fix everything" instruction after a client-facing audit) come
+  // from getSalesOverview — the exact same aggregator behind the on-screen
+  // Sales tab and the Generate Report PDF — rather than a new query, so this
+  // workbook can never drift from what's shown elsewhere. They're written as
+  // plain fetched values below, not live formulas: per-item cost and expense
+  // rows aren't on the Sales Data sheet (expenses have no link to individual
+  // sales in the schema at all), so there's no in-sheet range for Excel to
+  // compute them from. This is a deliberate, flagged exception to this
+  // workbook's "nothing is typed in" principle (see kpiCardStatic below).
   const from = fromRaw as string;
   const to = toRaw as string;
   const settings = await settingsService.getSettings();
@@ -99,7 +112,12 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
   const dateKeys = [...new Set(sorted.map((s) => new Date(s.sale_date).toISOString().slice(0, 10)))].sort();
   const totalRevenue = sorted.reduce((sum, s) => sum + Number(s.total), 0);
   const totalDiscount = sorted.reduce((sum, s) => sum + Number(s.total_discount ?? 0), 0);
-  const netRevenue = totalRevenue - totalDiscount;
+  // FIX (2026-10-01): totals in this system are already stored net of
+  // discount (sales.service.ts's completeSale: total = subtotal - totalDiscount),
+  // so netRevenue used to double-subtract the discount here, understating Net
+  // Revenue by one discount-amount per discounted sale. It now simply equals
+  // totalRevenue (see the matching per-row and Breakdown-sheet fixes below).
+  const netRevenue = totalRevenue;
   const largest = sorted.reduce((max, s) => Math.max(max, Number(s.total)), 0);
   const withDiscount = sorted.filter((s) => Number(s.total_discount ?? 0) > 0).length;
   const salesRange = (col: string) => `'Sales Data'!${col}${firstRow}:${col}${dataLastRow}`;
@@ -151,6 +169,29 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
     val.alignment = { horizontal: 'center', vertical: 'middle' };
   }
 
+  // Static variant of kpiCard() for figures that cannot be expressed as an
+  // in-sheet formula (see comment above) — a plain fetched value, visually
+  // distinguished with a dashed top border so it doesn't masquerade as a
+  // live formula like every other KPI card on this sheet.
+  function kpiCardStatic(col: number, row0: number, title: string, result: number, numFmt: string, fill: string, textColor: string) {
+    const c0 = dash.getColumn(col).letter;
+    const c1 = dash.getColumn(col + 1).letter;
+    dash.mergeCells(`${c0}${row0}:${c1}${row0}`);
+    const lab = dash.getCell(row0, col);
+    lab.value = title;
+    lab.font = { name: FONT, size: 9, bold: true, color: { argb: SLATE } };
+    lab.fill = solid(fill);
+    lab.alignment = { horizontal: 'center', vertical: 'middle' };
+    dash.mergeCells(`${c0}${row0 + 1}:${c1}${row0 + 2}`);
+    const val = dash.getCell(row0 + 1, col);
+    val.value = result;
+    val.font = { name: FONT, size: 16, bold: true, color: { argb: textColor } };
+    val.fill = solid(fill);
+    val.numFmt = numFmt;
+    val.alignment = { horizontal: 'center', vertical: 'middle' };
+    val.border = { top: { style: 'dashed', color: { argb: textColor } } };
+  }
+
   kpiCard(1, 5, 'TOTAL REVENUE', `SUM(${salesRange('E')})`, totalRevenue, TZS_FMT, GREEN_LIGHT, GREEN);
   kpiCard(4, 5, 'TOTAL DISCOUNT GIVEN', `SUM(${salesRange('F')})`, totalDiscount, TZS_FMT, AMBER_LIGHT, AMBER);
   kpiCard(7, 5, 'NET REVENUE', `SUM(${salesRange('G')})`, netRevenue, TZS_FMT, BLUE_LIGHT, BLUE);
@@ -160,16 +201,26 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
   kpiCard(7, 9, 'LARGEST SALE', `IFERROR(MAX(${salesRange('E')}),0)`, largest, TZS_FMT, BLUE_LIGHT, BLUE);
   kpiCard(10, 9, 'SALES WITH A DISCOUNT', `COUNTIF(${salesRange('F')},">0")`, withDiscount, '0', SLATE_LIGHT, SLATE);
 
+  kpiCardStatic(1, 13, 'GROSS PROFIT', overview.current.grossProfit, TZS_FMT, GREEN_LIGHT, GREEN);
+  kpiCardStatic(4, 13, 'EXPENSES', overview.current.expenses, TZS_FMT, AMBER_LIGHT, AMBER);
+  kpiCardStatic(7, 13, 'NET PROFIT', overview.current.netProfit, TZS_FMT, overview.current.netProfit >= 0 ? BLUE_LIGHT : AMBER_LIGHT, overview.current.netProfit >= 0 ? BLUE : RED);
+  const kpiNote3 = dash.getCell(13, 10);
+  kpiNote3.value = 'Fetched from the same Sales report shown on screen — not a live formula (see Sales Data sheet; expenses have no per-sale link).';
+  kpiNote3.font = { name: FONT, italic: true, size: 7.5, color: { argb: SLATE } };
+  kpiNote3.alignment = { wrapText: true, vertical: 'middle' };
+  dash.mergeCells('J13:L15');
+
   for (let c = 1; c <= 12; c++) dash.getColumn(c).width = 11.5;
   dash.getRow(5).height = 14;
   dash.getRow(9).height = 14;
+  dash.getRow(13).height = 14;
 
   // Staff/day mini-tables (values, not formulas — Breakdown tab below has
   // the live formula versions) plus data-bar conditional formatting, the
   // closest native-Excel stand-in for the two charts the chat-built
   // version had: exceljs cannot create real chart objects (see file
   // header comment).
-  const tableTitleRow = 13;
+  const tableTitleRow = 17;
   dash.getCell(tableTitleRow, 1).value = 'Revenue by Staff Member';
   dash.getCell(tableTitleRow, 1).font = { name: FONT, bold: true, size: 12, color: { argb: GREEN } };
   dash.getCell(tableTitleRow, 7).value = 'Revenue by Day';
@@ -280,7 +331,7 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
     row.getCell(5).numFmt = TZS_FMT;
     row.getCell(6).value = discount;
     row.getCell(6).numFmt = TZS_FMT;
-    row.getCell(7).value = { formula: `E${r}-F${r}`, result: total - discount };
+    row.getCell(7).value = { formula: `E${r}`, result: total };
     row.getCell(7).numFmt = TZS_FMT;
     row.getCell(8).value = { formula: `IF(E${r}=0,0,F${r}/E${r})`, result: total === 0 ? 0 : discount / total };
     row.getCell(8).numFmt = '0.0%';
@@ -313,7 +364,7 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
   const salesNoteRow = 2 + n + 1;
   const salesNote = sd.getCell(salesNoteRow, 1);
   salesNote.value =
-    'Discount % = Discount (TZS) ÷ Total Amount (TZS). Net Amount = Total Amount − Discount. Both are formulas, not typed-in figures — they recompute if a value above changes.';
+    'Total Amount is already net of discount (this system stores sale totals post-discount), so Net Amount always equals Total Amount — both are formulas, not typed-in figures. Discount % = Discount (TZS) ÷ Total Amount (TZS).';
   salesNote.font = { name: FONT, italic: true, size: 8.5, color: { argb: SLATE } };
 
   // -------------------------------------------------------------------
@@ -347,7 +398,7 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
       formula: `SUMIF('Sales Data'!${staffRange},$A${r},'Sales Data'!$F$${firstRow}:$F$${dataLastRow})`,
       result: staffSales.reduce((sum, s) => sum + Number(s.total_discount ?? 0), 0),
     };
-    bd.getCell(r, 5).value = { formula: `C${r}-D${r}` };
+    bd.getCell(r, 5).value = { formula: `C${r}` };
     bd.getCell(r, 6).value = { formula: `IF(B${r}=0,0,C${r}/B${r})` };
     [3, 4, 5, 6].forEach((c) => (bd.getCell(r, c).numFmt = TZS_FMT));
     for (let c = 1; c <= 6; c++) {
@@ -395,7 +446,7 @@ export async function buildSalesExcelWorkbook(fromRaw?: string, toRaw?: string) 
       formula: `SUMIFS('Sales Data'!$F$${firstRow}:$F$${dataLastRow},'Sales Data'!${dateRange},$A${r})`,
       result: dayRows.reduce((sum, s) => sum + Number(s.total_discount ?? 0), 0),
     };
-    bd.getCell(r, 5).value = { formula: `C${r}-D${r}` };
+    bd.getCell(r, 5).value = { formula: `C${r}` };
     [3, 4, 5].forEach((c) => (bd.getCell(r, c).numFmt = TZS_FMT));
     for (let c = 1; c <= 5; c++) {
       bd.getCell(r, c).font = { name: FONT, size: 10 };

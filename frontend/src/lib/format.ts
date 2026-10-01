@@ -32,24 +32,30 @@ export function formatTime(value: string | Date | null | undefined): string {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+// FIX (2026-10-01, CLAUDE.md audit): these two used .toISOString().slice(0,10),
+// which reads the UTC calendar date. For Tanzania (UTC+3), any moment between
+// local 00:00 and 02:59 landed on the WRONG (previous) day — the app thought
+// "today" was still "yesterday" for the first 3 hours of every day. This was a
+// known, deliberately-deferred bug (see the old local workarounds this fix now
+// makes redundant in SalesHistoryPage.tsx/DashboardPage.tsx) that also silently
+// affected the POS's Sale Date field, the Reports custom-range default, and the
+// Expenses date pickers. Both now share the same local-field-math toIso() used
+// by currentWeekRange/currentYearRange/monthRange below, which never had this bug.
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toIso(new Date());
 }
 
 export function isoDaysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
+  return toIso(d);
 }
 
-// Reports page date-range presets (2026-09-13, CLAUDE.md #62) — the owner
-// asked for quick Week/Month/Year presets and a specific-month picker
-// alongside the existing custom From/To range, instead of only ever typing
-// two dates by hand. All local-time (not UTC), matching how the two
-// existing date-only helpers above already behave (toISOString() slicing
-// happens after local field math, so this doesn't drift a day at the UTC
-// boundary the way `new Date(isoString)` parsing sometimes does elsewhere
-// in this codebase).
+// Local-date field math (no UTC round-trip, so this never drifts a day at
+// the UTC boundary the way `.toISOString().slice(0,10)` or `new Date(isoString)`
+// parsing sometimes does elsewhere in this codebase). Originally added for the
+// Reports page date-range presets (2026-09-13, CLAUDE.md #62); now also the
+// shared implementation behind todayIso()/isoDaysAgo() above (fixed 2026-10-01).
 function toIso(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');

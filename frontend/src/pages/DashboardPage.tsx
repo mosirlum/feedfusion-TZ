@@ -47,11 +47,10 @@ import {
 import { useToast } from '../components/ui/Toast';
 
 // Local-date helpers (mirrors SalesHistoryPage.tsx's own localIso/todayLocalIso,
-// CLAUDE.md #34) — todayIso()/isoDaysAgo() in lib/format.ts convert through
-// UTC, which can shift the reported calendar date back a day for a browser
-// timezone ahead of UTC (Tanzania is UTC+3). The custom-range picker below
-// only needs a "today" default, so it uses these local-date-only helpers
-// instead, same fix already applied on Sales History.
+// CLAUDE.md #34). UPDATE (2026-10-01): lib/format.ts's shared todayIso() now
+// uses this same local-date field math (the UTC skew these were built to avoid
+// is fixed at the source), so these are now redundant rather than a workaround
+// — left as-is to keep that fix's blast radius small.
 function localIso(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
