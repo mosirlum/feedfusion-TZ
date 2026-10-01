@@ -51,18 +51,13 @@ import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
 
-// Local-calendar-date helpers (2026-09-11) — deliberately NOT the shared
-// todayIso()/isoDaysAgo() in lib/format.ts, which round-trip through
-// Date.toISOString() (UTC). That shifts the calendar date by a day for any
-// browser whose local timezone is ahead of UTC — e.g. Tanzania is UTC+3, so
-// any moment between local midnight and 03:00 reports YESTERDAY's date, and
-// the same skew affects a month-start default built the same way (see
-// ProductsPage.tsx's monthStartIso()). This looks like a latent, real bug in
-// those shared helpers, not something introduced here — flagged in CLAUDE.md
-// rather than changed, since todayIso() is load-bearing elsewhere (BR-33
-// cash reconciliation, POS's date stamp) and fixing it is a bigger, separate
-// change than this page's redesign. These two helpers stay local-date-only
-// so this page's own default range isn't affected by the same issue.
+// Local-calendar-date helpers (2026-09-11). UPDATE (2026-10-01): the shared
+// todayIso()/isoDaysAgo() in lib/format.ts have since been fixed to use the
+// same local-date field math as these two (no more UTC round-trip skew for
+// Tanzania's UTC+3), so this page's own copies below are now redundant with
+// the shared helpers rather than a workaround for them. Left in place rather
+// than consolidated, to keep that fix's blast radius small — safe to switch
+// this page over to the shared helpers later if wanted.
 function localIso(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }

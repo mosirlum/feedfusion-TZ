@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
+  Banknote,
   XCircle,
   Lightbulb,
   Trophy,
@@ -582,8 +583,11 @@ function StatCardWithSparkline({
   tone,
   changePct,
   invert,
-  sparklineData,
-  sparklineColor,
+  // Optional (2026-09-30, Expenses/Net Profit cards) — those two have no
+  // daily series computed anywhere yet, only a range total, so they render
+  // without the sparkline row rather than faking one.
+  sparklineData = [],
+  sparklineColor = '#3B6D11',
 }: {
   label: string;
   value: ReactNode;
@@ -591,8 +595,8 @@ function StatCardWithSparkline({
   tone: 'green' | 'blue' | 'amber' | 'red';
   changePct: number | null;
   invert?: boolean;
-  sparklineData: number[];
-  sparklineColor: string;
+  sparklineData?: number[];
+  sparklineColor?: string;
 }) {
   const tones: Record<string, string> = {
     green: 'bg-green-50 text-green-700',
@@ -730,7 +734,7 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
     <div>
       <ReportToolbar onDownload={downloadSalesExcel} showPrint={false} downloadLabel="Download Excel" />
       <PrintLetterhead title="Sales" from={from} to={to} />
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         <StatCardWithSparkline
           label="Total Transactions"
           value={current.transactionCount}
@@ -779,6 +783,31 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           changePct={changePct.grossProfit}
           sparklineData={dailySeries.map((d) => d.grossProfit)}
           sparklineColor="#3B6D11"
+        />
+        {/* Expenses + Net Profit added 2026-09-30 — the client's own
+            complaint: this report showed Gross Profit but never the
+            Expenses (Staff Salary etc.) needed to see real Profit after
+            Overhead, so a loss visible on the Dashboard's "Profit & Loss"
+            card (which DOES subtract expenses, but only for two fixed
+            short windows — yesterday / last 7 days) had no explanation
+            here for whatever custom range this report is actually
+            showing. No sparkline here (unlike the cards above) — a daily
+            expenses/net-profit series isn't computed anywhere else yet;
+            only this range-total figure is. */}
+        <StatCardWithSparkline
+          label="Expenses"
+          value={tzs(current.expenses)}
+          icon={<TrendingDown size={18} />}
+          tone="red"
+          changePct={changePct.expenses}
+          invert
+        />
+        <StatCardWithSparkline
+          label="Net Profit"
+          value={tzs(current.netProfit)}
+          icon={<Banknote size={18} />}
+          tone="green"
+          changePct={changePct.netProfit}
         />
       </div>
 

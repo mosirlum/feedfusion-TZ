@@ -2,6 +2,7 @@ import { HttpError } from '../middleware/errorHandler';
 import * as reportsRepo from '../db/reportsRepo';
 import * as inventoryService from './inventory.service';
 import * as salesRepo from '../db/salesRepo';
+import * as expensesRepo from '../db/expensesRepo';
 import { previousPeriodRange, pctChange } from '../utils/period';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -64,8 +65,20 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
   const { from, to } = requireDateRange(fromRaw, toRaw);
   const { prevFrom, prevTo } = previousPeriodRange(from, to);
 
-  const [current, previous, dailyRows, profitDailyRows, revenueByCategory, revenueByStaff, topProductsAll, lowStock, profitAggregate, prevProfitAggregate] =
-    await Promise.all([
+  const [
+    current,
+    previous,
+    dailyRows,
+    profitDailyRows,
+    revenueByCategory,
+    revenueByStaff,
+    topProductsAll,
+    lowStock,
+    profitAggregate,
+    prevProfitAggregate,
+    expenses,
+    prevExpenses,
+  ] = await Promise.all([
       reportsRepo.salesTotals(from, to),
       reportsRepo.salesTotals(prevFrom, prevTo),
       reportsRepo.salesDailySeries(from, to),
@@ -76,6 +89,19 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
       inventoryService.getLowStock(),
       salesRepo.getSalesAggregate({ from, to, ownerView: true, requesterId: requesterId ?? 0 }),
       salesRepo.getSalesAggregate({ from: prevFrom, to: prevTo, ownerView: true, requesterId: requesterId ?? 0 }),
+      // Net Profit (2026-09-30, owner's/client's request) — the Sales tab
+      // previously only showed Gross Profit (revenue minus COGS), with no
+      // Expenses or true Net Profit anywhere on the Report page itself.
+      // The only place that ever computed Net Profit was the Dashboard's
+      // "Profit & Loss" card, and only for two fixed short windows
+      // (yesterday / last 7 days) — never for whatever custom range this
+      // report is actually showing. Reuses the exact same
+      // expensesRepo.sumExpensesForRange the Dashboard already uses (every
+      // expense type, matched purely by expense_date — see that function's
+      // own notes) so this never invents a second, different definition of
+      // "Expenses".
+      expensesRepo.sumExpensesForRange(from, to),
+      expensesRepo.sumExpensesForRange(prevFrom, prevTo),
     ]);
 
   // Fill gaps so a quiet day shows as zero, not a missing point that would
@@ -114,15 +140,24 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
   const voidedCount = Number(current.voided_count);
   const grossProfit = Number(profitAggregate.gross_profit);
   const totalQuantitySold = topProductsAll.reduce((sum: number, p: { quantity_sold: string }) => sum + Number(p.quantity_sold), 0);
+  const prevGrossProfit = Number(prevProfitAggregate.gross_profit);
+  // Net Profit = Gross Profit minus EVERY expense dated within this range
+  // (Staff Salary, rent, utilities — any expense_type), same "Overhead"
+  // the owner/client means by it. Can legitimately go negative; the
+  // frontend shows that as a real loss, not an error.
+  const netProfit = grossProfit - expenses;
+  const prevNetProfit = prevGrossProfit - prevExpenses;
 
   return {
-    current: { totalRevenue, transactionCount, totalDiscount, voidedCount, grossProfit },
+    current: { totalRevenue, transactionCount, totalDiscount, voidedCount, grossProfit, expenses, netProfit },
     changePct: {
       totalRevenue: pctChange(totalRevenue, Number(previous.total_revenue)),
       transactionCount: pctChange(transactionCount, Number(previous.transaction_count)),
       totalDiscount: pctChange(totalDiscount, Number(previous.total_discount)),
       voidedCount: pctChange(voidedCount, Number(previous.voided_count)),
-      grossProfit: pctChange(grossProfit, Number(prevProfitAggregate.gross_profit)),
+      grossProfit: pctChange(grossProfit, prevGrossProfit),
+      expenses: pctChange(expenses, prevExpenses),
+      netProfit: pctChange(netProfit, prevNetProfit),
     },
     dailySeries,
     revenueByCategory,
