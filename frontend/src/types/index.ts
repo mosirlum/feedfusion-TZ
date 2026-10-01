@@ -514,13 +514,27 @@ export interface RevenueByStaffRow {
 }
 
 export interface SalesOverviewReport {
-  current: { totalRevenue: number; transactionCount: number; totalDiscount: number; voidedCount: number; grossProfit: number };
+  // Expenses/netProfit added 2026-09-30 — Net Profit = Gross Profit minus
+  // every expense dated within this report's range (same figure the
+  // Dashboard's "Profit & Loss" card computes, just for an arbitrary
+  // range instead of only "yesterday"/"last 7 days").
+  current: {
+    totalRevenue: number;
+    transactionCount: number;
+    totalDiscount: number;
+    voidedCount: number;
+    grossProfit: number;
+    expenses: number;
+    netProfit: number;
+  };
   changePct: {
     totalRevenue: number | null;
     transactionCount: number | null;
     totalDiscount: number | null;
     voidedCount: number | null;
     grossProfit: number | null;
+    expenses: number | null;
+    netProfit: number | null;
   };
   dailySeries: DailySalesPoint[];
   revenueByCategory: RevenueByCategoryRow[];
