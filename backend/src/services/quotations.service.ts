@@ -107,9 +107,20 @@ export async function createQuotation(input: CreateQuotationLineInput, actor: Au
   const validUntil =
     input.validUntil ??
     (() => {
-      const d = new Date();
-      d.setDate(d.getDate() + Number(settings.quotation_validity_days ?? 14));
-      return d.toISOString().slice(0, 10);
+      // Same Tanzania-timezone fix as businessGrowth.service.ts's
+      // todayInTanzania() / dashboard.service.ts's todayIso() (2026-10-03,
+      // CLAUDE.md #74) — this server's own clock is UTC, not Tanzania, so
+      // anchoring "+N days" on a plain new Date() meant a quotation
+      // created between 00:00-02:59 Tanzania time got its validity window
+      // computed from the previous calendar day (both setDate/getDate and
+      // the final toISOString() read UTC fields here, so the mismatch was
+      // never between two timezones in this one function — just between
+      // the server's UTC "now" and Tanzania's actual "now"). Shift by the
+      // fixed Tanzania +3h offset first, then do the day arithmetic in
+      // that shifted UTC-field space.
+      const shifted = new Date(Date.now() + 3 * 60 * 60 * 1000);
+      shifted.setUTCDate(shifted.getUTCDate() + Number(settings.quotation_validity_days ?? 14));
+      return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
     })();
 
   // A genuine race on the numbering count (two quotations created at the

@@ -9,14 +9,32 @@ import { HttpError } from '../middleware/errorHandler';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+// UTC-vs-Tanzania "today" bug, fixed 2026-10-03 (CLAUDE.md #74) — found
+// while building the Business Growth feature, flagged there rather than
+// fixed as a drive-by, and fixed here as its own change. This is the
+// backend's own copy of the bug #71 already fixed on the frontend
+// (lib/format.ts's todayIso()): this server's process timezone is UTC,
+// not Tanzania, so `new Date().toISOString().slice(0, 10)` reported
+// *yesterday's* date for any moment between 00:00 and 02:59 Tanzania
+// time (UTC+3) — meaning the Dashboard's "today"/"yesterday"/"last 7
+// days" cards were querying the wrong calendar dates during those three
+// hours every single day. Same fix as businessGrowth.service.ts's
+// todayInTanzania(): shift the current UTC instant forward by a fixed
+// +3h (Africa/Dar_es_Salaam has no DST, so a constant offset holds
+// year-round), then read its UTC fields — never a reuse of the
+// frontend's fix, which only works because the *browser's* clock is
+// genuinely in Tanzania.
+const TZ_OFFSET_MS = 3 * 60 * 60 * 1000;
+
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const shifted = new Date(Date.now() + TZ_OFFSET_MS);
+  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
 }
 
 function isoDaysAgo(n: number): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - n);
-  return d.toISOString().slice(0, 10);
+  const shifted = new Date(Date.now() + TZ_OFFSET_MS);
+  shifted.setUTCDate(shifted.getUTCDate() - n);
+  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
 }
 
 async function sumPurchasesForDate(date: string): Promise<number> {
