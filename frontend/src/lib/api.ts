@@ -9,6 +9,7 @@ import type {
   ApprovalSummary,
   RecentActivityItem,
   AuditLogListResponse,
+  BusinessGrowthAnalysis,
   BusinessSettings,
   Category,
   Customer,
@@ -500,6 +501,12 @@ export const reportsApi = {
 // ---------------------------------------------------------------------------
 // Customers & Quotations (2026-09-12, CLAUDE.md #49)
 // ---------------------------------------------------------------------------
+// Business Growth (2026-10-03, CLAUDE.md #73) — single read-only
+// endpoint; all the analysis lives server-side, same as reportsApi.
+export const businessGrowthApi = {
+  get: () => http.get<BusinessGrowthAnalysis>('/business-growth'),
+};
+
 export const customersApi = {
   list: () => http.get<Customer[]>('/customers'),
   // Backs the Quotation form's "Ship To" autocomplete — empty q returns

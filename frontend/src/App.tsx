@@ -19,6 +19,7 @@ import PurchasesPage from './pages/PurchasesPage';
 import SuppliersPage from './pages/SuppliersPage';
 import ExpensesPage from './pages/ExpensesPage';
 import ReportsPage from './pages/ReportsPage';
+import BusinessGrowthPage from './pages/BusinessGrowthPage';
 import AuditLogPage from './pages/AuditLogPage';
 import UsersPage from './pages/UsersPage';
 import MyProfilePage from './pages/MyProfilePage';
@@ -125,6 +126,14 @@ export default function App() {
           element={
             <RequireAuth roles={['owner']}>
               <ReportsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/business-growth"
+          element={
+            <RequireAuth roles={['owner']}>
+              <BusinessGrowthPage />
             </RequireAuth>
           }
         />

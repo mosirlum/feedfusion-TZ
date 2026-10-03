@@ -18,6 +18,7 @@ import auditLogsRoutes from './auditLogs.routes';
 import customersRoutes from './customers.routes';
 import quotationsRoutes from './quotations.routes';
 import settingsRoutes from './settings.routes';
+import businessGrowthRoutes from './businessGrowth.routes';
 
 const router = Router();
 
@@ -50,5 +51,8 @@ router.use('/quotations', quotationsRoutes);
 // in businessSettingsRepo.ts existed since the original build but had no
 // route ever calling it; this is the first UI for it.
 router.use('/settings', settingsRoutes);
+// Business Growth (2026-10-03, CLAUDE.md #73) — owner-facing analysis +
+// advice page, derived entirely from existing reports/inventory/sales data.
+router.use('/business-growth', businessGrowthRoutes);
 
 export default router;

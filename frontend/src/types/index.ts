@@ -735,3 +735,32 @@ export interface ApiErrorShape {
   error: string;
   details?: unknown;
 }
+
+// Business Growth (2026-10-03, CLAUDE.md #73) — mirrors the backend's
+// BusinessGrowthAnalysis shape (businessGrowth.service.ts) exactly.
+export type GrowthIssueSeverity = 'critical' | 'warning' | 'info' | 'positive';
+export type GrowthIssueCategory = 'revenue' | 'stock' | 'debt' | 'pricing' | 'margin';
+
+export interface GrowthIssue {
+  id: string;
+  severity: GrowthIssueSeverity;
+  category: GrowthIssueCategory;
+  title: string;
+  detail: string;
+  advice: string;
+}
+
+export interface BusinessGrowthAnalysis {
+  asOf: string;
+  week: {
+    start: string;
+    daysElapsed: number;
+    revenueToDate: number;
+    expectedToDate: number | null;
+    pctOfExpected: number | null;
+    baselineWeeksUsed: number;
+    status: 'no_baseline' | 'ahead' | 'on_track' | 'behind' | 'critical';
+  };
+  weeklyTrend: Array<{ weekStart: string; revenue: number; isPartial: boolean }>;
+  issues: GrowthIssue[];
+}

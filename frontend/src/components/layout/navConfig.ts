@@ -11,6 +11,7 @@ import {
   SlidersHorizontal,
   Receipt,
   BarChart3,
+  TrendingUp,
   ScrollText,
   UserCog,
   FileText,
@@ -78,6 +79,11 @@ export const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { to: '/expenses', label: 'Expenses', icon: Receipt, roles: ['owner'] },
       { to: '/reports', label: 'Reports', icon: BarChart3, roles: ['owner'] },
+      // Business Growth (2026-10-03, CLAUDE.md #73) — owner's own ask:
+      // "ili mteja asije kuona aingiz faida yote na kufunga biashara"
+      // (analysis + advice across every issue, so the client doesn't
+      // conclude they're making no profit and close the business).
+      { to: '/business-growth', label: 'Business Growth', icon: TrendingUp, roles: ['owner'] },
     ],
   },
   {
