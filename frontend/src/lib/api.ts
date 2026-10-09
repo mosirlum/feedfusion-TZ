@@ -141,6 +141,7 @@ export async function apiErrorMessageFromBlob(err: unknown, fallback = 'Somethin
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: 'Incorrect email or password.',
   ACCOUNT_INACTIVE: 'This account has been deactivated. Contact the owner.',
+  TOO_MANY_ATTEMPTS: 'Too many failed attempts. Please wait a few minutes before trying again.',
   INSUFFICIENT_STOCK: 'Not enough stock available for this quantity.',
   PRODUCT_HAS_NO_APPROVED_PRICE: 'This product has no approved selling price yet.',
   DISCOUNT_EXCEEDS_LINE_TOTAL: 'The discount cannot exceed the line total.',
