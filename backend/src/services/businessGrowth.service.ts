@@ -1,6 +1,7 @@
 import * as reportsRepo from '../db/reportsRepo';
 import * as salesRepo from '../db/salesRepo';
 import * as inventoryService from './inventory.service';
+import { addDaysIso, mondayOnOrBefore, todayInTanzania, toDateOnlyIso } from '../utils/tzDate';
 
 /**
  * Business Growth (2026-10-03, owner's request) — "naomba tuiweke ambayo ni
@@ -36,52 +37,6 @@ import * as inventoryService from './inventory.service';
  * Each rule is independent and the Issue[] shape is designed so more can
  * be added later without touching the others.
  */
-
-const TZ_OFFSET_MS = 3 * 60 * 60 * 1000; // Africa/Dar_es_Salaam — fixed UTC+3, no DST
-
-// This runs on a server (Vercel), whose own process timezone is UTC, NOT
-// Tanzania's — unlike the browser-side fix already applied to
-// frontend/src/lib/format.ts's todayIso() (CLAUDE.md #71), simply reading
-// new Date()'s *local* getFullYear/getMonth/getDate here would be a no-op
-// (the server's "local" timezone already IS UTC), so it would NOT actually
-// fix anything. Instead: shift the current instant forward by the fixed
-// +3h offset, then read its UTC fields — equivalent to reading Tanzania's
-// wall-clock date directly, regardless of what timezone the server process
-// itself happens to be running in.
-function todayInTanzania(): string {
-  const shifted = new Date(Date.now() + TZ_OFFSET_MS);
-  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
-}
-
-// Pure calendar-date math from here down — every function takes/returns
-// 'YYYY-MM-DD' strings and uses UTC-anchored Date objects purely as a
-// calendar calculator (Date.UTC, getUTCDay, etc.), never touching "now" or
-// any timezone again. This keeps the one timezone-sensitive conversion
-// (todayInTanzania, above) isolated to a single, obviously-correct spot.
-function addDaysIso(iso: string, days: number): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + days);
-  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}-${String(dt.getUTCDate()).padStart(2, '0')}`;
-}
-
-function weekdayOf(iso: string): number {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0 = Sunday
-}
-
-// Monday-start week, same convention as frontend/src/lib/format.ts's
-// currentWeekRange() (CLAUDE.md #62).
-function mondayOnOrBefore(iso: string): string {
-  const dow = weekdayOf(iso);
-  const diffToMonday = dow === 0 ? 6 : dow - 1;
-  return addDaysIso(iso, -diffToMonday);
-}
-
-function toDateOnlyIso(value: string | Date): string {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return String(value).slice(0, 10);
-}
 
 export type IssueSeverity = 'critical' | 'warning' | 'info' | 'positive';
 export type IssueCategory = 'revenue' | 'stock' | 'debt' | 'pricing' | 'margin';
