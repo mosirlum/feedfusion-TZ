@@ -10,6 +10,7 @@ import type {
   RecentActivityItem,
   AuditLogListResponse,
   BusinessGrowthAnalysis,
+  BusinessGrowthDetails,
   BusinessSettings,
   Category,
   Customer,
@@ -505,6 +506,8 @@ export const reportsApi = {
 // endpoint; all the analysis lives server-side, same as reportsApi.
 export const businessGrowthApi = {
   get: () => http.get<BusinessGrowthAnalysis>('/business-growth'),
+  // Heavier detail tables load separately so a slow query here never blanks the advice cards.
+  details: () => http.get<BusinessGrowthDetails>('/business-growth/details'),
 };
 
 export const customersApi = {

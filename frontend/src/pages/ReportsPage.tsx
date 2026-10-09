@@ -38,6 +38,8 @@ import {
   IconChip,
   Input,
   PageHeader,
+  SegmentedControl,
+  Select,
   StatCard,
   Table,
   Td,
@@ -181,98 +183,110 @@ export default function ReportsPage() {
         icon={<BarChart3 size={20} />}
         title="Reports"
         subtitle="Everything you need to understand your business performance."
-        action={
-          needsRange ? (
-            <div className="no-print flex flex-wrap items-center gap-2">
-              <CalendarRange size={16} className="hidden text-slate-400 sm:block" />
-              <div className="flex overflow-hidden rounded-lg border border-slate-200">
-                {(['week', 'month', 'year', 'custom'] as const).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => selectPreset(p)}
-                    className={clsx(
-                      'px-3 py-1.5 text-xs font-medium capitalize transition-colors',
-                      preset === p ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
-                    )}
-                  >
-                    {p === 'week' ? 'This Week' : p === 'month' ? 'Month' : p === 'year' ? 'This Year' : 'Custom'}
-                  </button>
-                ))}
-              </div>
-
-              {preset === 'month' && (
-                <>
-                  <select
-                    value={pickerMonth}
-                    onChange={(e) => selectMonth(Number(e.target.value), pickerYear)}
-                    className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-700"
-                  >
-                    {MONTH_NAMES.map((name, i) => (
-                      <option key={name} value={i}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={pickerYear}
-                    onChange={(e) => selectMonth(pickerMonth, Number(e.target.value))}
-                    className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-700"
-                  >
-                    {YEAR_OPTIONS.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              )}
-
-              {preset === 'custom' && (
-                <>
-                  <span className="text-xs font-medium text-slate-500">From</span>
-                  <Input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} max={draftTo} className="w-auto" />
-                  <span className="text-xs font-medium text-slate-500">To</span>
-                  <Input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} min={draftFrom} max={todayIso()} className="w-auto" />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setFrom(draftFrom);
-                      setTo(draftTo);
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </>
-              )}
-
-              <div className="mx-1 h-6 w-px bg-slate-200" />
-              <Button
-                type="button"
-                size="sm"
-                icon={generatingReport ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
-                onClick={handleGenerateReport}
-                disabled={generatingReport}
-              >
-                {generatingReport ? 'Generating…' : 'Generate Report'}
-              </Button>
-            </div>
-          ) : undefined
-        }
       />
 
-      <div className="mb-5 flex flex-wrap gap-1.5 border-b border-slate-200">
+      {/* Range toolbar (2026-10-09 UI pass) — used to live inside the page
+          header, where the date inputs stretched to full width and crushed
+          the title on laptops and phones. Same presets, same Apply flow, same
+          Generate Report; it just gets its own row now. */}
+      {needsRange && (
+        <Card className="no-print mb-5 flex flex-col gap-3 p-4 lg:flex-row lg:flex-wrap lg:items-end lg:gap-x-5">
+          <div>
+            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">
+              <CalendarRange size={13} aria-hidden="true" /> Period
+            </p>
+            <SegmentedControl
+              label="Report period"
+              value={preset}
+              onChange={selectPreset}
+              options={[
+                { value: 'week', label: 'This week' },
+                { value: 'month', label: 'Month' },
+                { value: 'year', label: 'This year' },
+                { value: 'custom', label: 'Custom' },
+              ]}
+            />
+          </div>
+
+          {preset === 'month' && (
+            <div className="flex items-end gap-2">
+              <div>
+                <label htmlFor="rep-month" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">Month</label>
+                <Select id="rep-month" value={pickerMonth} onChange={(e) => selectMonth(Number(e.target.value), pickerYear)}>
+                  {MONTH_NAMES.map((name, i) => (
+                    <option key={name} value={i}>
+                      {name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <label htmlFor="rep-year" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">Year</label>
+                <Select id="rep-year" value={pickerYear} onChange={(e) => selectMonth(pickerMonth, Number(e.target.value))}>
+                  {YEAR_OPTIONS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {preset === 'custom' && (
+            <div className="flex flex-wrap items-end gap-2">
+              <div>
+                <label htmlFor="rep-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+                <Input id="rep-from" type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} max={draftTo} className="w-auto" />
+              </div>
+              <div>
+                <label htmlFor="rep-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+                <Input id="rep-to" type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} min={draftFrom} max={todayIso()} className="w-auto" />
+              </div>
+              <Button
+                type="button"
+                onClick={() => {
+                  setFrom(draftFrom);
+                  setTo(draftTo);
+                }}
+              >
+                Apply
+              </Button>
+            </div>
+          )}
+
+          <p className="text-sm text-slate-500 dark:text-[#97a49b] lg:pb-2.5">
+            Showing <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{formatDate(from)}</span> – <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{formatDate(to)}</span>
+          </p>
+
+          <Button
+            type="button"
+            className="lg:ml-auto"
+            icon={generatingReport ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            onClick={handleGenerateReport}
+            disabled={generatingReport}
+          >
+            {generatingReport ? 'Generating…' : 'Generate Report'}
+          </Button>
+        </Card>
+      )}
+
+      <div role="tablist" aria-label="Report type" className="no-print mb-5 flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-[rgba(255,255,255,0.1)]">
         {TABS.map(({ key, icon: Icon }) => (
           <button
             key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
             onClick={() => setTab(key)}
             className={clsx(
-              'flex items-center gap-1.5 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-colors',
-              tab === key ? 'border-b-2 border-green-600 text-green-700' : 'text-slate-500 hover:text-slate-700'
+              '-mb-px flex shrink-0 items-center gap-1.5 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400',
+              tab === key
+                ? 'border-green-600 text-green-700 dark:border-green-400 dark:text-green-300'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-[#97a49b] dark:hover:text-[#d2dbd5]'
             )}
           >
-            <Icon size={14} />
+            <Icon size={14} aria-hidden="true" />
             {key}
           </button>
         ))}
@@ -412,11 +426,11 @@ function buildDonutSlices(items: { name: string; value: number }[], total: numbe
 }
 
 function TrendLabel({ pct, invert }: { pct: number | null; invert?: boolean }) {
-  if (pct == null) return <span className="text-xs text-slate-400">No prior period to compare</span>;
+  if (pct == null) return <span className="text-xs text-slate-400 dark:text-[#77857c]">No prior period to compare</span>;
   const isGood = invert ? pct <= 0 : pct >= 0;
   const Icon = pct >= 0 ? TrendingUp : TrendingDown;
   return (
-    <span className={clsx('inline-flex items-center gap-1 text-xs font-medium', isGood ? 'text-green-700' : 'text-danger-600')}>
+    <span className={clsx('inline-flex items-center gap-1 text-xs font-medium', isGood ? 'text-green-700 dark:text-green-400' : 'text-danger-600 dark:text-danger-300')}>
       <Icon size={12} />
       {pct > 0 ? '+' : ''}
       {pct.toFixed(0)}% vs previous period
@@ -599,18 +613,18 @@ function StatCardWithSparkline({
   sparklineColor?: string;
 }) {
   const tones: Record<string, string> = {
-    green: 'bg-green-50 text-green-700',
-    blue: 'bg-blue-50 text-blue-700',
-    amber: 'bg-amber-50 text-amber-700',
-    red: 'bg-danger-50 text-danger-600',
+    green: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    red: 'bg-danger-50 text-danger-600 dark:bg-danger-900/40 dark:text-danger-300',
   };
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <div className={clsx('rounded-lg p-2', tones[tone])}>{icon}</div>
+    <Card className="p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">{label}</p>
+        <div className={clsx('shrink-0 rounded-lg p-2', tones[tone])}>{icon}</div>
       </div>
-      <p className="mt-2 text-2xl font-bold text-slate-800">{value}</p>
+      <p className="mt-2 break-words font-display text-xl font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5] sm:text-2xl">{value}</p>
       <div className="mt-1 flex items-center justify-between gap-2">
         <TrendLabel pct={changePct} invert={invert} />
       </div>
@@ -734,16 +748,9 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
     <div>
       <ReportToolbar onDownload={downloadSalesExcel} showPrint={false} downloadLabel="Download Excel" />
       <PrintLetterhead title="Sales" from={from} to={to} />
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-        <StatCardWithSparkline
-          label="Total Transactions"
-          value={current.transactionCount}
-          icon={<ShoppingCart size={18} />}
-          tone="green"
-          changePct={changePct.transactionCount}
-          sparklineData={dailySeries.map((d) => d.transactions)}
-          sparklineColor="#3B6D11"
-        />
+      {/* Headline numbers first (money in → profit out), then the supporting
+          counts, so nothing is squeezed into a 7-across row any more. */}
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCardWithSparkline
           label="Total Revenue"
           value={tzs(current.totalRevenue)}
@@ -752,6 +759,41 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           changePct={changePct.totalRevenue}
           sparklineData={dailySeries.map((d) => d.revenue)}
           sparklineColor="#185FA5"
+        />
+        <StatCardWithSparkline
+          label="Gross Profit"
+          value={tzs(current.grossProfit)}
+          icon={<TrendingUp size={18} />}
+          tone="blue"
+          changePct={changePct.grossProfit}
+          sparklineData={dailySeries.map((d) => d.grossProfit)}
+          sparklineColor="#3B6D11"
+        />
+        <StatCardWithSparkline
+          label="Expenses"
+          value={tzs(current.expenses)}
+          icon={<TrendingDown size={18} />}
+          tone="red"
+          changePct={changePct.expenses}
+          invert
+        />
+        <StatCardWithSparkline
+          label="Net Profit"
+          value={tzs(current.netProfit)}
+          icon={<Banknote size={18} />}
+          tone="green"
+          changePct={changePct.netProfit}
+        />
+      </div>
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCardWithSparkline
+          label="Total Transactions"
+          value={current.transactionCount}
+          icon={<ShoppingCart size={18} />}
+          tone="green"
+          changePct={changePct.transactionCount}
+          sparklineData={dailySeries.map((d) => d.transactions)}
+          sparklineColor="#3B6D11"
         />
         <StatCardWithSparkline
           label="Total Discounts"
@@ -772,42 +814,6 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           invert
           sparklineData={dailySeries.map((d) => d.voided)}
           sparklineColor="#A32D2D"
-        />
-        {/* Gross Profit stat card added 2026-09-19 (CLAUDE.md #69) — the
-            owner's own complaint: this report "gives only revenue". */}
-        <StatCardWithSparkline
-          label="Gross Profit"
-          value={tzs(current.grossProfit)}
-          icon={<TrendingUp size={18} />}
-          tone="blue"
-          changePct={changePct.grossProfit}
-          sparklineData={dailySeries.map((d) => d.grossProfit)}
-          sparklineColor="#3B6D11"
-        />
-        {/* Expenses + Net Profit added 2026-09-30 — the client's own
-            complaint: this report showed Gross Profit but never the
-            Expenses (Staff Salary etc.) needed to see real Profit after
-            Overhead, so a loss visible on the Dashboard's "Profit & Loss"
-            card (which DOES subtract expenses, but only for two fixed
-            short windows — yesterday / last 7 days) had no explanation
-            here for whatever custom range this report is actually
-            showing. No sparkline here (unlike the cards above) — a daily
-            expenses/net-profit series isn't computed anywhere else yet;
-            only this range-total figure is. */}
-        <StatCardWithSparkline
-          label="Expenses"
-          value={tzs(current.expenses)}
-          icon={<TrendingDown size={18} />}
-          tone="red"
-          changePct={changePct.expenses}
-          invert
-        />
-        <StatCardWithSparkline
-          label="Net Profit"
-          value={tzs(current.netProfit)}
-          icon={<Banknote size={18} />}
-          tone="green"
-          changePct={changePct.netProfit}
         />
       </div>
 

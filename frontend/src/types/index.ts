@@ -764,3 +764,66 @@ export interface BusinessGrowthAnalysis {
   weeklyTrend: Array<{ weekStart: string; revenue: number; isPartial: boolean }>;
   issues: GrowthIssue[];
 }
+
+// Business Growth detail sections (2026-10-09) — mirrors the backend's
+// BusinessGrowthDetails (businessGrowthDetails.service.ts) exactly.
+export interface GrowthSlowMovingItem {
+  productId: number;
+  name: string;
+  unit: string | null;
+  currentStock: number;
+  stockValueCost: number | null;
+  daysSinceLastSale: number | null;
+  soldLast30d: number;
+  daysOfCover: number | null;
+  reason: 'no_recent_sales' | 'overstocked';
+}
+
+export interface GrowthReorderSuggestion {
+  productId: number;
+  name: string;
+  unit: string | null;
+  currentStock: number;
+  minimumStock: number;
+  avgDailySales: number;
+  daysOfCover: number | null;
+  suggestedQty: number;
+  estimatedCost: number | null;
+  urgency: 'now' | 'soon';
+}
+
+export interface GrowthTrendPoint {
+  period: string;
+  revenue: number;
+  grossProfit: number;
+  revenueChangePct: number | null;
+  isPartial: boolean;
+}
+
+export interface GrowthCustomerRevenue {
+  name: string;
+  phone: string | null;
+  salesCount: number;
+  revenue: number;
+}
+
+export interface GrowthCustomerDebt {
+  name: string;
+  phone: string | null;
+  invoices: number;
+  balanceDue: number;
+  overdueBalance: number;
+  oldestDueDate: string | null;
+}
+
+export interface BusinessGrowthDetails {
+  asOf: string;
+  slowMoving: { items: GrowthSlowMovingItem[]; totalValueTiedUp: number; totalCount: number };
+  reorder: { items: GrowthReorderSuggestion[]; totalCount: number };
+  trend: { weekly: GrowthTrendPoint[]; monthly: GrowthTrendPoint[] };
+  customers: {
+    windowDays: number;
+    top: GrowthCustomerRevenue[];
+    debts: { items: GrowthCustomerDebt[]; totalOutstanding: number; debtorCount: number };
+  };
+}

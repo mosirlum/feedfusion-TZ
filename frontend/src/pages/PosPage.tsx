@@ -590,257 +590,266 @@ export default function PosPage() {
         }}
       />
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px_320px]">
+      {/* POS layout (2026-10-09 UI pass) — two columns instead of three: a
+          wide, tappable product grid on the left, and ONE sticky "sale" panel
+          on the right (items → totals → payment), so the cashier's eyes only
+          travel left-to-right once per sale. Logic below is unchanged. */}
+      <div className="grid grid-cols-1 gap-5 pb-20 lg:grid-cols-[minmax(0,1fr)_380px] lg:pb-0 xl:grid-cols-[minmax(0,1fr)_420px]">
         {/* Product catalog */}
         <div>
           <Card className="p-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+                <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" aria-hidden="true" />
                 <Input
                   ref={searchBoxRef}
                   placeholder="Search products by name or category…"
+                  aria-label="Search products"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="pl-9"
                 />
               </div>
-              <Button type="button" variant="outline" onClick={() => searchBoxRef.current?.blur()}>
-                Search
+              {/* Only useful on a phone: dismisses the keyboard. */}
+              <Button type="button" variant="outline" className="lg:hidden" onClick={() => searchBoxRef.current?.blur()}>
+                Done
               </Button>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <button
-                onClick={() => setCategoryFilter('all')}
-                className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
-                  categoryFilter === 'all' ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-[#0e1512] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-200'
-                }`}
-              >
-                All
-              </button>
-              {categoryNames.map((name) => (
-                <button
-                  key={name}
-                  onClick={() => setCategoryFilter(name)}
-                  className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
-                    categoryFilter === name ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-[#0e1512] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-200'
-                  }`}
-                >
-                  {name}
-                </button>
-              ))}
-              {hasUncategorized && (
-                <button
-                  onClick={() => setCategoryFilter('uncategorized')}
-                  className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
-                    categoryFilter === 'uncategorized' ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-[#0e1512] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-200'
-                  }`}
-                >
-                  Uncategorized
-                </button>
+              {query && (
+                <Button type="button" variant="ghost" className="hidden lg:inline-flex" onClick={() => setQuery('')}>
+                  Clear
+                </Button>
               )}
             </div>
 
-            <div className="mt-3 max-h-[560px] space-y-1.5 overflow-y-auto">
+            <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0" role="group" aria-label="Filter by category">
+              {[
+                { key: 'all', label: 'All' },
+                ...categoryNames.map((name) => ({ key: name, label: name })),
+                ...(hasUncategorized ? [{ key: 'uncategorized', label: 'Uncategorized' }] : []),
+              ].map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setCategoryFilter(c.key)}
+                  aria-pressed={categoryFilter === c.key}
+                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
+                    categoryFilter === c.key
+                      ? 'bg-green-600 text-white shadow-card'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#0e1512] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 lg:max-h-[calc(100vh-17rem)] lg:overflow-y-auto lg:pr-1">
               {catalog.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-400 dark:text-[#77857c]">
+                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#97a49b]">
                   No sellable products yet — add a product and set a price on the Products page first.
                 </p>
               ) : filteredCatalog.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-400 dark:text-[#77857c]">No products match "{query}".</p>
+                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#97a49b]">No products match "{query}".</p>
               ) : (
-                filteredCatalog.map((p) => {
-                  const stock = stockById.get(p.id) ?? 0;
-                  const qtyInCart = cartQtyById.get(p.id);
-                  const tone = stockDotTone(stock, p.minimum_stock);
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => addToCart(p)}
-                      className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors ${
-                        qtyInCart ? 'border-green-300 bg-green-50/60' : 'border-slate-100 dark:border-[rgba(255,255,255,0.08)] hover:border-green-200 hover:bg-green-50/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-green-600 text-[11px] font-bold text-white">
-                          {initials(p.name)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">
-                            {p.category_name ?? 'Uncategorized'} · {p.unit}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-shrink-0 items-center gap-3">
-                        <p className="text-sm font-semibold text-green-700">{tzs(p.active_price)}</p>
-                        <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-[#77857c]">
-                          <span
-                            className={`h-2 w-2 rounded-full ${
-                              tone === 'green' ? 'bg-green-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-danger-500'
-                            }`}
-                          />
-                          {stock}
-                        </span>
-                        {qtyInCart ? (
-                          <Badge tone="green">×{qtyInCart}</Badge>
-                        ) : (
-                          <span className="flex h-6 w-6 items-center justify-center rounded-md text-slate-300">
-                            <Plus size={14} />
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })
+                <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 2xl:grid-cols-3">
+                  {filteredCatalog.map((p) => {
+                    const stock = stockById.get(p.id) ?? 0;
+                    const qtyInCart = cartQtyById.get(p.id);
+                    const tone = stockDotTone(stock, p.minimum_stock);
+                    return (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onClick={() => addToCart(p)}
+                          aria-label={`Add ${p.name} to the sale, ${tzs(p.active_price)}, ${stock} in stock`}
+                          className={`group flex h-full w-full flex-col gap-3 rounded-xl border p-3.5 text-left transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-[0.98] ${
+                            qtyInCart
+                              ? 'border-green-400 bg-green-50/70 shadow-card dark:border-green-600 dark:bg-green-900/20'
+                              : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-green-300 hover:shadow-card dark:border-[rgba(255,255,255,0.1)] dark:bg-[#121a16] dark:hover:border-green-700'
+                          } ${stock <= 0 ? 'opacity-75' : ''}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-green-600 text-[11px] font-bold text-white">
+                              {initials(p.name)}
+                            </div>
+                            {qtyInCart ? (
+                              <Badge tone="green">×{qtyInCart} in sale</Badge>
+                            ) : (
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 transition-colors group-hover:bg-green-600 group-hover:text-white dark:bg-[#0e1512] dark:text-[#77857c]" aria-hidden="true">
+                                <Plus size={14} />
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="break-words text-sm font-semibold leading-snug text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">
+                              {p.category_name ?? 'Uncategorized'} · {p.unit}
+                            </p>
+                          </div>
+                          <div className="mt-auto flex items-end justify-between gap-2">
+                            <p className="font-display text-base font-extrabold tabular-nums text-green-700 dark:text-green-400">{tzs(p.active_price)}</p>
+                            <span className={`flex items-center gap-1.5 text-xs font-medium tabular-nums ${stock <= 0 ? 'text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]'}`}>
+                              <span
+                                className={`h-2 w-2 rounded-full ${tone === 'green' ? 'bg-green-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-danger-500'}`}
+                                aria-hidden="true"
+                              />
+                              {stock <= 0 ? 'Out of stock' : `${stock} left`}
+                            </span>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           </Card>
         </div>
 
-        {/* Sale items + stock check + summary */}
-        <div className="flex flex-col gap-4">
+        {/* The sale: items → totals → payment, one sticky panel */}
+        <div id="pos-cart" className="flex scroll-mt-4 flex-col gap-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto lg:pr-0.5">
           <Card>
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Sale Items</h3>
-              <div className="flex items-center gap-2">
-                <Badge tone="blue">{cart.length} {cart.length === 1 ? 'item' : 'items'}</Badge>
-                {cart.length > 0 && (
-                  <button onClick={resetSale} className="text-xs text-slate-400 dark:text-[#77857c] hover:text-danger-600 flex items-center gap-1">
-                    <RotateCcw size={12} /> Clear
-                  </button>
-                )}
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 dark:border-[rgba(255,255,255,0.08)]">
+              <div className="flex items-center gap-2.5">
+                <IconChip tone="blue" size={30} icon={<ShoppingCart size={14} />} />
+                <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Sale items</h3>
+                <Badge tone="blue">{cart.length}</Badge>
               </div>
+              {cart.length > 0 && (
+                <button type="button" onClick={resetSale} className="flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-slate-500 hover:text-danger-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 dark:text-[#97a49b]">
+                  <RotateCcw size={12} aria-hidden="true" /> Clear
+                </button>
+              )}
             </div>
 
-            <div className="max-h-[360px] overflow-y-auto px-5 py-3">
+            <div className="max-h-[300px] overflow-y-auto px-4 py-3 lg:max-h-[max(9rem,24vh)]">
               {cart.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-400 dark:text-[#77857c]">Cart is empty. Add products from the left.</p>
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <ShoppingCart size={26} className="text-slate-300 dark:text-[#4a5650]" aria-hidden="true" />
+                  <p className="text-sm font-medium text-slate-600 dark:text-[#b6c2ba]">No items yet</p>
+                  <p className="text-xs text-slate-500 dark:text-[#97a49b]">Tap a product to add it to this sale.</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <ul className="space-y-2.5">
                   {cart.map((line, idx) => {
                     const disc = lineDiscountAmount(line);
                     const stock = stockById.get(line.product.id) ?? 0;
                     const short = line.quantity > stock;
                     return (
-                      <div
+                      <li
                         key={line.product.id}
-                        className={`rounded-lg border p-3 ${short ? 'border-danger-200 bg-danger-50/40' : 'border-slate-100 dark:border-[rgba(255,255,255,0.08)]'}`}
+                        className={`rounded-xl border p-3 ${short ? 'border-danger-200 bg-danger-50/50 dark:border-danger-700/50 dark:bg-danger-900/20' : 'border-slate-100 dark:border-[rgba(255,255,255,0.08)]'}`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-[#eef3ef]">{line.product.name}</p>
-                            <p className="text-xs text-slate-400 dark:text-[#77857c]">
-                              {line.product.category_name ?? 'Uncategorized'} · {line.product.unit}
+                          <div className="min-w-0">
+                            <p className="break-words text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{line.product.name}</p>
+                            <p className={`text-xs ${short ? 'font-semibold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]'}`}>
+                              {tzs(line.product.active_price)} each · {short ? `only ${stock} in stock` : `${stock} in stock`}
                             </p>
-                            <p className={`text-xs ${short ? 'font-semibold text-danger-600' : 'text-slate-400 dark:text-[#77857c]'}`}>Stock: {stock}</p>
                           </div>
-                          <button onClick={() => removeLine(line.product.id)} className="text-slate-300 hover:text-danger-600">
+                          <button
+                            type="button"
+                            onClick={() => removeLine(line.product.id)}
+                            aria-label={`Remove ${line.product.name}`}
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-danger-50 hover:text-danger-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 dark:hover:bg-danger-900/30"
+                          >
                             <Trash2 size={15} />
                           </button>
                         </div>
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5">
+                        <div className="mt-2.5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1">
                             <button
+                              type="button"
                               onClick={() => updateQuantity(line.product.id, line.quantity - 1)}
-                              className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-100"
+                              aria-label={`Decrease ${line.product.name}`}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]"
                             >
-                              <Minus size={12} />
+                              <Minus size={13} />
                             </button>
-                            <span className="w-8 text-center text-sm font-medium">{line.quantity}</span>
+                            <span className="w-9 text-center text-sm font-bold tabular-nums" aria-live="polite">{line.quantity}</span>
                             <button
+                              type="button"
                               onClick={() => updateQuantity(line.product.id, line.quantity + 1)}
-                              className="flex h-6 w-6 items-center justify-center rounded border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-100"
+                              aria-label={`Increase ${line.product.name}`}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]"
                             >
-                              <Plus size={12} />
+                              <Plus size={13} />
                             </button>
                           </div>
                           <button
+                            type="button"
                             onClick={() => setDiscountModalIndex(idx)}
-                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                            className="flex items-center gap-1 rounded px-1 text-xs font-semibold text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:text-blue-400"
                           >
-                            <Tag size={12} /> {disc > 0 ? `-${tzs(disc)}` : 'Discount'}
+                            <Tag size={12} aria-hidden="true" /> {disc > 0 ? `-${tzs(disc)}` : 'Discount'}
                           </button>
+                          <span className="font-display text-sm font-bold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(lineSubtotal(line) - disc)}</span>
                         </div>
-                        <div className="mt-1.5 flex justify-between text-sm">
-                          <span className="text-slate-400 dark:text-[#77857c]">{tzs(line.product.active_price)} each</span>
-                          <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{tzs(lineSubtotal(line) - disc)}</span>
-                        </div>
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               )}
             </div>
-          </Card>
 
-          <Card className={`flex items-start gap-2.5 p-4 ${cart.length === 0 ? '' : shortages.length > 0 ? 'bg-danger-50/50' : 'bg-green-50/50'}`}>
-            {cart.length === 0 ? (
-              <>
-                <ClipboardCheck size={18} className="mt-0.5 flex-shrink-0 text-slate-400 dark:text-[#77857c]" />
-                <div>
-                  <p className="text-sm font-semibold text-slate-600 dark:text-[#b6c2ba]">Stock Check</p>
-                  <p className="text-xs text-slate-400 dark:text-[#77857c]">Add products to check availability.</p>
-                </div>
-              </>
-            ) : shortages.length > 0 ? (
-              <>
-                <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-danger-600" />
-                <div>
-                  <p className="text-sm font-semibold text-danger-700">Not enough stock</p>
-                  <p className="text-xs text-danger-600">
-                    {shortages.map((l) => l.product.name).join(', ')} — reduce the quantity to continue.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 size={18} className="mt-0.5 flex-shrink-0 text-green-600" />
-                <div>
-                  <p className="text-sm font-semibold text-green-700">Stock Check</p>
-                  <p className="text-xs text-green-600">All items are available in stock.</p>
-                </div>
-              </>
-            )}
-          </Card>
-
-          <Card className="p-5">
-            <div className="mb-3 flex items-center gap-2.5">
-              <IconChip tone="blue" size={30} icon={<Receipt size={14} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Sale Summary</h3>
+            {/* Stock check — now one slim status row under the items */}
+            <div
+              role="status"
+              className={`flex items-center gap-2 border-t px-5 py-2.5 text-xs ${
+                cart.length === 0
+                  ? 'border-slate-100 text-slate-500 dark:border-[rgba(255,255,255,0.08)] dark:text-[#97a49b]'
+                  : shortages.length > 0
+                    ? 'border-danger-100 bg-danger-50/60 text-danger-700 dark:border-danger-700/40 dark:bg-danger-900/20 dark:text-danger-300'
+                    : 'border-green-100 bg-green-50/60 text-green-700 dark:border-green-900/40 dark:bg-green-900/15 dark:text-green-300'
+              }`}
+            >
+              {cart.length === 0 ? (
+                <>
+                  <ClipboardCheck size={15} aria-hidden="true" /> <span>Stock check runs as you add products.</span>
+                </>
+              ) : shortages.length > 0 ? (
+                <>
+                  <AlertTriangle size={15} aria-hidden="true" />
+                  <span>
+                    <b>Not enough stock:</b> {shortages.map((l) => l.product.name).join(', ')} — reduce the quantity to continue.
+                  </span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={15} aria-hidden="true" /> <span>All items are available in stock.</span>
+                </>
+              )}
             </div>
-            <div className="space-y-2 text-sm">
+
+            <dl className="space-y-1.5 border-t border-slate-100 px-5 py-4 text-sm dark:border-[rgba(255,255,255,0.08)]">
               <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
-                <span>Subtotal</span>
-                <span>{tzs(subtotal)}</span>
+                <dt>Subtotal</dt>
+                <dd className="tabular-nums">{tzs(subtotal)}</dd>
               </div>
               <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
-                <span>Discount</span>
-                <span className={totalDiscount > 0 ? 'text-danger-600' : ''}>{totalDiscount > 0 ? `-${tzs(totalDiscount)}` : tzs(0)}</span>
+                <dt>Discount</dt>
+                <dd className={`tabular-nums ${totalDiscount > 0 ? 'text-danger-600 dark:text-danger-300' : ''}`}>{totalDiscount > 0 ? `-${tzs(totalDiscount)}` : tzs(0)}</dd>
               </div>
-              <div className="flex items-center justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-2.5 text-base font-bold text-slate-800 dark:text-[#eef3ef]">
-                <span>Total Amount</span>
-                <span>{tzs(total)}</span>
+              <div className="flex items-baseline justify-between border-t border-slate-100 pt-2.5 dark:border-[rgba(255,255,255,0.08)]">
+                <dt className="font-semibold text-slate-800 dark:text-[#eef3ef]">Total amount</dt>
+                <dd className="font-display text-2xl font-extrabold tabular-nums text-slate-900 dark:text-[#f4f8f5]">{tzs(total)}</dd>
               </div>
-            </div>
+            </dl>
           </Card>
-        </div>
 
-        {/* Payment */}
-        <div className="flex flex-col gap-4">
           <Card className="p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <IconChip tone="green" size={30} icon={<CreditCard size={14} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Payment Details</h3>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Payment</h3>
             </div>
 
             {/* Backdated sale entry (2026-09-25, owner's request) —
                 entering today a sale that actually happened on an earlier
                 real day. Reports/history use this date; the stock itself
                 still leaves right now, at the moment this sale completes. */}
-            <Label>Sale Date</Label>
+            <Label htmlFor="pos-sale-date">Sale Date</Label>
             <Input
+              id="pos-sale-date"
               type="date"
               max={todayIso()}
               value={saleDate}
@@ -852,10 +861,10 @@ export default function PosPage() {
                 021) — TZS 0 collected right now, tracked as a real debt.
                 Requires a saved customer, never just a typed walk-in name,
                 since there'd be nobody to actually chase for the debt. */}
-            <label className="mb-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 px-3.5 py-2.5">
+            <label className="mb-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 px-3.5 py-2.5 transition-colors focus-within:ring-2 focus-within:ring-amber-400 dark:border-amber-700/60 dark:bg-amber-900/20">
               <span>
-                <span className="block text-sm font-semibold text-amber-800">Kwa Deni (Give on Credit)</span>
-                <span className="block text-xs text-amber-600">Customer takes the goods now, pays TZS 0 today.</span>
+                <span className="block text-sm font-semibold text-amber-800 dark:text-amber-300">Kwa Deni (Give on Credit)</span>
+                <span className="block text-xs text-amber-700 dark:text-amber-400">Customer takes the goods now, pays TZS 0 today.</span>
               </span>
               <input
                 type="checkbox"
@@ -866,10 +875,10 @@ export default function PosPage() {
             </label>
             {isCreditSale && (
               <div className="mb-4 space-y-2">
-                <Label>Due Date</Label>
-                <Input type="date" min={todayIso()} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                <Label htmlFor="pos-due-date">Due Date</Label>
+                <Input id="pos-due-date" type="date" min={todayIso()} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                 {!customerId && (
-                  <p className="text-xs font-medium text-danger-600">
+                  <p className="text-xs font-medium text-danger-600 dark:text-danger-300">
                     Select a saved customer above (tap "Customer" and pick one from the search) — a typed walk-in name isn't enough for credit.
                   </p>
                 )}
@@ -878,8 +887,8 @@ export default function PosPage() {
 
             {!isCreditSale && (
               <>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Payment Method</p>
-                <div className="mb-4 grid grid-cols-3 gap-2">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Payment Method</p>
+                <div className="mb-4 grid grid-cols-3 gap-2" role="group" aria-label="Payment method">
                   {(
                     [
                       { value: 'CASH' as const, label: 'Cash', icon: Wallet },
@@ -891,20 +900,25 @@ export default function PosPage() {
                       key={m.value}
                       type="button"
                       onClick={() => setPaymentMethod(m.value)}
-                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 text-center transition-colors ${
-                        paymentMethod === m.value ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:border-slate-300'
+                      aria-pressed={paymentMethod === m.value}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 text-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
+                        paymentMethod === m.value
+                          ? 'border-green-500 bg-green-50 text-green-800 dark:border-green-500 dark:bg-green-900/30 dark:text-green-200'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-300 dark:border-[rgba(255,255,255,0.14)] dark:text-[#97a49b] dark:hover:border-[rgba(255,255,255,0.25)]'
                       }`}
                     >
-                      <m.icon size={17} />
+                      <m.icon size={17} aria-hidden="true" />
                       <span className="text-[11.5px] font-semibold leading-tight">{m.label}</span>
                     </button>
                   ))}
                 </div>
 
-                <Label>Amount Collected Now</Label>
+                <Label htmlFor="pos-amount">Amount Collected Now</Label>
                 <div className="relative mb-1">
                   <Input
+                    id="pos-amount"
                     type="number"
+                    inputMode="numeric"
                     min={0}
                     placeholder={total > 0 ? String(total) : '0'}
                     value={paymentAmount}
@@ -914,30 +928,30 @@ export default function PosPage() {
                     }}
                     className="pr-9 text-lg font-bold"
                   />
-                  {amountCoversTotal && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600" />}
+                  {amountCoversTotal && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600" aria-hidden="true" />}
                 </div>
                 {/* Credit sales (2026-09-12, CLAUDE.md #50) — collecting less
                     than the total is allowed; the shortfall shows as a balance
                     owed instead of "Change", so it's obvious this will be a
                     PARTIAL sale before completing it. */}
                 {balanceDue > 0 && amountReceived > 0 ? (
-                  <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm">
-                    <span className="font-medium text-amber-700">Balance Due (owed after this sale)</span>
-                    <span className="font-bold text-amber-800">{tzs(balanceDue)}</span>
+                  <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm dark:bg-amber-900/20">
+                    <span className="font-medium text-amber-700 dark:text-amber-300">Balance Due (owed after this sale)</span>
+                    <span className="font-bold tabular-nums text-amber-800 dark:text-amber-200">{tzs(balanceDue)}</span>
                   </div>
                 ) : (
                   <div className="mb-4 flex items-center justify-between text-sm">
-                    <span className="text-slate-400 dark:text-[#77857c]">Change</span>
-                    <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{tzs(change)}</span>
+                    <span className="text-slate-500 dark:text-[#97a49b]">Change</span>
+                    <span className="font-semibold tabular-nums text-slate-700 dark:text-[#d2dbd5]">{tzs(change)}</span>
                   </div>
                 )}
               </>
             )}
 
             {isCreditSale && (
-              <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm">
-                <span className="font-medium text-amber-700">Balance Due (owed after this sale)</span>
-                <span className="font-bold text-amber-800">{tzs(total)}</span>
+              <div className="mb-4 flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-sm dark:bg-amber-900/20">
+                <span className="font-medium text-amber-700 dark:text-amber-300">Balance Due (owed after this sale)</span>
+                <span className="font-bold tabular-nums text-amber-800 dark:text-amber-200">{tzs(total)}</span>
               </div>
             )}
 
@@ -949,11 +963,27 @@ export default function PosPage() {
               onClick={() => submitSale()}
               disabled={cart.length === 0 || shortages.length > 0 || (isCreditSale && (!customerId || !dueDate))}
             >
-              Complete Sale
+              Complete Sale{cart.length > 0 ? ` · ${tzs(total)}` : ''}
             </Button>
           </Card>
         </div>
       </div>
+
+      {/* Phone only: a pinned summary so the cashier can always jump from the
+          product list to the sale panel below. */}
+      {cart.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-panel backdrop-blur dark:border-[rgba(255,255,255,0.1)] dark:bg-[#121a16]/95 lg:hidden">
+          <a
+            href="#pos-cart"
+            className="flex items-center justify-between gap-3 rounded-xl bg-green-600 px-4 py-3 text-white shadow-card transition-colors hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 active:bg-green-800"
+          >
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <ShoppingCart size={16} aria-hidden="true" /> {cart.length} item{cart.length === 1 ? '' : 's'} · Review &amp; pay
+            </span>
+            <span className="font-display font-extrabold tabular-nums">{tzs(total)}</span>
+          </a>
+        </div>
+      )}
 
       <p className="mt-5 text-center text-xs text-slate-400 dark:text-[#77857c]">
         Sale #{nextInvoice ?? '…'} · {formatDateTime(new Date())} · Served by {user?.name}

@@ -26,6 +26,7 @@ import {
 import { dashboardApi, apiErrorMessage } from '../lib/api';
 import { DashboardToday } from '../types';
 import { tzs, formatDate } from '../lib/format';
+import { useElementWidth } from '../lib/useElementWidth';
 import {
   Button,
   Card,
@@ -37,6 +38,7 @@ import {
   IconChip,
   Input,
   PageHeader,
+  SegmentedControl,
   StatCard,
   Table,
   Td,
@@ -81,6 +83,8 @@ export default function DashboardPage() {
   // calendar sitting there." So this starts collapsed behind a plain toggle
   // button, not a permanently-visible date picker.
   const [showCustomRange, setShowCustomRange] = useState(false);
+  const [plRange, setPlRange] = useState<'yesterday' | 'week' | 'custom'>('yesterday');
+  const [showAllDebtors, setShowAllDebtors] = useState(false);
   const [customFrom, setCustomFrom] = useState(todayLocalIso());
   const [customTo, setCustomTo] = useState(todayLocalIso());
   const [customResult, setCustomResult] = useState<{ from: string; to: string; grossProfit: number; expenses: number; netProfit: number } | null>(null);
@@ -142,37 +146,97 @@ export default function DashboardPage() {
   ].map((s) => ({ ...s, pct: data.totalProductsTracked > 0 ? (s.value / data.totalProductsTracked) * 100 : 0 }));
 
   const growthPct = data.deltas.totalSales;
+  const plFigures =
+    plRange === 'yesterday' ? data.profitAndLoss.yesterday : plRange === 'week' ? data.profitAndLoss.last7Days : customResult;
+  const plPeriodLabel =
+    plRange === 'yesterday'
+      ? 'Net of expenses, for yesterday'
+      : plRange === 'week'
+        ? 'Net of expenses, for the last 7 days'
+        : customResult
+          ? `Net of expenses, ${formatDate(customResult.from)} – ${formatDate(customResult.to)}`
+          : 'Net of expenses, for dates you choose';
+
+  const debtors = data.outstandingDebt.topDebtors;
+  const visibleDebtors = showAllDebtors ? debtors : debtors.slice(0, 5);
 
   return (
     <div>
       <PageHeader title="Today's Overview" subtitle={formatDate(data.date)} />
 
       {data.lowStockAlert && (
-        <div className="mb-6 flex flex-col gap-2">
-          {data.lowStockAlert && (
-            <AlertBanner
-              icon={<PackageX size={16} />}
-              tone="amber"
-              text={`${data.lowStockCount} product${data.lowStockCount === 1 ? '' : 's'} low on stock or out of stock.`}
-              action={
-                <Link to="/inventory" className="font-semibold underline underline-offset-2">
-                  View inventory
-                </Link>
-              }
-            />
-          )}
+        <div className="mb-4 flex flex-col gap-2">
+          <AlertBanner
+            icon={<PackageX size={16} />}
+            tone="amber"
+            text={`${data.lowStockCount} product${data.lowStockCount === 1 ? '' : 's'} low on stock or out of stock.`}
+            action={
+              <Link to="/inventory" className="whitespace-nowrap font-semibold underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
+                View inventory
+              </Link>
+            }
+          />
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total Sales"
-          value={tzs(data.totalSales)}
-          icon={<ShoppingBag size={18} />}
-          tone="green"
-          hint={`${data.transactionCount} transactions`}
-          delta={deltaProp(data.deltas.totalSales)}
-        />
+      {/* Today at a glance (2026-10-09 UI pass) — one hero instead of four
+          equal cards: the number the owner checks first (sales) leads, and
+          the profit chain (gross → expenses → net) reads left to right. */}
+      <section aria-label="Today at a glance" className="overflow-hidden rounded-card bg-brand-gradient p-5 text-white shadow-panel sm:p-6">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr] lg:items-end">
+          <div>
+            <p className="text-sm text-green-100/80">Total sales today</p>
+            <p className="mt-1 font-display text-3xl font-extrabold tabular-nums sm:text-4xl">{tzs(data.totalSales)}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-green-100/80">
+              <span>
+                {data.transactionCount} transaction{data.transactionCount === 1 ? '' : 's'}
+              </span>
+              <HeroDelta pct={data.deltas.totalSales} />
+            </div>
+          </div>
+          <dl className="grid grid-cols-3 gap-3 border-t border-white/10 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <HeroStat label="Gross profit" value={tzs(data.grossProfit)} pct={data.deltas.grossProfit} />
+            <HeroStat label="Expenses" value={tzs(data.expenses)} pct={data.deltas.expenses} invert />
+            <HeroStat label="Estimated net" value={tzs(data.estimatedNet)} pct={data.deltas.estimatedNet} negative={data.estimatedNet < 0} />
+          </dl>
+        </div>
+      </section>
+
+      {/* Phone: the three supporting numbers as one compact list card. */}
+      <Card className="mt-4 divide-y divide-slate-100 dark:divide-[rgba(255,255,255,0.08)] sm:hidden">
+        {[
+          { label: 'Total Purchases', hint: 'Recorded today', value: tzs(data.totalPurchasesToday), tone: 'blue' as const, icon: <Truck size={16} /> },
+          { label: 'Current Stock Value', hint: 'At current cost', value: tzs(data.currentStockValue), tone: 'purple' as const, icon: <Layers size={16} /> },
+          {
+            label: 'Low Stock Items',
+            hint: data.lowStockCount > 0 ? 'Products need attention' : 'Everything is stocked',
+            value: String(data.lowStockCount),
+            tone: data.lowStockCount > 0 ? ('amber' as const) : ('green' as const),
+            icon: <AlertTriangle size={16} />,
+          },
+        ].map((k) => (
+          <div key={k.label} className="flex items-center gap-3 px-4 py-3.5">
+            <div
+              className={clsx(
+                'rounded-[10px] p-2',
+                k.tone === 'blue' && 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                k.tone === 'purple' && 'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+                k.tone === 'amber' && 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                k.tone === 'green' && 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+              )}
+            >
+              {k.icon}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-700 dark:text-[#d2dbd5]">{k.label}</p>
+              <p className="text-xs text-slate-500 dark:text-[#97a49b]">{k.hint}</p>
+            </div>
+            <p className="font-display font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{k.value}</p>
+          </div>
+        ))}
+      </Card>
+
+      <div className="mt-4 hidden grid-cols-3 gap-4 sm:grid">
         <StatCard
           label="Total Purchases"
           value={tzs(data.totalPurchasesToday)}
@@ -187,209 +251,149 @@ export default function DashboardPage() {
           value={data.lowStockCount}
           icon={<AlertTriangle size={18} />}
           tone={data.lowStockCount > 0 ? 'amber' : 'green'}
-          hint="Products need attention"
-        />
-        <StatCard label="Gross Profit" value={tzs(data.grossProfit)} icon={<TrendingUp size={18} />} tone="blue" delta={deltaProp(data.deltas.grossProfit)} />
-        <StatCard label="Expenses" value={tzs(data.expenses)} icon={<Receipt size={18} />} tone="amber" delta={deltaProp(data.deltas.expenses)} />
-        <StatCard
-          label="Estimated Net"
-          value={tzs(data.estimatedNet)}
-          icon={<BadgeCheck size={18} />}
-          tone={data.estimatedNet >= 0 ? 'green' : 'red'}
-          delta={deltaProp(data.deltas.estimatedNet)}
+          hint={data.lowStockCount > 0 ? 'Products need attention' : 'Everything is stocked'}
         />
       </div>
 
-      {/* Profit & Loss at a glance (2026-09-19, CLAUDE.md #69) — the stat
-          cards above are all "today"; the owner's own words were that he
-          (and customers asking him) wants "jana nilipata faida kiasi gani"
-          (yesterday's profit) and "wiki iliyopita" (last week's) without
-          leaving the dashboard. Two compact panels rather than more stat
-          cards, since each carries three related numbers (gross, expenses,
-          net) that read better grouped than spread across the grid. */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Card className="p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <IconChip tone="blue" size={26} icon={<Wallet size={13} />} />
+      {/* Profit & Loss (CLAUDE.md #69) — Yesterday, Last 7 days and the
+          owner's hidden "customize" range (his own request: a button, not a
+          calendar sitting there) now share ONE panel behind a switch, instead
+          of two cards plus a loose link. Same numbers, same endpoints. */}
+      <Card className="mt-4">
+        <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <IconChip tone="green" size={34} icon={<Wallet size={16} />} />
             <div>
-              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Yesterday&apos;s Profit</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Profit &amp; loss</h3>
+              <p className="text-sm text-slate-500 dark:text-[#97a49b]">{plPeriodLabel}</p>
             </div>
           </div>
-          <p
-            className={clsx(
-              'font-display text-2xl font-extrabold',
-              data.profitAndLoss.yesterday.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
-            )}
-          >
-            {tzs(data.profitAndLoss.yesterday.netProfit)}
-          </p>
-          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
-            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.grossProfit)}</b></span>
-            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.yesterday.expenses)}</b></span>
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <IconChip tone="green" size={26} icon={<BarChart3 size={13} />} />
-            <div>
-              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Last 7 Days&apos; Profit</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">Net of expenses</p>
-            </div>
-          </div>
-          <p
-            className={clsx(
-              'font-display text-2xl font-extrabold',
-              data.profitAndLoss.last7Days.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
-            )}
-          >
-            {tzs(data.profitAndLoss.last7Days.netProfit)}
-          </p>
-          <div className="mt-2 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
-            <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.grossProfit)}</b></span>
-            <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(data.profitAndLoss.last7Days.expenses)}</b></span>
-          </div>
-        </Card>
-      </div>
-
-      {/* Outstanding Customer Debt (2026-09-19, CLAUDE.md #69 follow-up) —
-          "Total Sales" above reflects the full invoiced amount of every
-          completed sale, credit sales included (CLAUDE.md #50), so it can
-          read stronger than the cash actually in hand. This surfaces what's
-          still owed: every COMPLETED sale with payment_status PARTIAL and a
-          real balance left, oldest first (see salesRepo.getOutstandingBalances
-          for why oldest-first was picked over largest-first — flagged as a
-          judgment call, not a spelled-out requirement). */}
-      <Card className="mt-4 p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <IconChip tone="amber" size={26} icon={<HandCoins size={13} />} />
-            <div>
-              <p className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Outstanding Customer Debt</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">Money owed to the shop from credit sales</p>
-            </div>
-          </div>
-          <Link to="/sales-history" className="text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
-            View in Sales History
-          </Link>
+          <SegmentedControl
+            label="Profit period"
+            value={plRange}
+            onChange={(v) => {
+              setPlRange(v);
+              setShowCustomRange(v === 'custom');
+            }}
+            options={[
+              { value: 'yesterday', label: 'Yesterday' },
+              { value: 'week', label: 'Last 7 days' },
+              { value: 'custom', label: 'Custom' },
+            ]}
+          />
         </div>
-        {data.outstandingDebt.debtorCount === 0 ? (
-          <EmptyState title="No outstanding customer debt right now." />
-        ) : (
-          <>
-            <div className="mb-3 flex flex-wrap items-baseline gap-x-6 gap-y-1">
-              <p className="font-display text-2xl font-extrabold text-amber-600 dark:text-amber-300">
-                {tzs(data.outstandingDebt.totalOutstanding)}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">
-                across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
-              </p>
-              {/* Overdue (2026-09-25, migration 021) — "ila alert ifanye":
-                  the owner asked to skip external SMS/WhatsApp notifications
-                  for now but wants the in-app alert to actually work. This
-                  is that alert — a due date was agreed and it's passed. */}
-              {data.outstandingDebt.overdueCount > 0 && (
-                <p className="flex items-center gap-1 text-xs font-bold text-danger-600">
-                  <AlertTriangle size={13} /> {data.outstandingDebt.overdueCount} overdue
-                </p>
-              )}
+        {plRange === 'custom' && (
+          <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
+            <div>
+              <label htmlFor="pl-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+              <Input id="pl-from" type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} max={customTo} className="w-auto" />
             </div>
-            <Table>
-              <THead>
-                <tr>
-                  <Th>Date</Th>
-                  <Th>Customer</Th>
-                  <Th>Invoice</Th>
-                  <Th>Due</Th>
-                  <Th className="text-right">Total</Th>
-                  <Th className="text-right">Balance Due</Th>
-                </tr>
-              </THead>
-              <tbody>
-                {data.outstandingDebt.topDebtors.map((d) => (
-                  <Tr key={d.id}>
-                    <Td className="whitespace-nowrap text-slate-500 dark:text-[#97a49b]">{formatDate(d.sale_date)}</Td>
-                    <Td className="font-semibold text-slate-800 dark:text-[#eef3ef]">
-                      {d.customer_name || 'Walk-in'}
-                      {d.customer_phone && (
-                        <span className="ml-1.5 font-normal text-slate-400 dark:text-[#77857c]">{d.customer_phone}</span>
-                      )}
-                    </Td>
-                    <Td className="text-slate-500 dark:text-[#97a49b]">{d.invoice_number}</Td>
-                    <Td className="whitespace-nowrap">
-                      {d.due_date ? (
-                        <span className={d.is_overdue ? 'font-bold text-danger-600' : 'text-slate-500 dark:text-[#97a49b]'}>
-                          {formatDate(d.due_date)}
-                          {d.is_overdue && ' — overdue'}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300 dark:text-[#4a5650]">—</span>
-                      )}
-                    </Td>
-                    <Td className="text-right">{tzs(d.total)}</Td>
-                    <Td className="text-right font-bold text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-            {data.outstandingDebt.debtorCount > data.outstandingDebt.topDebtors.length && (
-              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
-                Showing the {data.outstandingDebt.topDebtors.length} oldest of {data.outstandingDebt.debtorCount} unpaid sales.
-              </p>
-            )}
-          </>
+            <div>
+              <label htmlFor="pl-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+              <Input id="pl-to" type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} min={customFrom} max={todayLocalIso()} className="w-auto" />
+            </div>
+            <Button size="sm" loading={customLoading} onClick={fetchCustomRange}>
+              Show profit
+            </Button>
+          </div>
+        )}
+        {plFigures ? (
+          <dl className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-3">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Net profit</dt>
+              <dd className={clsx('mt-1 font-display text-2xl font-extrabold tabular-nums', plFigures.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300')}>
+                {tzs(plFigures.netProfit)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Gross profit</dt>
+              <dd className="mt-1 font-display text-xl font-bold tabular-nums text-slate-700 dark:text-[#dbe6de]">{tzs(plFigures.grossProfit)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Expenses</dt>
+              <dd className="mt-1 font-display text-xl font-bold tabular-nums text-slate-700 dark:text-[#dbe6de]">{tzs(plFigures.expenses)}</dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="p-5 text-sm text-slate-500 dark:text-[#97a49b]">Pick the dates above and choose “Show profit”.</p>
         )}
       </Card>
 
-      {/* Custom-range Profit & Loss — hidden behind a plain toggle button by
-          default (owner's own request, see the state comment above), so it
-          protects the dashboard's clean layout until it's actually needed. */}
-      <div className="mt-2">
-        <button
-          type="button"
-          onClick={() => setShowCustomRange((v) => !v)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
-        >
-          {showCustomRange ? <X size={13} /> : <Calendar size={13} />}
-          {showCustomRange ? 'Hide custom range' : 'Custom range'}
-        </button>
-        {showCustomRange && (
-          <Card className="mt-2 p-4">
-            <div className="flex flex-wrap items-end gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
-                <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} max={customTo} className="w-auto" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
-                <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} min={customFrom} max={todayLocalIso()} className="w-auto" />
-              </div>
-              <Button size="sm" loading={customLoading} onClick={fetchCustomRange}>
-                Show
-              </Button>
+      {/* Outstanding Customer Debt (CLAUDE.md #69 follow-up) — see
+          salesRepo.getOutstandingBalances for why oldest-first. Now a list
+          (works on a phone) showing the 5 oldest, with the rest one click away. */}
+      <Card className="mt-4">
+        <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <IconChip tone="amber" size={34} icon={<HandCoins size={16} />} />
+            <div>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Outstanding customer debt</h3>
+              <p className="text-sm text-slate-500 dark:text-[#97a49b]">Money owed to the shop from credit sales</p>
             </div>
-            {customResult && (
-              <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/10">
-                <p className="text-xs text-slate-400 dark:text-[#77857c]">
-                  {formatDate(customResult.from)} – {formatDate(customResult.to)}
-                </p>
-                <p
-                  className={clsx(
-                    'font-display text-2xl font-extrabold',
-                    customResult.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'
-                  )}
+          </div>
+          <Link to="/sales-history" className="inline-flex items-center gap-1 text-sm font-semibold text-green-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-green-400">
+            View in Sales History <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
+        {data.outstandingDebt.debtorCount === 0 ? (
+          <EmptyState icon={<BadgeCheck size={28} />} title="No outstanding customer debt right now." description="Every credit sale has been paid." />
+        ) : (
+          <>
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-5 pt-4">
+              <p className="font-display text-2xl font-extrabold tabular-nums text-amber-600 dark:text-amber-300">{tzs(data.outstandingDebt.totalOutstanding)}</p>
+              <p className="text-sm text-slate-500 dark:text-[#97a49b]">
+                across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
+              </p>
+              {/* Overdue (2026-09-25, migration 021) — the in-app alert the
+                  owner asked for instead of external SMS/WhatsApp. */}
+              {data.outstandingDebt.overdueCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-danger-50 px-2.5 py-0.5 text-xs font-bold text-danger-600 dark:bg-danger-900/40 dark:text-danger-300">
+                  <AlertTriangle size={12} aria-hidden="true" /> {data.outstandingDebt.overdueCount} overdue
+                </span>
+              )}
+            </div>
+            <ul className="mt-2 divide-y divide-slate-100 dark:divide-[rgba(255,255,255,0.08)]">
+              {visibleDebtors.map((d) => (
+                <li key={d.id} className="flex flex-col gap-1 px-5 py-3 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      {d.customer_name || 'Walk-in'}
+                      {d.customer_phone && <span className="ml-2 text-sm font-normal text-slate-400 dark:text-[#77857c]">{d.customer_phone}</span>}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+                      {d.invoice_number} · sold {formatDate(d.sale_date)} · total {tzs(d.total)}
+                    </p>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-4 sm:flex-col sm:items-end sm:justify-center sm:gap-0">
+                    <p className="font-bold tabular-nums text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</p>
+                    {d.due_date ? (
+                      <p className={clsx('text-xs tabular-nums', d.is_overdue ? 'font-bold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]')}>
+                        {d.is_overdue ? 'Overdue since' : 'Due'} {formatDate(d.due_date)}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400 dark:text-[#77857c]">no due date</p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-5 py-3 text-sm dark:border-[rgba(255,255,255,0.08)]">
+              <span className="text-slate-500 dark:text-[#97a49b]">
+                Showing the {visibleDebtors.length} oldest of {data.outstandingDebt.debtorCount} unpaid sales.
+              </span>
+              {debtors.length > 5 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllDebtors((v) => !v)}
+                  className="rounded font-semibold text-green-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-green-400"
                 >
-                  {tzs(customResult.netProfit)}
-                </p>
-                <div className="mt-1 flex gap-4 text-xs text-slate-500 dark:text-[#97a49b]">
-                  <span>Gross profit: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.grossProfit)}</b></span>
-                  <span>Expenses: <b className="text-slate-700 dark:text-[#dbe6de]">{tzs(customResult.expenses)}</b></span>
-                </div>
-              </div>
-            )}
-          </Card>
+                  {showAllDebtors ? 'Show fewer' : `Show ${debtors.length - 5} more`}
+                </button>
+              )}
+            </div>
+          </>
         )}
-      </div>
+      </Card>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr_1fr]">
         <Card className="p-5">
@@ -615,7 +619,7 @@ function niceCeil(v: number): number {
 // ---------------------------------------------------------------------------
 function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
   const [hover, setHover] = useState<number | null>(null);
-  const W = 640;
+  const { ref, width: W } = useElementWidth(640);
   const H = 210;
   const padL = 34;
   const padR = 8;
@@ -643,8 +647,8 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
   const hoverRow = hover !== null ? trend[hover] : null;
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" style={{ overflow: 'visible' }}>
+    <div ref={ref} className="relative w-full">
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block max-w-full" style={{ overflow: 'visible' }}>
         <defs>
           <linearGradient id="dashGradGreen" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#1f9e5d" stopOpacity="0.28" />
@@ -662,7 +666,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
           return (
             <g key={i}>
               <line x1={padL} x2={W - padR} y1={ly} y2={ly} className="stroke-slate-100 dark:stroke-[rgba(255,255,255,0.08)]" strokeWidth={1} />
-              <text x={0} y={ly + 3} className="fill-slate-400 dark:fill-[#77857c]" fontSize={9}>
+              <text x={0} y={ly + 3} className="fill-slate-400 dark:fill-[#77857c]" fontSize={10}>
                 {v === 0 ? '0' : fmtK(v)}
               </text>
             </g>
@@ -670,7 +674,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
         })}
 
         {trend.map((t, i) => (
-          <text key={t.date} x={x(i)} y={H - 4} textAnchor="middle" className="fill-slate-400 dark:fill-[#77857c]" fontSize={9}>
+          <text key={t.date} x={x(i)} y={H - 4} textAnchor="middle" className="fill-slate-400 dark:fill-[#77857c]" fontSize={10}>
             {shortDate(t.date)}
           </text>
         ))}
@@ -732,6 +736,32 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
             Purchases <b className="ml-1">{tzs(hoverRow.purchases)}</b>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function HeroDelta({ pct }: { pct: number | null }) {
+  if (pct === null) return null;
+  const up = pct >= 0;
+  return (
+    <span className={clsx('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums', up ? 'bg-green-300/20 text-green-100' : 'bg-danger-300/30 text-red-100')}>
+      {up ? '↗' : '↘'} {Math.round(Math.abs(pct) * 10) / 10}% vs yesterday
+    </span>
+  );
+}
+
+function HeroStat({ label, value, pct, negative, invert }: { label: string; value: string; pct: number | null; negative?: boolean; invert?: boolean }) {
+  // `invert`: for expenses, going up is the unwelcome direction.
+  const good = pct === null ? null : invert ? pct <= 0 : pct >= 0;
+  return (
+    <div className="min-w-0">
+      <dt className="text-xs text-green-100/80">{label}</dt>
+      <dd className={clsx('mt-0.5 break-words font-display text-base font-extrabold tabular-nums sm:text-lg', negative && 'text-red-200')}>{value}</dd>
+      {pct !== null && (
+        <dd className={clsx('mt-0.5 text-xs font-semibold tabular-nums', good ? 'text-green-200' : 'text-red-200')}>
+          {pct >= 0 ? '↗' : '↘'} {Math.round(Math.abs(pct) * 10) / 10}%
+        </dd>
       )}
     </div>
   );

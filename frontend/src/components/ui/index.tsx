@@ -460,7 +460,8 @@ export function DonutChart({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <p className="font-display text-[13px] font-extrabold text-slate-800 dark:text-[#eef3ef]">{centerValue}</p>
+        {/* Long figures ("TZS 50,521,750") used to spill over the ring — shrink to fit. */}
+        <p className={`max-w-[84px] break-words font-display font-extrabold leading-tight tabular-nums text-slate-800 dark:text-[#eef3ef] ${centerValue.length <= 8 ? 'text-[13px]' : centerValue.length <= 11 ? 'text-[11.5px]' : 'text-[10px]'}`}>{centerValue}</p>
         <p className="text-[10px] text-slate-400 dark:text-[#77857c]">{centerLabel}</p>
       </div>
     </div>
@@ -510,6 +511,54 @@ export function Modal({
         <div className="overflow-y-auto px-5 py-4">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">{footer}</div>}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton — loading placeholder shaped like the content it stands in for
+// (2026-10-09 UI pass). Prefer this over a bare spinner for cards/tables.
+// ---------------------------------------------------------------------------
+export function Skeleton({ className }: { className?: string }) {
+  return <div aria-hidden="true" className={clsx('animate-pulse rounded-lg bg-slate-200/70 dark:bg-[rgba(255,255,255,0.08)]', className)} />;
+}
+
+// ---------------------------------------------------------------------------
+// SegmentedControl — compact either/or switch (e.g. Weekly | Monthly).
+// ---------------------------------------------------------------------------
+export function SegmentedControl<T extends string>({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: Array<{ value: T; label: string }>;
+  label: string;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-[#0e1512]"
+    >
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          aria-pressed={value === o.value}
+          onClick={() => onChange(o.value)}
+          className={clsx(
+            'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400',
+            value === o.value
+              ? 'bg-white text-green-800 shadow-sm dark:bg-[#1c2a23] dark:text-green-300'
+              : 'text-slate-500 hover:text-slate-700 dark:text-[#97a49b] dark:hover:text-[#d2dbd5]'
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }
