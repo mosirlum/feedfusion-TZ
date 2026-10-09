@@ -43,7 +43,7 @@ describe('completeSale — stock and overselling (BR-05/06/18/19)', () => {
     await expect(
       completeSale({
         items: [{ productId: product.id, quantity: 11 }],
-        paymentAmount: 999999,
+        paymentMethod: 'CASH', paymentAmount: 999999,
         servedBy: { id: sales.id, role: 'sales' },
       })
     ).rejects.toMatchObject({ status: 409, code: 'INSUFFICIENT_STOCK' });
@@ -67,8 +67,8 @@ describe('completeSale — stock and overselling (BR-05/06/18/19)', () => {
     const servedBy = { id: sales.id, role: 'sales' as const };
 
     const results = await Promise.allSettled([
-      completeSale({ items: [{ productId: product.id, quantity: 7 }], paymentAmount: 999999, servedBy }),
-      completeSale({ items: [{ productId: product.id, quantity: 7 }], paymentAmount: 999999, servedBy }),
+      completeSale({ items: [{ productId: product.id, quantity: 7 }], paymentMethod: 'CASH', paymentAmount: 999999, servedBy }),
+      completeSale({ items: [{ productId: product.id, quantity: 7 }], paymentMethod: 'CASH', paymentAmount: 999999, servedBy }),
     ]);
 
     const fulfilled = results.filter((r) => r.status === 'fulfilled');
@@ -101,7 +101,7 @@ describe('completeSale — stock and overselling (BR-05/06/18/19)', () => {
     await expect(
       completeSale({
         items: [{ productId: product.id, quantity: 1 }],
-        paymentAmount: 999999,
+        paymentMethod: 'CASH', paymentAmount: 999999,
         servedBy: { id: owner.id, role: 'owner' },
       })
     ).rejects.toMatchObject({ status: 422, code: 'PRODUCT_HAS_NO_APPROVED_PRICE' });
@@ -113,12 +113,12 @@ describe('completeSale — stock and overselling (BR-05/06/18/19)', () => {
 
     const sale = await completeSale({
       items: [{ productId: product.id, quantity: 5 }],
-      paymentAmount: 10000,
+      paymentMethod: 'CASH', paymentAmount: 10000,
       servedBy: { id: sales.id, role: 'sales' },
     });
 
     expect(sale.total).toBe('10000.00');
-    expect(sale.invoice_number).toMatch(/^INV-\d{8}-[0-9A-F]{6}$/);
+    expect(sale.invoice_number).toMatch(/^INV-\d{4}-\d{4}$/);
 
     const client = await pool.connect();
     try {
@@ -129,81 +129,88 @@ describe('completeSale — stock and overselling (BR-05/06/18/19)', () => {
   });
 });
 
-describe('completeSale — discount limit (BR-30/31/32)', () => {
-  it('requires a reason for any non-zero discount', async () => {
+describe('completeSale — discounts (BR-30/31/32, amended by CLAUDE.md #66)', () => {
+  // #66 (2026-09-13): a discount no longer needs a reason, and one above the
+  // global limit no longer blocks the sale on an owner PIN — the sale always
+  // completes, the cashier gets a warning, and the audit log keeps a
+  // DISCOUNT_APPLIED_HIGH record.
+
+  it('accepts a discount with no reason', async () => {
     const { product } = await seedStockedProduct(10, 2000);
     const sales = await insertTestUser({ email: 'sales@feedfusion.co.tz', password: 'x', role: 'sales' });
 
-    await expect(
-      completeSale({
-        items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 100, reason: '' } }],
-        paymentAmount: 999999,
-        servedBy: { id: sales.id, role: 'sales' },
-      })
-    ).rejects.toMatchObject({ status: 400, code: 'DISCOUNT_REASON_REQUIRED' });
+    const sale = await completeSale({
+      items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 40 } }],
+      paymentMethod: 'CASH',
+      paymentAmount: 999999,
+      servedBy: { id: sales.id, role: 'sales' },
+    });
+
+    expect(sale.total_discount).toBe('40.00');
   });
 
-  it('requires owner PIN when the discount exceeds the global limit, and rejects a wrong PIN', async () => {
+  it('completes an over-limit discount without a PIN, warns the cashier and writes an audit entry', async () => {
     // default_max_discount_pct = 5 (see beforeEach). 2000/unit, discount of
     // 200 on one unit = 10% — above the limit.
     const { product } = await seedStockedProduct(10, 2000);
-    await insertTestUser({ email: 'owner@feedfusion.co.tz', password: 'OwnerPin123', role: 'owner' });
     const sales = await insertTestUser({ email: 'sales@feedfusion.co.tz', password: 'x', role: 'sales' });
-    const servedBy = { id: sales.id, role: 'sales' as const };
-
-    await expect(
-      completeSale({
-        items: [
-          { productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 200, reason: 'negotiation' } },
-        ],
-        paymentAmount: 999999,
-        servedBy,
-      })
-    ).rejects.toMatchObject({ status: 422, code: 'DISCOUNT_APPROVAL_REQUIRED' });
-
-    await expect(
-      completeSale({
-        items: [
-          { productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 200, reason: 'negotiation' } },
-        ],
-        paymentAmount: 999999,
-        discountPin: 'WrongPassword',
-        servedBy,
-      })
-    ).rejects.toMatchObject({ status: 403, code: 'DISCOUNT_PIN_INVALID' });
 
     const sale = await completeSale({
-      items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 200, reason: 'negotiation' } }],
+      items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 200 } }],
+      paymentMethod: 'CASH',
       paymentAmount: 999999,
-      discountPin: 'OwnerPin123',
-      servedBy,
+      servedBy: { id: sales.id, role: 'sales' },
     });
+
     expect(sale.total_discount).toBe('200.00');
+    expect(sale.highDiscountWarnings).toHaveLength(1);
+    expect(sale.highDiscountWarnings[0]).toMatchObject({ productName: 'KPC-30', maxPct: 5 });
+
+    const { rows } = await pool.query(
+      "SELECT details FROM audit_logs WHERE action = 'DISCOUNT_APPLIED_HIGH' AND entity_id = $1",
+      [sale.id]
+    );
+    expect(rows).toHaveLength(1);
   });
 
-  it('allows a discount within the global limit without a PIN', async () => {
+  it('does not warn for a discount within the global limit', async () => {
     // 2000/unit, discount 80 on one unit = 4% — within the 5% limit.
     const { product } = await seedStockedProduct(10, 2000);
     const sales = await insertTestUser({ email: 'sales@feedfusion.co.tz', password: 'x', role: 'sales' });
 
     const sale = await completeSale({
-      items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 80, reason: 'loyal customer' } }],
+      items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 80 } }],
+      paymentMethod: 'CASH',
       paymentAmount: 999999,
       servedBy: { id: sales.id, role: 'sales' },
     });
 
     expect(sale.total_discount).toBe('80.00');
+    expect(sale.highDiscountWarnings ?? []).toHaveLength(0);
+  });
+
+  it('rejects a discount larger than the line subtotal', async () => {
+    const { product } = await seedStockedProduct(10, 2000);
+    const sales = await insertTestUser({ email: 'sales@feedfusion.co.tz', password: 'x', role: 'sales' });
+
+    await expect(
+      completeSale({
+        items: [{ productId: product.id, quantity: 1, discount: { type: 'FIXED', value: 5000 } }],
+        paymentMethod: 'CASH',
+        paymentAmount: 999999,
+        servedBy: { id: sales.id, role: 'sales' },
+      })
+    ).rejects.toMatchObject({ status: 400 });
   });
 });
 
 describe('voidSale — never deletes, only reverses (BR-11/12)', () => {
   it('reverses stock via a positive VOID_REVERSAL movement and marks the sale VOIDED, not deleted', async () => {
-    const { product } = await seedStockedProduct(20, 2000);
-    const owner = await insertTestUser({ email: 'owner@feedfusion.co.tz', password: 'x', role: 'owner' });
+    const { product, owner } = await seedStockedProduct(20, 2000);
 
     const sale = await completeSale({
       items: [{ productId: product.id, quantity: 6 }],
-      paymentAmount: 999999,
+      paymentMethod: 'CASH', paymentAmount: 999999,
       servedBy: { id: owner.id, role: 'owner' },
     });
 
@@ -227,11 +234,10 @@ describe('voidSale — never deletes, only reverses (BR-11/12)', () => {
   });
 
   it('rejects voiding a sale that is already voided', async () => {
-    const { product } = await seedStockedProduct(20, 2000);
-    const owner = await insertTestUser({ email: 'owner@feedfusion.co.tz', password: 'x', role: 'owner' });
+    const { product, owner } = await seedStockedProduct(20, 2000);
     const sale = await completeSale({
       items: [{ productId: product.id, quantity: 1 }],
-      paymentAmount: 999999,
+      paymentMethod: 'CASH', paymentAmount: 999999,
       servedBy: { id: owner.id, role: 'owner' },
     });
 
@@ -244,11 +250,10 @@ describe('voidSale — never deletes, only reverses (BR-11/12)', () => {
   });
 
   it('requires a reason to void', async () => {
-    const { product } = await seedStockedProduct(20, 2000);
-    const owner = await insertTestUser({ email: 'owner@feedfusion.co.tz', password: 'x', role: 'owner' });
+    const { product, owner } = await seedStockedProduct(20, 2000);
     const sale = await completeSale({
       items: [{ productId: product.id, quantity: 1 }],
-      paymentAmount: 999999,
+      paymentMethod: 'CASH', paymentAmount: 999999,
       servedBy: { id: owner.id, role: 'owner' },
     });
 
