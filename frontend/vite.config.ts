@@ -38,6 +38,22 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Pages are code-split (App.tsx); without this, every shared icon
+        // from lucide-react becomes its own tiny chunk. Grouping the
+        // vendor libraries keeps the request count low and lets the
+        // browser cache React/icons across deployments of app code.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('lucide-react')) return 'icons';
+          if (/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return 'react-vendor';
+          return undefined;
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
   },

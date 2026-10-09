@@ -1,11 +1,11 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, Suspense, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, ChevronDown, UserCircle, Sun, Monitor, Moon } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { navSections } from './navConfig';
-import { UserAvatar } from '../ui';
+import { FullPageSpinner, UserAvatar } from '../ui';
 
 const THEME_OPTIONS = [
   { value: 'light' as const, label: 'Light theme', Icon: Sun },
@@ -189,7 +189,11 @@ export function AppShell() {
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8 max-w-[1600px]">
-          <Outlet />
+          {/* Pages are code-split (App.tsx) — keep the sidebar/header on screen
+              while a page chunk loads instead of blanking the whole app. */}
+          <Suspense fallback={<FullPageSpinner />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

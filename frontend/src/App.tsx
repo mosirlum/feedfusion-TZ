@@ -2,31 +2,32 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { RequireAuth } from './components/ProtectedRoute';
 import { AppShell } from './components/layout/AppShell';
+import { lazyWithRetry } from './lib/lazyWithRetry';
 
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import PosPage from './pages/PosPage';
-import SalesHistoryPage from './pages/SalesHistoryPage';
-import InventoryPage from './pages/InventoryPage';
-import ProductsPage from './pages/ProductsPage';
+const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage'));
+const PosPage = lazyWithRetry(() => import('./pages/PosPage'));
+const SalesHistoryPage = lazyWithRetry(() => import('./pages/SalesHistoryPage'));
+const InventoryPage = lazyWithRetry(() => import('./pages/InventoryPage'));
+const ProductsPage = lazyWithRetry(() => import('./pages/ProductsPage'));
 // File kept as PriceApprovalsPage.tsx (renaming it would need deleting the
 // old file, which isn't possible from here this session) — its default
 // export is now the Change Approval Center (CLAUDE.md #35).
-import ApprovalCenterPage from './pages/PriceApprovalsPage';
-import StockCountPage from './pages/StockCountPage';
-import StockAdjustmentsPage from './pages/StockAdjustmentsPage';
-import PurchasesPage from './pages/PurchasesPage';
-import SuppliersPage from './pages/SuppliersPage';
-import ExpensesPage from './pages/ExpensesPage';
-import ReportsPage from './pages/ReportsPage';
-import AuditLogPage from './pages/AuditLogPage';
-import UsersPage from './pages/UsersPage';
-import MyProfilePage from './pages/MyProfilePage';
-import QuotationsPage from './pages/QuotationsPage';
-import QuotationFormPage from './pages/QuotationFormPage';
-import QuotationViewPage from './pages/QuotationViewPage';
-import CustomersPage from './pages/CustomersPage';
-import SettingsPage from './pages/SettingsPage';
+const ApprovalCenterPage = lazyWithRetry(() => import('./pages/PriceApprovalsPage'));
+const StockCountPage = lazyWithRetry(() => import('./pages/StockCountPage'));
+const StockAdjustmentsPage = lazyWithRetry(() => import('./pages/StockAdjustmentsPage'));
+const PurchasesPage = lazyWithRetry(() => import('./pages/PurchasesPage'));
+const SuppliersPage = lazyWithRetry(() => import('./pages/SuppliersPage'));
+const ExpensesPage = lazyWithRetry(() => import('./pages/ExpensesPage'));
+const ReportsPage = lazyWithRetry(() => import('./pages/ReportsPage'));
+const AuditLogPage = lazyWithRetry(() => import('./pages/AuditLogPage'));
+const UsersPage = lazyWithRetry(() => import('./pages/UsersPage'));
+const MyProfilePage = lazyWithRetry(() => import('./pages/MyProfilePage'));
+const QuotationsPage = lazyWithRetry(() => import('./pages/QuotationsPage'));
+const QuotationFormPage = lazyWithRetry(() => import('./pages/QuotationFormPage'));
+const QuotationViewPage = lazyWithRetry(() => import('./pages/QuotationViewPage'));
+const CustomersPage = lazyWithRetry(() => import('./pages/CustomersPage'));
+const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage'));
 import NotFoundPage from './pages/NotFoundPage';
 
 function HomeRedirect() {
