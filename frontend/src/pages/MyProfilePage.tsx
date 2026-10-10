@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Camera, Eye, EyeOff, KeyRound, Save, UserCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usersApi, authApi, apiErrorMessage } from '../lib/api';
-import { Button, Card, CardHeader, FormField, Input, PageHeader, UserAvatar } from '../components/ui';
+import { Button, Card, CardHeader, FormField, Input, UserAvatar, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { isValidTzPhone, sanitizePhoneInput, TZ_PHONE_PLACEHOLDER, TZ_PHONE_HINT, TZ_PHONE_ERROR } from '../lib/phone';
 
@@ -141,7 +141,12 @@ export default function MyProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <PageHeader title="My Profile" subtitle="Manage your own name, contact details, photo and password." icon={<UserCircle size={20} />} />
+      <SummaryHero
+        icon={<UserCircle size={20} />}
+        title="My Profile"
+        subtitle="Manage your own name, contact details, photo and password."
+        lead={{ label: 'Signed in as', value: user.name, hint: `${user.role === 'owner' ? 'Owner' : 'Sales'}${user.email ? ` · ${user.email}` : ''}` }}
+      />
 
       <Card className="mb-6">
         <CardHeader title="Profile details" subtitle="Visible to the owner and, where relevant, other staff." />

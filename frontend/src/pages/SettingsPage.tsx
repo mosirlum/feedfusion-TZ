@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Settings as SettingsIcon, Building2, Landmark, Percent, Smartphone, FileText } from 'lucide-react';
 import { settingsApi, apiErrorMessage } from '../lib/api';
 import { BusinessSettings } from '../types';
-import { Button, Card, FormField, IconChip, Input, PageHeader, Textarea } from '../components/ui';
+import { Button, Card, FormField, IconChip, Input, Textarea, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 // New Business Settings page (2026-09-12, Quotations feature, CLAUDE.md
@@ -112,10 +112,11 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<SettingsIcon size={20} />}
         title="Business Settings"
         subtitle="Your shop's official details — used on printed receipts and quotations."
+        lead={{ label: 'Printed on every receipt as', value: businessName || 'Your business name', hint: 'Check these details before the next print' }}
       />
 
       <form onSubmit={handleSubmit} className="flex max-w-2xl flex-col gap-5">

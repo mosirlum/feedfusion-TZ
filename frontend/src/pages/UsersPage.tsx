@@ -4,25 +4,7 @@ import { Plus, Search, Users as UsersIcon, UserCheck, UserX, ShieldCheck, UserCo
 import { usersApi, apiErrorMessage } from '../lib/api';
 import { PublicUser, UserRole } from '../types';
 import { formatDate } from '../lib/format';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FormField,
-  FullPageSpinner,
-  Input,
-  Modal,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Th,
-  THead,
-  Tr,
-  UserAvatar,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FormField, FullPageSpinner, Input, Modal, Select, Table, Td, Th, THead, Tr, UserAvatar, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { isValidTzPhone, sanitizePhoneInput, TZ_PHONE_PLACEHOLDER, TZ_PHONE_HINT, TZ_PHONE_ERROR } from '../lib/phone';
@@ -140,19 +122,22 @@ export default function UsersPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
+        icon={<UsersIcon size={20} />}
         title="Users"
         subtitle="Every account is separate — no shared logins (BR-02)."
-        icon={<UsersIcon size={20} />}
-        action={<Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>New User</Button>}
+        action={
+          <HeroButton icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+            New User
+          </HeroButton>
+        }
+        lead={{ label: 'Accounts', value: stats.total, hint: `${stats.active} active` }}
+        stats={[
+          { label: 'Active', value: stats.active },
+          { label: 'Inactive', value: stats.inactive, tone: stats.inactive > 0 ? 'warn' : 'default' },
+          { label: 'Owners', value: stats.owners },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Users" value={stats.total} icon={<UsersIcon size={18} />} tone="blue" />
-        <StatCard label="Active" value={stats.active} icon={<UserCheck size={18} />} tone="green" />
-        <StatCard label="Inactive" value={stats.inactive} icon={<UserX size={18} />} tone="red" />
-        <StatCard label="Owners" value={stats.owners} icon={<ShieldCheck size={18} />} tone="amber" />
-      </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">

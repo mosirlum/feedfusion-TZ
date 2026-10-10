@@ -11,17 +11,7 @@ import {
   RecentActivityItem,
 } from '../types';
 import { tzs, formatDate, timeAgo, initials, roleLabel } from '../lib/format';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  PageHeader,
-  Select,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Select, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 type TypeFilter = 'all' | 'price' | 'sale' | 'purchase';
@@ -411,38 +401,16 @@ export default function ApprovalCenterPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<ShieldCheck size={20} />}
         title="Change Approval Center"
         subtitle="Review and approve changes to sales, purchases, and product prices before they take effect."
+        lead={{ label: 'Waiting for your approval', value: pending.total, hint: pending.total > 0 ? 'Requires your attention' : 'All caught up' }}
+        stats={[
+          { label: 'Approved today', value: approvedToday, hint: approvedHint },
+          { label: 'Rejected today', value: rejectedToday, hint: rejectedToday > 0 ? 'Today' : 'None', tone: rejectedToday > 0 ? 'bad' : 'default' },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Pending Approval</p>
-            <div className="rounded-lg bg-amber-50 p-2 text-amber-600"><Clock size={18} /></div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{pending.total}</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{pending.total > 0 ? 'Requires your attention' : 'All caught up'}</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Approved Today</p>
-            <div className="rounded-lg bg-green-50 p-2 text-green-700"><CheckCircle2 size={18} /></div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{approvedToday}</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{approvedHint}</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Rejected Today</p>
-            <div className="rounded-lg bg-danger-50 p-2 text-danger-600"><XCircle size={18} /></div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{rejectedToday}</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{rejectedToday > 0 ? 'Today' : 'No rejections today'}</p>
-        </Card>
-      </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div>

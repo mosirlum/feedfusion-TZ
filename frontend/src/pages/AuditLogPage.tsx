@@ -30,7 +30,7 @@ import {
 import { auditLogsApi, usersApi, salesApi, purchasesApi, apiErrorMessage } from '../lib/api';
 import { AuditLog, PublicUser, Sale, Purchase } from '../types';
 import { tzs, formatDateTime, isoDaysAgo, todayIso } from '../lib/format';
-import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, PageHeader, Select, Table, Td, Th, THead, Tr, UserAvatar } from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Select, SummaryHero, Table, Td, Th, THead, Tr, UserAvatar } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 /**
@@ -195,18 +195,6 @@ function summarizeDetails(action: string, details: Record<string, unknown> | nul
       return parts.length ? parts.join(' · ') : '—';
     }
   }
-}
-
-function TrendChip({ kind, value }: { kind: 'pct' | 'delta'; value: number | null }) {
-  if (value === null) return <span className="text-xs text-slate-400 dark:text-[#77857c]">No prior period to compare</span>;
-  const Icon = value >= 0 ? TrendingUp : TrendingDown;
-  const text = kind === 'pct' ? `${value > 0 ? '+' : ''}${value.toFixed(0)}%` : `${value > 0 ? '+' : ''}${value}`;
-  return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-[#97a49b]">
-      <Icon size={12} />
-      {text} vs previous period
-    </span>
-  );
 }
 
 function SortableTh({
@@ -481,17 +469,32 @@ export default function AuditLogPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<ScrollText size={20} />}
         title="Audit Log"
         subtitle="Track all important activities in your store. See who did what, when, and more."
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <CalendarRange size={16} className="hidden text-slate-400 dark:text-[#77857c] sm:block" />
-            <Input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} max={draftTo} className="w-auto" />
-            <span className="text-xs text-slate-400 dark:text-[#77857c]">to</span>
-            <Input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} min={draftFrom} max={todayIso()} className="w-auto" />
-            <Select value={draftUserId} onChange={(e) => setDraftUserId(e.target.value)} className="w-auto">
+        lead={{
+          label: 'Events in the selected period',
+          value: summary?.totalEvents ?? 0,
+          hint: summary?.trend.totalEventsPct != null ? `${summary.trend.totalEventsPct > 0 ? '+' : ''}${summary.trend.totalEventsPct.toFixed(0)}% vs previous period` : 'No prior period to compare',
+        }}
+        stats={[
+          { label: 'Unique users', value: summary?.uniqueUsers ?? 0 },
+          { label: 'Different actions', value: summary?.differentActions ?? 0 },
+          {
+            label: 'Latest activity',
+            value: summary?.latestActivity ? formatDateTime(summary.latestActivity.createdAt) : '—',
+            hint: `By ${summary?.latestActivity?.userName ?? '—'}`,
+          },
+        ]}
+      />
+
+      <Card className="mb-5 p-4">
+        <div className="grid grid-cols-1 items-center gap-2.5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] [&>*]:min-w-0">
+            <Input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} max={draftTo} aria-label="From date" />
+            <span className="hidden text-center text-xs text-slate-400 dark:text-[#77857c] lg:block">to</span>
+            <Input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} min={draftFrom} max={todayIso()} aria-label="To date" />
+            <Select value={draftUserId} onChange={(e) => setDraftUserId(e.target.value)} >
               <option value="">All Users</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -499,7 +502,7 @@ export default function AuditLogPage() {
                 </option>
               ))}
             </Select>
-            <Select value={draftAction} onChange={(e) => setDraftAction(e.target.value)} className="w-auto">
+            <Select value={draftAction} onChange={(e) => setDraftAction(e.target.value)} >
               <option value="">All Actions</option>
               {Object.entries(ACTION_META).map(([code, m]) => (
                 <option key={code} value={code}>
@@ -520,64 +523,12 @@ export default function AuditLogPage() {
               Apply
             </Button>
           </div>
-        }
-      />
+      </Card>
 
       {loading && !data ? (
         <FullPageSpinner />
       ) : (
         <>
-          <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-            <Card className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Total Events</p>
-                <div className="rounded-lg bg-green-50 p-2 text-green-700">
-                  <Activity size={18} />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.totalEvents ?? 0}</p>
-              <div className="mt-1">
-                <TrendChip kind="pct" value={summary?.trend.totalEventsPct ?? null} />
-              </div>
-            </Card>
-            <Card className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Unique Users</p>
-                <div className="rounded-lg bg-blue-50 p-2 text-blue-700">
-                  <UsersIcon size={18} />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.uniqueUsers ?? 0}</p>
-              <div className="mt-1">
-                <TrendChip kind="delta" value={summary?.trend.uniqueUsersDelta ?? null} />
-              </div>
-            </Card>
-            <Card className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Different Actions</p>
-                <div className="rounded-lg bg-amber-50 p-2 text-amber-700">
-                  <Settings2 size={18} />
-                </div>
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.differentActions ?? 0}</p>
-              <div className="mt-1">
-                <TrendChip kind="delta" value={summary?.trend.differentActionsDelta ?? null} />
-              </div>
-            </Card>
-            <Card className="p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Latest Activity</p>
-                <div className="rounded-lg bg-purple-50 p-2 text-purple-700">
-                  <Clock size={18} />
-                </div>
-              </div>
-              <p className="mt-2 text-lg font-bold text-slate-800 dark:text-[#eef3ef]">
-                {summary?.latestActivity ? formatDateTime(summary.latestActivity.createdAt) : '—'}
-              </p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">By {summary?.latestActivity?.userName ?? '—'}</p>
-            </Card>
-          </div>
-
           <div className="mb-4 flex flex-wrap gap-1.5">
             {FEATURES.map((f) => {
               const Icon = f === 'All' ? Activity : FEATURE_ICON[f];

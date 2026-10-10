@@ -4,7 +4,7 @@ import { SlidersHorizontal, Plus, Minus, TrendingUp, TrendingDown, PackageMinus,
 import { stockAdjustmentsApi, productsApi, apiErrorMessage } from '../lib/api';
 import { StockAdjustment, Product, StockLevel, StockAdjustmentsSummary } from '../types';
 import { timeAgo, initials, roleLabel } from '../lib/format';
-import { Button, Card, EmptyState, FullPageSpinner, IconChip, Input, PageHeader, Select, Textarea } from '../components/ui';
+import { Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Select, Textarea, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 // Split by direction (2026-09-13, CLAUDE.md #65) — the owner raised a real
@@ -181,54 +181,17 @@ export default function StockAdjustmentsPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<SlidersHorizontal size={20} />}
         title="Stock Adjustments Center"
         subtitle="Direct manual corrections to the stock ledger — damage, loss, or counting fixes. Owner-approved by definition (Section 23)."
+        lead={{ label: 'Adjustments today', value: adjustmentsToday, hint: todayHint }}
+        stats={[
+          { label: 'Units written off', value: `${summary?.writtenOffLast7 ?? 0} units`, hint: summary?.writtenOffHint ?? 'Last 7 days', tone: (summary?.writtenOffLast7 ?? 0) > 0 ? 'bad' : 'default' },
+          { label: 'Stock increased', value: `${summary?.increasedLast7 ?? 0} units`, hint: 'Last 7 days' },
+          { label: 'Stock decreased', value: `${summary?.decreasedLast7 ?? 0} units`, hint: 'Last 7 days', tone: (summary?.decreasedLast7 ?? 0) > 0 ? 'warn' : 'default' },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Adjustments Today</p>
-            <div className="rounded-lg bg-blue-50 p-2 text-blue-700">
-              <CalendarClock size={18} />
-            </div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{adjustmentsToday}</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{todayHint}</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Units Written Off</p>
-            <div className="rounded-lg bg-danger-50 p-2 text-danger-600">
-              <PackageMinus size={18} />
-            </div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.writtenOffLast7 ?? 0} units</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{summary?.writtenOffHint ?? 'Last 7 days'}</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Stock Increased</p>
-            <div className="rounded-lg bg-green-50 p-2 text-green-700">
-              <TrendingUp size={18} />
-            </div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.increasedLast7 ?? 0} units</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">Last 7 days</p>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Stock Decreased</p>
-            <div className="rounded-lg bg-amber-100 p-2 text-amber-700">
-              <TrendingDown size={18} />
-            </div>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{summary?.decreasedLast7 ?? 0} units</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">Last 7 days</p>
-        </Card>
-      </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
         <Card className="h-fit p-5">

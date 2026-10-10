@@ -3,18 +3,7 @@ import { Check, X, ClipboardList, Clock, CheckCircle2, XCircle, Gauge, Search, L
 import { stockCountsApi, productsApi, apiErrorMessage } from '../lib/api';
 import { StockCount, Product, StockLevel, StockCountSummary, StockCountActivityEvent } from '../types';
 import { formatDate, timeAgo, initials, roleLabel } from '../lib/format';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  PageHeader,
-  Select,
-  Textarea,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Select, Textarea, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -196,48 +185,25 @@ export default function StockCountPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<ClipboardList size={20} />}
         title="Stock Count Center"
         subtitle="Reconcile physical stock against the system ledger through a propose → approve workflow."
+        lead={
+          isOwner
+            ? { label: 'Counts waiting for your approval', value: pending, hint: pending > 0 ? 'Requires your attention' : 'All caught up' }
+            : { label: 'Count what is on the shelf', value: 'Propose a count', hint: 'The owner approves it before stock changes' }
+        }
+        stats={
+          isOwner
+            ? [
+                { label: 'Counted today', value: countedToday, hint: countedHint },
+                { label: 'Variance pending', value: `${pendingVariance} units`, hint: 'Across pending counts', tone: pendingVariance !== 0 ? 'warn' : 'default' },
+                { label: 'Rejected today', value: rejectedToday, hint: rejectedToday > 0 ? 'Needs review' : 'None', tone: rejectedToday > 0 ? 'bad' : 'default' },
+              ]
+            : undefined
+        }
       />
-
-      {isOwner && (
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Pending Approval</p>
-              <div className="rounded-lg bg-amber-50 p-2 text-amber-600"><Clock size={18} /></div>
-            </div>
-            <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{pending}</p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{pending > 0 ? 'Requires your attention' : 'All caught up'}</p>
-          </Card>
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Counted Today</p>
-              <div className="rounded-lg bg-green-50 p-2 text-green-700"><CheckCircle2 size={18} /></div>
-            </div>
-            <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{countedToday}</p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{countedHint}</p>
-          </Card>
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Total Variance</p>
-              <div className="rounded-lg bg-blue-50 p-2 text-blue-700"><Gauge size={18} /></div>
-            </div>
-            <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{pendingVariance} units</p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">Across pending counts</p>
-          </Card>
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Rejected Today</p>
-              <div className="rounded-lg bg-danger-50 p-2 text-danger-600"><XCircle size={18} /></div>
-            </div>
-            <p className="mt-2 text-2xl font-bold text-slate-800 dark:text-[#eef3ef]">{rejectedToday}</p>
-            <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{rejectedToday > 0 ? 'Needs review' : 'No rejections today'}</p>
-          </Card>
-        </div>
-      )}
 
       <div className={isOwner ? 'grid grid-cols-1 gap-5 lg:grid-cols-[360px_minmax(0,1fr)_300px]' : 'max-w-md'}>
         <Card className="h-fit p-5">

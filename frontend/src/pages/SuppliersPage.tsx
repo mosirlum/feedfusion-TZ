@@ -21,28 +21,7 @@ import {
 import { suppliersApi, apiErrorMessage } from '../lib/api';
 import { Supplier, Purchase, SupplierStats } from '../types';
 import { tzs, formatDate, initials } from '../lib/format';
-import {
-  Badge,
-  Button,
-  Card,
-  CHART_COLORS,
-  DonutChart,
-  EmptyState,
-  FormField,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  Modal,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Textarea,
-  Th,
-  THead,
-  Tr,
-} from '../components/ui';
+import { Badge, Button, Card, CHART_COLORS, DonutChart, EmptyState, FormField, FullPageSpinner, IconChip, Input, Modal, Select, Table, Td, Textarea, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { isValidTzPhone, sanitizePhoneInput, TZ_PHONE_PLACEHOLDER, TZ_PHONE_HINT, TZ_PHONE_ERROR } from '../lib/phone';
 
@@ -245,36 +224,30 @@ export default function SuppliersPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
+        icon={<Users size={20} />}
         title="Suppliers"
         subtitle="Manage your suppliers, view history, and track their performance."
-        action={<Button icon={<Plus size={16} />} onClick={openCreate}>Add New Supplier</Button>}
+        action={
+          <HeroButton icon={<Plus size={16} />} onClick={openCreate}>
+            Add New Supplier
+          </HeroButton>
+        }
+        lead={{
+          label: 'Spent with suppliers this month',
+          value: tzs(totalThisMonth),
+          hint: monthChangePct !== null ? `${monthChangePct >= 0 ? '↑' : '↓'} ${Math.abs(monthChangePct).toFixed(0)}% vs last month` : 'This month',
+        }}
+        stats={[
+          { label: 'Active suppliers', value: stats?.total_suppliers ?? suppliers.filter((s) => s.status === 'active').length },
+          { label: 'Deliveries this month', value: stats?.purchase_count_this_month ?? 0, hint: 'Recorded purchases' },
+          {
+            label: 'Top supplier',
+            value: topSupplierThisMonth?.name ?? '—',
+            hint: topSupplierSharePct !== null ? `${topSupplierSharePct.toFixed(0)}% of this month's spend` : 'No purchases yet this month',
+          },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-        <StatCard label="Total Suppliers" value={stats?.total_suppliers ?? suppliers.filter((s) => s.status === 'active').length} icon={<Users size={18} />} tone="green" hint="Active suppliers" />
-        <StatCard
-          label="Total Purchases"
-          value={tzs(totalThisMonth)}
-          icon={<ShoppingCart size={18} />}
-          tone="blue"
-          hint={monthChangePct !== null ? `${monthChangePct >= 0 ? '↑' : '↓'} ${Math.abs(monthChangePct).toFixed(0)}% vs last month` : 'This month'}
-        />
-        <StatCard
-          label="Top Supplier"
-          value={topSupplierThisMonth?.name ?? '—'}
-          icon={<Wallet size={18} />}
-          tone="amber"
-          hint={topSupplierSharePct !== null ? `${topSupplierSharePct.toFixed(0)}% of this month's spend` : 'No purchases yet this month'}
-        />
-        <StatCard
-          label="Purchases This Month"
-          value={stats?.purchase_count_this_month ?? 0}
-          icon={<Sparkles size={18} />}
-          tone="green"
-          hint="Deliveries recorded this month"
-        />
-      </div>
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
