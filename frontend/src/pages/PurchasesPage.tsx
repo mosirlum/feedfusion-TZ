@@ -738,8 +738,8 @@ export default function PurchasesPage() {
           </Card>
 
           {/* Reference + date — de-emphasized meta strip */}
-          <Card className="flex flex-wrap items-center gap-4 px-4 py-3">
-            <div className="flex items-center gap-2">
+          <Card className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <FileText size={14} className="text-slate-400 dark:text-[#77857c]" />
               <span className="text-xs font-medium text-slate-500 dark:text-[#97a49b]">Reference #</span>
               <Input
@@ -749,7 +749,7 @@ export default function PurchasesPage() {
                   setReferenceNumber(e.target.value);
                 }}
                 placeholder="auto-generated"
-                className="w-56 py-1.5 text-sm"
+                className="min-w-0 flex-1 py-1.5 text-sm sm:w-56 sm:flex-none"
               />
               {referenceEdited && (
                 <button
@@ -764,11 +764,11 @@ export default function PurchasesPage() {
                 </button>
               )}
             </div>
-            <div className="h-5 w-px bg-slate-200" />
-            <div className="flex items-center gap-2">
+            <div className="hidden h-5 w-px bg-slate-200 sm:block dark:bg-[rgba(255,255,255,0.08)]" />
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <Calendar size={14} className="text-slate-400 dark:text-[#77857c]" />
               <span className="text-xs font-medium text-slate-500 dark:text-[#97a49b]">Date</span>
-              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} className="w-40 py-1.5 text-sm" />
+              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} className="min-w-0 flex-1 py-1.5 text-sm sm:w-40 sm:flex-none" />
             </div>
           </Card>
 
@@ -1128,7 +1128,7 @@ export default function PurchasesPage() {
           title="Recent Purchases"
           subtitle="Last 50, newest first"
           action={
-            <div className="relative w-full max-w-[220px]">
+            <div className="relative w-full sm:max-w-[220px]">
               <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
               <Input
                 placeholder="Search supplier or ref…"

@@ -68,8 +68,8 @@ export function Card({ className, children, ...rest }: { className?: string; chi
 
 export function CardHeader({ title, subtitle, action }: { title: ReactNode; subtitle?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
-      <div>
+    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
+      <div className="min-w-[10rem] flex-1">
         <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">{title}</h3>
         {subtitle && <p className="text-sm text-slate-500 dark:text-[#97a49b] mt-0.5">{subtitle}</p>}
       </div>
@@ -315,9 +315,9 @@ export function StatCard({
     purple: 'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   };
   return (
-    <Card className="p-5">
+    <Card className="p-3.5 sm:p-5">
       <div className="flex items-center justify-between">
-        {icon ? <div className={clsx('rounded-[10px] p-2', tones[tone])}>{icon}</div> : <span />}
+        {icon ? <div className={clsx('rounded-[10px] p-1.5 sm:p-2', tones[tone])}>{icon}</div> : <span />}
         {delta && (
           <span
             className={clsx(
@@ -331,9 +331,9 @@ export function StatCard({
           </span>
         )}
       </div>
-      <p className="mt-3 text-sm font-semibold text-slate-500 dark:text-[#97a49b]">{label}</p>
-      <p className="mt-1 font-display text-2xl font-extrabold text-slate-800 dark:text-[#f4f8f5]">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{hint}</p>}
+      <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-[#97a49b] sm:mt-3 sm:text-sm">{label}</p>
+      <p className="mt-0.5 break-words font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5] sm:mt-1 sm:text-2xl">{value}</p>
+      {hint && <p className="mt-1 text-[11px] text-slate-500 dark:text-[#97a49b] sm:text-xs">{hint}</p>}
     </Card>
   );
 }

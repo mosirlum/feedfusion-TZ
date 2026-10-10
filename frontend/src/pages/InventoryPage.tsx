@@ -44,6 +44,7 @@ import { useToast } from '../components/ui/Toast';
 import { CreateProductModal } from '../components/products/CreateProductModal';
 import { ProposePriceModal } from '../components/products/ProposePriceModal';
 
+const STATUS_LABEL: Record<InventoryRow['status'], string> = { HEALTHY: 'Healthy', LOW: 'Low', OUT_OF_STOCK: 'Out of stock' };
 const STATUS_TONE: Record<InventoryRow['status'], 'green' | 'amber' | 'red'> = {
   HEALTHY: 'green',
   LOW: 'amber',
@@ -218,7 +219,7 @@ export default function InventoryPage() {
         }
       />
 
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard label="Total Products" value={rows.length} icon={<Package size={18} />} tone="blue" hint="Across all categories" />
         <StatCard label="Total Stock Value" value={tzs(totalStockValue)} icon={<Wallet size={18} />} tone="green" hint="At current cost" />
         <StatCard
@@ -333,7 +334,7 @@ export default function InventoryPage() {
                   <Td className="text-right">{r.active_price ? tzs(r.active_price) : <Badge tone="amber">No price</Badge>}</Td>
                   <Td className="text-right">{tzs(r.stock_value_cost)}</Td>
                   <Td>
-                    <Badge tone={STATUS_TONE[r.status]}>{r.status.replace('_', ' ')}</Badge>
+                    <Badge tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status] ?? r.status.replace(/_/g, ' ')}</Badge>
                   </Td>
                   <Td>
                     <div className="flex items-center gap-3">
@@ -426,7 +427,7 @@ export default function InventoryPage() {
                 <Tr key={m.id}>
                   <Td className="text-xs text-slate-400 dark:text-[#77857c]">{formatDateTime(m.created_at)}</Td>
                   <Td>
-                    <Badge tone={m.quantity >= 0 ? 'green' : 'red'}>{m.movement_type.replace('_', ' ')}</Badge>
+                    <Badge tone={m.quantity >= 0 ? 'green' : 'red'}>{m.movement_type.replace(/_/g, ' ')}</Badge>
                   </Td>
                   <Td className={`text-right font-medium ${m.quantity >= 0 ? 'text-green-700' : 'text-danger-600'}`}>
                     {m.quantity >= 0 ? '+' : ''}

@@ -100,16 +100,26 @@ export default function CustomersPage() {
               <tr>
                 <Th>Customer</Th>
                 <Th>Phone</Th>
-                <Th>Email</Th>
-                <Th>Address</Th>
-                <Th>Status</Th>
+                <Th className="hidden md:table-cell">Email</Th>
+                <Th className="hidden md:table-cell">Address</Th>
+                <Th className="hidden sm:table-cell">Status</Th>
                 <Th></Th>
               </tr>
             </THead>
             <tbody>
               {filtered.map((c) => (
                 <Tr key={c.id}>
-                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{c.name}</Td>
+                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">
+                    {c.name}
+                    {(c.email || c.address) && (
+                      <span className="mt-0.5 block whitespace-normal text-xs font-normal text-slate-500 dark:text-[#97a49b] md:hidden">
+                        {[c.email, c.address].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
+                    <span className="mt-1 block sm:hidden">
+                      <Badge tone={c.status === 'active' ? 'green' : 'slate'}>{c.status}</Badge>
+                    </span>
+                  </Td>
                   <Td className="text-slate-500 dark:text-[#97a49b]">
                     {c.phone ? (
                       <span className="flex items-center gap-1.5">
@@ -119,7 +129,7 @@ export default function CustomersPage() {
                       '—'
                     )}
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">
+                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">
                     {c.email ? (
                       <span className="flex items-center gap-1.5">
                         <Mail size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.email}
@@ -128,7 +138,7 @@ export default function CustomersPage() {
                       '—'
                     )}
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">
+                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">
                     {c.address ? (
                       <span className="flex items-center gap-1.5">
                         <MapPin size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.address}
@@ -137,11 +147,11 @@ export default function CustomersPage() {
                       '—'
                     )}
                   </Td>
-                  <Td>
+                  <Td className="hidden sm:table-cell">
                     <Badge tone={c.status === 'active' ? 'green' : 'slate'}>{c.status}</Badge>
                   </Td>
                   <Td>
-                    <button onClick={() => openEdit(c)} className="text-slate-400 dark:text-[#77857c] hover:text-amber-600" title="Edit customer">
+                    <button onClick={() => openEdit(c)} className="text-slate-400 dark:text-[#77857c] hover:text-amber-600" title="Edit customer" aria-label={`Edit ${c.name}`}>
                       <Pencil size={16} />
                     </button>
                   </Td>

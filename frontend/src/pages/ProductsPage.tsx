@@ -215,7 +215,7 @@ export default function ProductsPage() {
       />
 
       {isOwner && (
-        <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard
             label="Total Products"
             value={activeProductsCount}
@@ -289,8 +289,8 @@ export default function ProductsPage() {
                 <THead>
                   <tr>
                     <Th>Product</Th>
-                    <Th>Category</Th>
-                    <Th>Unit</Th>
+                    <Th className="hidden md:table-cell">Category</Th>
+                    <Th className="hidden md:table-cell">Unit</Th>
                     <Th className="text-right">Active Price</Th>
                     {isOwner && <Th className="text-right">Stock</Th>}
                     <Th>Status</Th>
@@ -309,12 +309,14 @@ export default function ProductsPage() {
                             </div>
                             <div>
                               <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
-                              <p className="text-xs text-slate-400 dark:text-[#77857c]">PRD-{String(p.id).padStart(3, '0')}</p>
+                              <p className="text-xs text-slate-400 dark:text-[#77857c]">PRD-{String(p.id).padStart(3, '0')}
+                                <span className="md:hidden">{` · ${p.category_name ?? 'No category'} · ${p.unit}`}</span>
+                              </p>
                             </div>
                           </div>
                         </Td>
-                        <Td>{p.category_name ? <Badge tone="blue">{p.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
-                        <Td>{p.unit}</Td>
+                        <Td className="hidden md:table-cell">{p.category_name ? <Badge tone="blue">{p.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
+                        <Td className="hidden md:table-cell">{p.unit}</Td>
                         <Td className="text-right">{p.active_price ? tzs(p.active_price) : <Badge tone="amber">No price</Badge>}</Td>
                         {isOwner && (
                           <Td className="text-right">

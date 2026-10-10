@@ -296,7 +296,7 @@ export default function ExpensesPage() {
     <div>
       <PageHeader icon={<ReceiptIcon size={20} />} title="Expenses" subtitle="General operating costs — kept separate from inventory cost (Section 24)." />
 
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard
           label="This Month's Expenses"
           value={tzs(monthTrend.thisMonth)}
@@ -406,8 +406,8 @@ export default function ExpensesPage() {
             </Button>
           </div>
 
-          <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="relative">
+          <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 [&>*]:min-w-0">
+            <div className="relative sm:col-span-2">
               <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search expenses..." className="pl-9" />
             </div>
@@ -427,10 +427,10 @@ export default function ExpensesPage() {
                 </option>
               ))}
             </Select>
-            <div className="flex items-center gap-1.5">
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} max={dateTo} />
+            <div className="flex items-center gap-1.5 sm:col-span-2">
+              <Input type="date" aria-label="From date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} max={dateTo} className="min-w-0" />
               <span className="text-xs text-slate-400 dark:text-[#77857c]">to</span>
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} min={dateFrom} max={todayIso()} />
+              <Input type="date" aria-label="To date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} min={dateFrom} max={todayIso()} className="min-w-0" />
             </div>
           </div>
 

@@ -251,7 +251,7 @@ export default function SuppliersPage() {
         action={<Button icon={<Plus size={16} />} onClick={openCreate}>Add New Supplier</Button>}
       />
 
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard label="Total Suppliers" value={stats?.total_suppliers ?? suppliers.filter((s) => s.status === 'active').length} icon={<Users size={18} />} tone="green" hint="Active suppliers" />
         <StatCard
           label="Total Purchases"

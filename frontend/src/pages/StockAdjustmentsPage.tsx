@@ -187,7 +187,7 @@ export default function StockAdjustmentsPage() {
         subtitle="Direct manual corrections to the stock ledger — damage, loss, or counting fixes. Owner-approved by definition (Section 23)."
       />
 
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">Adjustments Today</p>
