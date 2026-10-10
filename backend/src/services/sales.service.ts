@@ -12,6 +12,7 @@ import { getBusinessSettings } from '../db/businessSettingsRepo';
 import { writeAuditLog } from '../db/auditRepo';
 import { AuthenticatedUser } from '../types/auth';
 import { previousPeriodRange, pctChange } from '../utils/period';
+import { tanzaniaDateAtCurrentTime } from '../utils/tzDate';
 
 export interface SaleLineInput {
   productId: number;
@@ -102,30 +103,21 @@ export async function previewNextInvoiceNumber(): Promise<string> {
 function resolveSaleDate(saleDate: string | null | undefined): Date {
   const now = new Date();
   if (!saleDate) return now;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(saleDate);
-  if (!match) {
-    throw new HttpError(400, 'INVALID_SALE_DATE');
-  }
-  const [, y, m, d] = match;
-  const combined = new Date(
-    Number(y),
-    Number(m) - 1,
-    Number(d),
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds(),
-    now.getMilliseconds()
-  );
-  if (Number.isNaN(combined.getTime())) {
+  // The picked date is a Tanzania calendar date and the server runs in UTC,
+  // so both the combine and the "not in the future" check are done on
+  // Tanzania wall-clock time (a UTC-based check wrongly rejected "today"
+  // between 00:00 and 03:00 Tanzania time).
+  const instant = tanzaniaDateAtCurrentTime(saleDate, now.getTime());
+  if (instant === null) {
     throw new HttpError(400, 'INVALID_SALE_DATE');
   }
   // A minute of slack for clock/rounding noise — the real intent this
   // guards against is a date days/months in the future, not a few seconds
   // of drift between the browser and this server.
-  if (combined.getTime() > now.getTime() + 60_000) {
+  if (instant > now.getTime() + 60_000) {
     throw new HttpError(400, 'SALE_DATE_CANNOT_BE_IN_FUTURE');
   }
-  return combined;
+  return new Date(instant);
 }
 
 export async function completeSale(input: CompleteSaleInput) {

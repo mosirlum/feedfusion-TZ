@@ -256,7 +256,7 @@ export default function ReportsPage() {
           )}
 
           <p className="text-sm text-slate-500 dark:text-[#97a49b] lg:pb-2.5">
-            Showing <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{formatDate(from)}</span> – <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{formatDate(to)}</span>
+            Showing <span className="font-semibold text-slate-700 dark:text-[#b6c2ba] dark:text-[#d2dbd5]">{formatDate(from)}</span> – <span className="font-semibold text-slate-700 dark:text-[#b6c2ba] dark:text-[#d2dbd5]">{formatDate(to)}</span>
           </p>
 
           <Button
@@ -271,7 +271,7 @@ export default function ReportsPage() {
         </Card>
       )}
 
-      <div role="tablist" aria-label="Report type" className="no-print mb-5 flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-[rgba(255,255,255,0.1)]">
+      <div role="tablist" aria-label="Report type" className="no-print mb-5 flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-[rgba(255,255,255,0.12)] dark:border-[rgba(255,255,255,0.1)]">
         {TABS.map(({ key, icon: Icon }) => (
           <button
             key={key}
@@ -624,7 +624,7 @@ function StatCardWithSparkline({
         <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">{label}</p>
         <div className={clsx('shrink-0 rounded-lg p-2', tones[tone])}>{icon}</div>
       </div>
-      <p className="mt-2 break-words font-display text-xl font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5] sm:text-2xl">{value}</p>
+      <p className="mt-2 break-words font-display text-xl font-extrabold tabular-nums text-slate-800 dark:text-[#eef3ef] dark:text-[#f4f8f5] sm:text-2xl">{value}</p>
       <div className="mt-1 flex items-center justify-between gap-2">
         <TrendLabel pct={changePct} invert={invert} />
       </div>
@@ -822,13 +822,13 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           <div className="mb-1 flex items-center gap-2">
             <IconChip tone="green" size={26} icon={<BarChart3 size={13} />} />
             <div>
-              <p className="font-semibold text-slate-800">Sales Overview</p>
-              <p className="text-xs text-slate-400">Daily revenue and transactions</p>
+              <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Sales Overview</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Daily revenue and transactions</p>
             </div>
           </div>
-          <p className="mb-1 mt-3 text-xs font-medium text-slate-500">Revenue (TZS)</p>
+          <p className="mb-1 mt-3 text-xs font-medium text-slate-500 dark:text-[#97a49b]">Revenue (TZS)</p>
           <DailyChart series={dailySeries} valueKey="revenue" variant="bar" color="#3B6D11" formatValue={tzs} showGrid />
-          <p className="mb-1 mt-3 text-xs font-medium text-slate-500">Transactions</p>
+          <p className="mb-1 mt-3 text-xs font-medium text-slate-500 dark:text-[#97a49b]">Transactions</p>
           <DailyChart series={dailySeries} valueKey="transactions" variant="line" color="#185FA5" formatValue={(v) => String(v)} showLabels showGrid />
         </Card>
 
@@ -836,8 +836,8 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           <div className="mb-3 flex items-center gap-2">
             <IconChip tone="blue" size={26} icon={<Package size={13} />} />
             <div>
-              <p className="font-semibold text-slate-800">Revenue by Category</p>
-              <p className="text-xs text-slate-400">Share of total revenue</p>
+              <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Revenue by Category</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Share of total revenue</p>
             </div>
           </div>
           {categorySlices.length === 0 ? (
@@ -848,11 +848,11 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
               <div className="flex-1 space-y-1.5 text-xs">
                 {categorySlices.map((s) => (
                   <div key={s.name} className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 truncate text-slate-600">
+                    <span className="flex items-center gap-1.5 truncate text-slate-600 dark:text-[#b6c2ba]">
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
                       {s.name}
                     </span>
-                    <span className="flex-shrink-0 font-medium text-slate-700">{s.pct.toFixed(1)}%</span>
+                    <span className="flex-shrink-0 font-medium text-slate-700 dark:text-[#b6c2ba]">{s.pct.toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
@@ -866,7 +866,7 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <IconChip tone="amber" size={26} icon={<Trophy size={13} />} />
-              <p className="font-semibold text-slate-800">Top 5 Best-Selling Products</p>
+              <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Top 5 Best-Selling Products</p>
             </div>
           </div>
           {topProducts.length === 0 ? (
@@ -875,18 +875,18 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
             <ul className="space-y-3">
               {topProducts.map((p, i) => (
                 <li key={p.product_id} className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-[rgba(255,255,255,0.08)] text-xs font-bold text-slate-500 dark:text-[#97a49b]">
                     {i + 1}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className="truncate text-sm font-medium text-slate-800">{p.product_name}</p>
-                      <p className="flex-shrink-0 text-xs text-slate-400">{tzs(p.revenue)}</p>
+                      <p className="truncate text-sm font-medium text-slate-800 dark:text-[#eef3ef]">{p.product_name}</p>
+                      <p className="flex-shrink-0 text-xs text-slate-400 dark:text-[#77857c]">{tzs(p.revenue)}</p>
                     </div>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-400 dark:text-[#77857c]">
                       {p.quantity_sold} {p.unit}
                     </p>
-                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[rgba(255,255,255,0.08)]">
                       <div
                         className="h-full rounded-full bg-green-600"
                         style={{ width: `${Math.min(100, (Number(p.quantity_sold) / topProductMaxQty) * 100)}%` }}
@@ -903,8 +903,8 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
           <div className="mb-3 flex items-center gap-2">
             <IconChip tone="slate" size={26} icon={<UsersIcon size={13} />} />
             <div>
-              <p className="font-semibold text-slate-800">Revenue by Staff Member</p>
-              <p className="text-xs text-slate-400">Who served each sale</p>
+              <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Revenue by Staff Member</p>
+              <p className="text-xs text-slate-400 dark:text-[#77857c]">Who served each sale</p>
             </div>
           </div>
           {staffSlices.length === 0 ? (
@@ -915,11 +915,11 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
               <div className="flex-1 space-y-1.5 text-xs">
                 {staffSlices.map((s) => (
                   <div key={s.name} className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 truncate text-slate-600">
+                    <span className="flex items-center gap-1.5 truncate text-slate-600 dark:text-[#b6c2ba]">
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
                       {s.name}
                     </span>
-                    <span className="flex-shrink-0 font-medium text-slate-700">{s.pct.toFixed(1)}%</span>
+                    <span className="flex-shrink-0 font-medium text-slate-700 dark:text-[#b6c2ba]">{s.pct.toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
@@ -936,8 +936,8 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
             other Card on this page stays intact via index.css's default
             break-inside: avoid. */}
         <Card className="print-allow-break">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3" style={{ breakAfter: 'avoid' }}>
-            <p className="font-semibold text-slate-800">Sales Transactions</p>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3" style={{ breakAfter: 'avoid' }}>
+            <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Sales Transactions</p>
           </div>
           {!transactions || transactions.length === 0 ? (
             <EmptyState title="No sales in this range." />
@@ -967,8 +967,8 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
                   ))}
                 </tbody>
               </Table>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-5 py-3">
-                <p className="text-xs text-slate-400">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3">
+                <p className="text-xs text-slate-400 dark:text-[#77857c]">
                   Showing {txPageItems.length} of {transactions.length} sales
                 </p>
                 <div className="flex items-center gap-1">
@@ -976,18 +976,18 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
                     type="button"
                     disabled={txPage <= 1}
                     onClick={() => setTxPage((p) => Math.max(1, p - 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.12)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 dark:hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-40"
                   >
                     <ChevronLeft size={14} />
                   </button>
-                  <span className="px-2 text-xs text-slate-500">
+                  <span className="px-2 text-xs text-slate-500 dark:text-[#97a49b]">
                     Page {txPage} of {txTotalPages}
                   </span>
                   <button
                     type="button"
                     disabled={txPage >= txTotalPages}
                     onClick={() => setTxPage((p) => Math.min(txTotalPages, p + 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.12)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 dark:hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-40"
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -1000,10 +1000,10 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
         <Card className="p-5">
           <div className="mb-3 flex items-center gap-2">
             <IconChip tone="amber" size={26} icon={<Lightbulb size={13} />} />
-            <p className="font-semibold text-slate-800">Quick Insights</p>
+            <p className="font-semibold text-slate-800 dark:text-[#eef3ef]">Quick Insights</p>
           </div>
           {insights.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-400">Nothing notable in this range yet.</p>
+            <p className="py-6 text-center text-sm text-slate-400 dark:text-[#77857c]">Nothing notable in this range yet.</p>
           ) : (
             <ul className="space-y-3">
               {insights.map((ins, i) => {
@@ -1022,8 +1022,8 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
                       <Icon size={14} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-800">{ins.text}</p>
-                      <p className="text-xs text-slate-400">{ins.sub}</p>
+                      <p className="text-sm font-medium text-slate-800 dark:text-[#eef3ef]">{ins.text}</p>
+                      <p className="text-xs text-slate-400 dark:text-[#77857c]">{ins.sub}</p>
                     </div>
                   </li>
                 );
@@ -1075,13 +1075,13 @@ function ProductsReport({ from, to }: { from: string; to: string }) {
           <tbody>
             {data.map((p) => (
               <Tr key={p.product_id}>
-                <Td className="font-medium text-slate-800">{p.product_name}</Td>
+                <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{p.product_name}</Td>
                 <Td className="text-right">
                   {p.quantity_sold} {p.unit}
                 </Td>
                 <Td className="text-right">{tzs(p.revenue)}</Td>
-                <Td className="text-right text-slate-400">{tzs(p.cost)}</Td>
-                <Td className="text-right font-semibold text-green-700">{tzs(p.gross_profit)}</Td>
+                <Td className="text-right text-slate-400 dark:text-[#77857c]">{tzs(p.cost)}</Td>
+                <Td className="text-right font-semibold text-green-700 dark:text-green-400">{tzs(p.gross_profit)}</Td>
               </Tr>
             ))}
           </tbody>
@@ -1114,7 +1114,7 @@ function DiscountsReport({ from, to }: { from: string; to: string }) {
       <PrintLetterhead title="Discounts" from={from} to={to} />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
       <Card>
-        <div className="border-b border-slate-100 px-5 py-3 font-semibold text-slate-800">By Staff</div>
+        <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3 font-semibold text-slate-800 dark:text-[#eef3ef]">By Staff</div>
         {data.byUser.length === 0 ? (
           <EmptyState title="No discounts given in this range." />
         ) : (
@@ -1129,7 +1129,7 @@ function DiscountsReport({ from, to }: { from: string; to: string }) {
             <tbody>
               {data.byUser.map((u: any) => (
                 <Tr key={u.user_id}>
-                  <Td className="font-medium text-slate-800">{u.user_name}</Td>
+                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{u.user_name}</Td>
                   <Td className="text-right">{u.discount_count}</Td>
                   <Td className="text-right">{tzs(u.total_discount)}</Td>
                 </Tr>
@@ -1139,7 +1139,7 @@ function DiscountsReport({ from, to }: { from: string; to: string }) {
         )}
       </Card>
       <Card>
-        <div className="border-b border-slate-100 px-5 py-3 font-semibold text-slate-800">By Reason</div>
+        <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3 font-semibold text-slate-800 dark:text-[#eef3ef]">By Reason</div>
         {data.byReason.length === 0 ? (
           <EmptyState title="No discounts given in this range." />
         ) : (
@@ -1215,7 +1215,7 @@ function PurchaseCostsReportView({ from, to }: { from: string; to: string }) {
 
       <div className="mb-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card>
-          <div className="border-b border-slate-100 px-5 py-3 font-semibold text-slate-800">Additional Cost Lines by Label</div>
+          <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3 font-semibold text-slate-800 dark:text-[#eef3ef]">Additional Cost Lines by Label</div>
           {data.costLinesByLabel.length === 0 ? (
             <EmptyState title="No additional cost lines in this range." />
           ) : (
@@ -1238,9 +1238,9 @@ function PurchaseCostsReportView({ from, to }: { from: string; to: string }) {
           )}
         </Card>
         <Card>
-          <div className="border-b border-slate-100 px-5 py-3 font-semibold text-slate-800">
+          <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3 font-semibold text-slate-800 dark:text-[#eef3ef]">
             Per-Purchase Expenses by Category
-            <span className="ml-2 text-xs font-normal text-slate-400">Not on the supplier's invoice</span>
+            <span className="ml-2 text-xs font-normal text-slate-400 dark:text-[#77857c]">Not on the supplier's invoice</span>
           </div>
           {data.perPurchaseByCategory.length === 0 ? (
             <EmptyState title="No Per-Purchase expenses in this range." />
@@ -1266,7 +1266,7 @@ function PurchaseCostsReportView({ from, to }: { from: string; to: string }) {
       </div>
 
       <Card>
-        <div className="border-b border-slate-100 px-5 py-3 font-semibold text-slate-800">Purchases in Range</div>
+        <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3 font-semibold text-slate-800 dark:text-[#eef3ef]">Purchases in Range</div>
         {data.purchases.length === 0 ? (
           <EmptyState title="No purchases in this range." />
         ) : (
@@ -1286,8 +1286,8 @@ function PurchaseCostsReportView({ from, to }: { from: string; to: string }) {
                 <Tr key={p.id}>
                   <Td className="font-mono text-xs">{p.reference_number}</Td>
                   <Td>{formatDate(p.purchase_date)}</Td>
-                  <Td className="font-medium text-slate-800">{p.supplier_name}</Td>
-                  <Td className="text-right text-slate-500">{tzs(p.goods_subtotal)}</Td>
+                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{p.supplier_name}</Td>
+                  <Td className="text-right text-slate-500 dark:text-[#97a49b]">{tzs(p.goods_subtotal)}</Td>
                   <Td className="text-right font-medium text-amber-700">{tzs(p.additional_costs)}</Td>
                   <Td className="text-right font-semibold">{tzs(p.total_cost)}</Td>
                 </Tr>
@@ -1318,7 +1318,7 @@ function UsersReport({ from, to }: { from: string; to: string }) {
       <ReportToolbar onDownload={downloadCsvFile} />
       <PrintLetterhead title="Users" from={from} to={to} />
       <Card>
-      <p className="px-5 pt-4 text-xs text-slate-400">
+      <p className="px-5 pt-4 text-xs text-slate-400 dark:text-[#77857c]">
         A performance signal, not an accusation — differences in revenue often reflect shifts worked, not conduct (Section 26).
       </p>
       {data.length === 0 ? (
@@ -1337,7 +1337,7 @@ function UsersReport({ from, to }: { from: string; to: string }) {
           <tbody>
             {data.map((u) => (
               <Tr key={u.user_id}>
-                <Td className="font-medium text-slate-800">{u.name}</Td>
+                <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{u.name}</Td>
                 <Td className="text-right">{u.transaction_count}</Td>
                 <Td className="text-right">{tzs(u.total_revenue)}</Td>
                 <Td className="text-right">{tzs(u.total_discount)}</Td>
@@ -1389,11 +1389,11 @@ function StockReport({ low }: { low: boolean }) {
           <tbody>
             {data.map((r: InventoryRow) => (
               <Tr key={r.id}>
-                <Td className="font-medium text-slate-800">{r.name}</Td>
+                <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{r.name}</Td>
                 <Td className="text-right">
                   {r.current_stock} {r.unit}
                 </Td>
-                <Td className="text-right text-slate-400">
+                <Td className="text-right text-slate-400 dark:text-[#77857c]">
                   {r.minimum_stock} {r.unit}
                 </Td>
                 <Td className="text-right">{tzs(r.stock_value_cost)}</Td>

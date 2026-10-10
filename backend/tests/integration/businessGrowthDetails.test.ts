@@ -88,9 +88,7 @@ describe('GET /api/v1/business-growth/details', () => {
     await pool.query("UPDATE stock_movements SET created_at = now() - interval '60 days' WHERE product_id IN ($1, $2)", [fast.id, stale.id]);
     await pool.query("UPDATE stock_movements SET created_at = now() - interval '1 day' WHERE product_id = $1", [fresh.id]);
 
-    // completeSale validates saleDate against the *server's* UTC date, so seed with that
-    // (not Tanzania's) to stay deterministic around 00:00–03:00 Tanzania time.
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayInTanzania();
     // 30 single-bag cash sales of "fast", one per day over the last 30 days.
     for (let i = 0; i < 30; i++) {
       await completeSale({

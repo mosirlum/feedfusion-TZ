@@ -57,3 +57,23 @@ export function firstOfMonthOffset(iso: string, offset: number): string {
 export function daysBetween(fromIso: string, toIso: string): number {
   return Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86400000);
 }
+
+/**
+ * The instant (epoch ms) that is calendar date `iso` at the *current Tanzania
+ * time of day*. Used for backdated sales: the date the user picked is a
+ * Tanzania calendar date, so it must be combined with the Tanzania wall-clock
+ * time, not the server's (UTC) one. For Tanzania's own "today" this returns
+ * `now` exactly. Returns null for a malformed or impossible date.
+ */
+export function tanzaniaDateAtCurrentTime(iso: string, now: number = Date.now()): number | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const probe = new Date(Date.UTC(y, mo - 1, d));
+  if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== mo - 1 || probe.getUTCDate() !== d) return null;
+  const wall = new Date(now + TZ_OFFSET_MS); // Tanzania wall clock, read via UTC fields
+  return (
+    Date.UTC(y, mo - 1, d, wall.getUTCHours(), wall.getUTCMinutes(), wall.getUTCSeconds(), wall.getUTCMilliseconds()) -
+    TZ_OFFSET_MS
+  );
+}

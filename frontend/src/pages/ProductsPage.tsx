@@ -75,7 +75,9 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'grid' : 'list'
+  );
   const [page, setPage] = useState(1);
 
   function load() {
@@ -395,7 +397,7 @@ export default function ProductsPage() {
                           {stock.current_stock} {stock.unit} in stock
                         </p>
                       )}
-                      <div className="mt-1 flex items-center gap-3 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-3">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-3">
                         <button
                           onClick={() => setProposeProduct(p)}
                           className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
