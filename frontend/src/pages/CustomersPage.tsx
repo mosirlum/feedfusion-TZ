@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Search, Phone, Mail, MapPin, Users as UsersIcon } from 'lucide-react';
 import { customersApi, apiErrorMessage } from '../lib/api';
 import { Customer } from '../types';
-import { Badge, Button, Card, EmptyState, FullPageSpinner, Input, PageHeader, Select, Table, Td, Th, THead, Tr } from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, Input, Select, Table, Td, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { CustomerFormModal } from '../components/CustomerFormModal';
 
@@ -63,11 +63,26 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<UsersIcon size={20} />}
         title="Customers"
         subtitle="Saved customer details — used to fill a Quotation's Ship To section automatically."
-        action={<Button icon={<Plus size={16} />} onClick={openCreate}>Add Customer</Button>}
+        action={
+          <HeroButton icon={<Plus size={16} />} onClick={openCreate}>
+            Add Customer
+          </HeroButton>
+        }
+        lead={{ label: 'Customers saved', value: customers.length, hint: loading ? undefined : `${customers.filter((c) => c.status === 'active').length} active` }}
+        stats={[
+          { label: 'Active', value: customers.filter((c) => c.status === 'active').length },
+          { label: 'Inactive', value: customers.filter((c) => c.status === 'inactive').length },
+          {
+            label: 'No phone number',
+            value: customers.filter((c) => !c.phone).length,
+            hint: 'Hard to call about a debt',
+            tone: customers.some((c) => !c.phone) ? 'warn' : 'default',
+          },
+        ]}
       />
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
@@ -122,9 +137,9 @@ export default function CustomersPage() {
                   </Td>
                   <Td className="text-slate-500 dark:text-[#97a49b]">
                     {c.phone ? (
-                      <span className="flex items-center gap-1.5">
+                      <a href={`tel:${c.phone.replace(/\s+/g, '')}`} className="flex items-center gap-1.5 hover:text-green-700 hover:underline" aria-label={`Call ${c.name}`}>
                         <Phone size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.phone}
-                      </span>
+                      </a>
                     ) : (
                       '—'
                     )}

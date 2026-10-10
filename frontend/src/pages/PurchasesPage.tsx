@@ -28,27 +28,7 @@ import { purchasesApi, suppliersApi, productsApi, apiErrorMessage } from '../lib
 import { Supplier, Product, Purchase } from '../types';
 import { tzs, formatDate, todayIso, initials } from '../lib/format';
 import { isValidTzPhone, sanitizePhoneInput, TZ_PHONE_PLACEHOLDER, TZ_PHONE_ERROR } from '../lib/phone';
-import {
-  Badge,
-  Button,
-  Card,
-  CardHeader,
-  EmptyState,
-  FormField,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  Modal,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Textarea,
-  Th,
-  THead,
-  Tr,
-} from '../components/ui';
+import { Badge, Button, Card, CardHeader, EmptyState, FormField, FullPageSpinner, IconChip, Input, Modal, PageHeader, Select, Table, Td, Textarea, Th, THead, Tr, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -631,28 +611,19 @@ export default function PurchasesPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
+        icon={<Truck size={20} />}
         title="Purchases"
         subtitle="Record deliveries from suppliers — stock and cost updates automatically."
-        icon={<Truck size={20} />}
+        lead={{ label: 'Value of recent purchases', value: tzs(purchaseStats.totalValue), hint: `Last ${purchaseStats.count} purchase${purchaseStats.count === 1 ? '' : 's'}, newest first` }}
+        stats={[
+          { label: 'Purchases', value: purchaseStats.count },
+          { label: 'Suppliers', value: purchaseStats.supplierCount, hint: 'Distinct' },
+          isOwner
+            ? { label: 'Pending corrections', value: pendingPurchaseIds.size, hint: 'Awaiting your review', tone: pendingPurchaseIds.size > 0 ? ('bad' as const) : ('default' as const) }
+            : { label: 'Average purchase', value: tzs(purchaseStats.avgValue) },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Purchases Shown" value={purchaseStats.count} icon={<ShoppingCart size={18} />} tone="blue" hint="Last 50, newest first" />
-        <StatCard label="Total Value" value={tzs(purchaseStats.totalValue)} icon={<Banknote size={18} />} tone="green" hint="Of purchases shown" />
-        <StatCard label="Suppliers" value={purchaseStats.supplierCount} icon={<Warehouse size={18} />} tone="amber" hint="Distinct, of purchases shown" />
-        {isOwner ? (
-          <StatCard
-            label="Pending Corrections"
-            value={pendingPurchaseIds.size}
-            icon={<Clock size={18} />}
-            tone={pendingPurchaseIds.size > 0 ? 'red' : 'purple'}
-            hint="Awaiting your review"
-          />
-        ) : (
-          <StatCard label="Avg per Purchase" value={tzs(purchaseStats.avgValue)} icon={<TrendingUp size={18} />} tone="purple" hint="Of purchases shown" />
-        )}
-      </div>
 
       <form id="purchase-form" onSubmit={handleSubmit} className="flex flex-col gap-5 lg:flex-row lg:items-start">
         {/* LEFT: form column */}

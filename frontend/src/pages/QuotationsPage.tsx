@@ -4,7 +4,7 @@ import { Plus, Search, FileText } from 'lucide-react';
 import { quotationsApi, apiErrorMessage } from '../lib/api';
 import { Quotation, QuotationStatus } from '../types';
 import { tzs, formatDate } from '../lib/format';
-import { Badge, Card, EmptyState, FullPageSpinner, Input, PageHeader, Select, Table, Td, Th, THead, Tr, Button } from '../components/ui';
+import { Badge, Card, EmptyState, FullPageSpinner, Input, Select, Table, Td, Th, THead, Tr, Button, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 // New Quotations list page (2026-09-12, CLAUDE.md #49) — the app-side
@@ -45,17 +45,34 @@ export default function QuotationsPage() {
     });
   }, [quotations, search, statusFilter]);
 
+  const openValue = quotations
+    .filter((q) => q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'ACCEPTED')
+    .reduce((sum, q) => sum + Number(q.total), 0);
+
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<FileText size={20} />}
         title="Quotations"
         subtitle="Quote a price to a customer before the sale — printable, and convertible to a real sale once accepted."
         action={
           <Link to="/quotations/new">
-            <Button icon={<Plus size={16} />}>New Quotation</Button>
+            <HeroButton icon={<Plus size={16} />} tabIndex={-1}>
+              New Quotation
+            </HeroButton>
           </Link>
         }
+        lead={{
+          label: 'Open quotation value',
+          value: tzs(openValue),
+          hint: `${quotations.filter((q) => q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'ACCEPTED').length} waiting for an answer or conversion`,
+        }}
+        stats={[
+          { label: 'Drafts', value: quotations.filter((q) => q.status === 'DRAFT').length },
+          { label: 'Sent', value: quotations.filter((q) => q.status === 'SENT').length },
+          { label: 'Accepted', value: quotations.filter((q) => q.status === 'ACCEPTED').length, hint: 'Ready to convert' },
+          { label: 'Converted', value: quotations.filter((q) => q.status === 'CONVERTED').length },
+        ]}
       />
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
@@ -100,11 +117,11 @@ export default function QuotationsPage() {
               <tr>
                 <Th>Quotation</Th>
                 <Th>Customer</Th>
-                <Th>Date</Th>
-                <Th>Valid Until</Th>
+                <Th className="hidden md:table-cell">Date</Th>
+                <Th className="hidden md:table-cell">Valid Until</Th>
                 <Th className="text-right">Total</Th>
                 <Th>Status</Th>
-                <Th>Created By</Th>
+                <Th className="hidden lg:table-cell">Created By</Th>
               </tr>
             </THead>
             <tbody>
@@ -115,14 +132,17 @@ export default function QuotationsPage() {
                       {quo.quotation_number}
                     </Link>
                   </Td>
-                  <Td className="text-slate-700 dark:text-[#d2dbd5]">{quo.customer_name}</Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{formatDate(quo.quotation_date)}</Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{quo.valid_until ? formatDate(quo.valid_until) : '—'}</Td>
+                  <Td className="text-slate-700 dark:text-[#d2dbd5]">
+                    {quo.customer_name}
+                    <span className="block text-xs text-slate-400 dark:text-[#77857c] md:hidden">{formatDate(quo.quotation_date)}</span>
+                  </Td>
+                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{formatDate(quo.quotation_date)}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{quo.valid_until ? formatDate(quo.valid_until) : '—'}</Td>
                   <Td className="text-right font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(quo.total)}</Td>
                   <Td>
                     <Badge tone={STATUS_TONE[quo.status]}>{quo.status}</Badge>
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{quo.created_by_name ?? '—'}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#97a49b] lg:table-cell">{quo.created_by_name ?? '—'}</Td>
                 </Tr>
               ))}
             </tbody>

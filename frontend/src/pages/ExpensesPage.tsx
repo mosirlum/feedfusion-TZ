@@ -25,24 +25,7 @@ import { expensesApi, apiErrorMessage } from '../lib/api';
 import { Expense, ExpenseType } from '../types';
 import { tzs, formatDate, formatTime, todayIso, isoDaysAgo, initials, pageWindow } from '../lib/format';
 import { downloadCsv } from '../lib/exportCsv';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Textarea,
-  Th,
-  THead,
-  Tr,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Select, Table, Td, Textarea, Th, THead, Tr, SummaryHero } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 /**
@@ -294,26 +277,21 @@ export default function ExpensesPage() {
 
   return (
     <div>
-      <PageHeader icon={<ReceiptIcon size={20} />} title="Expenses" subtitle="General operating costs — kept separate from inventory cost (Section 24)." />
-
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-        <StatCard
-          label="This Month's Expenses"
-          value={tzs(monthTrend.thisMonth)}
-          icon={monthTrendIsIncrease ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
-          tone="green"
-          hint={monthHint}
-        />
-        <StatCard label="Total Records" value={filtered.length} icon={<Calendar size={18} />} tone="blue" hint="In selected filters" />
-        <StatCard label="Average Amount" value={tzs(avgAmount)} icon={<Coins size={18} />} tone="amber" hint="Per expense, in selected filters" />
-        <StatCard
-          label="Top Category"
-          value={topCategory ? topCategory.category : '—'}
-          icon={<Tag size={18} />}
-          tone="purple"
-          hint={topCategory ? `${topCategory.pct.toFixed(0)}% of filtered total` : 'No expenses in range'}
-        />
-      </div>
+      <SummaryHero
+        icon={<ReceiptIcon size={20} />}
+        title="Expenses"
+        subtitle="General operating costs — kept separate from inventory cost (Section 24)."
+        lead={{ label: "This month's expenses", value: tzs(monthTrend.thisMonth), hint: monthHint }}
+        stats={[
+          { label: 'Records', value: filtered.length, hint: 'In selected filters' },
+          { label: 'Average', value: tzs(avgAmount), hint: 'Per expense' },
+          {
+            label: 'Top category',
+            value: topCategory ? topCategory.category : '—',
+            hint: topCategory ? `${topCategory.pct.toFixed(0)}% of filtered total` : 'No expenses in range',
+          },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
         <Card className="h-fit">
@@ -446,10 +424,10 @@ export default function ExpensesPage() {
                     <tr>
                       <Th>Date</Th>
                       <Th>Category</Th>
-                      <Th>Type</Th>
-                      <Th>Description</Th>
+                      <Th className="hidden md:table-cell">Type</Th>
+                      <Th className="hidden md:table-cell">Description</Th>
                       <Th className="text-right">Amount (TZS)</Th>
-                      <Th>Added By</Th>
+                      <Th className="hidden lg:table-cell">Added By</Th>
                     </tr>
                   </THead>
                   <tbody>
@@ -461,15 +439,20 @@ export default function ExpensesPage() {
                           <Td>
                             <div className="flex items-center gap-2">
                               <IconChip tone={tone} size={26} icon={<CatIcon size={13} />} />
-                              <span className="font-medium text-slate-800 dark:text-[#eef3ef]">{e.category}</span>
+                              <div className="min-w-0">
+                                <span className="font-medium text-slate-800 dark:text-[#eef3ef]">{e.category}</span>
+                                <span className="block max-w-[11rem] truncate text-xs text-slate-400 dark:text-[#77857c] md:hidden">
+                                  {TYPE_LABEL[e.expense_type]}{e.description ? ` · ${e.description}` : ''}
+                                </span>
+                              </div>
                             </div>
                           </Td>
-                          <Td>
+                          <Td className="hidden md:table-cell">
                             <Badge tone={TYPE_TONE[e.expense_type]}>{TYPE_LABEL[e.expense_type]}</Badge>
                           </Td>
-                          <Td className="max-w-xs truncate text-slate-500 dark:text-[#97a49b]">{e.description ?? '—'}</Td>
+                          <Td className="hidden max-w-xs truncate text-slate-500 dark:text-[#97a49b] md:table-cell">{e.description ?? '—'}</Td>
                           <Td className="text-right font-semibold text-slate-800 dark:text-[#eef3ef]">{tzs(e.amount)}</Td>
-                          <Td>
+                          <Td className="hidden lg:table-cell">
                             <div className="flex items-center gap-2">
                               <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-[10px] font-bold text-white">
                                 {initials(e.created_by_name ?? '?')}

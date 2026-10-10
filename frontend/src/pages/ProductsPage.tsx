@@ -23,24 +23,7 @@ import { tzs, initials, todayIso, pageWindow } from '../lib/format';
 import { CreateProductModal } from '../components/products/CreateProductModal';
 import { EditProductModal } from '../components/products/EditProductModal';
 import { ProposePriceModal } from '../components/products/ProposePriceModal';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FullPageSpinner,
-  IconChip,
-  Input,
-  Modal,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Th,
-  THead,
-  Tr,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, IconChip, Input, Modal, Select, Table, Td, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 
@@ -206,42 +189,30 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
+        icon={<Package size={20} />}
         title="Products"
-        subtitle={isOwner ? 'Manage your product catalog, stock levels, and pricing information.' : 'Products available for sale.'}
+        subtitle={isOwner ? 'Your catalog — what you sell, at what price, and how much is left.' : 'Products available for sale.'}
         action={
-          <Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+          <HeroButton icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
             Add New Product
-          </Button>
+          </HeroButton>
+        }
+        lead={
+          isOwner
+            ? { label: 'Active products', value: activeProductsCount, hint: newProductsThisMonth > 0 ? `${newProductsThisMonth} added this month` : 'None added this month' }
+            : { label: 'Active products', value: activeProductsCount }
+        }
+        stats={
+          isOwner
+            ? [
+                { label: 'Stock value', value: tzs(totalStockValue), hint: 'At current cost' },
+                { label: 'Low stock', value: lowStockRows.length, hint: lowStockRows.length > 0 ? 'Need attention' : 'All healthy', tone: lowStockRows.length > 0 ? 'warn' : 'default' },
+                { label: 'Top category', value: topCategory?.[0] ?? '—', hint: topCategory ? `${topCategory[1]} products` : undefined },
+              ]
+            : undefined
         }
       />
-
-      {isOwner && (
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-          <StatCard
-            label="Total Products"
-            value={activeProductsCount}
-            icon={<Package size={18} />}
-            tone="green"
-            hint={newProductsThisMonth > 0 ? `${newProductsThisMonth} new this month` : 'Active products'}
-          />
-          <StatCard
-            label="Low Stock"
-            value={lowStockRows.length}
-            icon={<AlertTriangle size={18} />}
-            tone="amber"
-            hint={lowStockRows.length > 0 ? 'Need attention' : 'All healthy'}
-          />
-          <StatCard label="Total Stock Value" value={tzs(totalStockValue)} icon={<Wallet size={18} />} tone="blue" hint="At current cost" />
-          <StatCard
-            label="Top Category"
-            value={topCategory?.[0] ?? '—'}
-            icon={<Award size={18} />}
-            tone="green"
-            hint={topCategory ? `${topCategory[1]} products` : 'No active products yet'}
-          />
-        </div>
-      )}
 
       <div className={isOwner ? 'grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_300px]' : ''}>
         <div className="min-w-0">
@@ -292,7 +263,7 @@ export default function ProductsPage() {
                   <tr>
                     <Th>Product</Th>
                     <Th className="hidden md:table-cell">Category</Th>
-                    <Th className="hidden md:table-cell">Unit</Th>
+                    <Th className="hidden 2xl:table-cell">Unit</Th>
                     <Th className="text-right">Active Price</Th>
                     {isOwner && <Th className="text-right">Stock</Th>}
                     <Th>Status</Th>
@@ -318,7 +289,7 @@ export default function ProductsPage() {
                           </div>
                         </Td>
                         <Td className="hidden md:table-cell">{p.category_name ? <Badge tone="blue">{p.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
-                        <Td className="hidden md:table-cell">{p.unit}</Td>
+                        <Td className="hidden 2xl:table-cell">{p.unit}</Td>
                         <Td className="text-right">{p.active_price ? tzs(p.active_price) : <Badge tone="amber">No price</Badge>}</Td>
                         {isOwner && (
                           <Td className="text-right">
@@ -332,24 +303,30 @@ export default function ProductsPage() {
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => setProposeProduct(p)}
+                              title={isOwner ? 'Set price' : 'Propose a price'}
+                              aria-label={`${isOwner ? 'Set price' : 'Propose price'} for ${p.name}`}
                               className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
                             >
-                              <Tag size={13} /> {isOwner ? 'Set price' : 'Propose'}
+                              <Tag size={13} /> <span className="hidden 2xl:inline">{isOwner ? 'Set price' : 'Propose'}</span>
                             </button>
                             {isOwner && (
                               <button
                                 onClick={() => setEditProduct(p)}
+                                title="Edit product"
+                                aria-label={`Edit ${p.name}`}
                                 className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#97a49b]"
                               >
-                                <Pencil size={13} /> Edit
+                                <Pencil size={13} /> <span className="hidden 2xl:inline">Edit</span>
                               </button>
                             )}
                             {isOwner && (
                               <button
                                 onClick={() => setDeleteTarget(p)}
+                                title="Delete product"
+                                aria-label={`Delete ${p.name}`}
                                 className="flex items-center gap-1 text-xs font-medium text-danger-600 hover:underline"
                               >
-                                <Trash2 size={13} /> Delete
+                                <Trash2 size={13} /> <span className="hidden 2xl:inline">Delete</span>
                               </button>
                             )}
                             {isOwner && (

@@ -23,23 +23,7 @@ import {
 import { inventoryApi, productsApi, categoriesApi, apiErrorMessage } from '../lib/api';
 import { InventoryRow, StockMovement, Category } from '../types';
 import { tzs, formatDateTime, initials, pageWindow } from '../lib/format';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  FullPageSpinner,
-  Input,
-  Modal,
-  PageHeader,
-  Select,
-  StatCard,
-  Table,
-  Td,
-  Th,
-  THead,
-  Tr,
-} from '../components/ui';
+import { Badge, Button, Card, EmptyState, FullPageSpinner, Input, Modal, Select, Table, Td, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 import { CreateProductModal } from '../components/products/CreateProductModal';
 import { ProposePriceModal } from '../components/products/ProposePriceModal';
@@ -195,49 +179,27 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <PageHeader
+      <SummaryHero
         icon={<Boxes size={20} />}
         title="Inventory"
-        subtitle={`Total stock value (at cost): ${tzs(totalStockValue)}`}
+        subtitle="What is on the shelf, what is running low, and what it is worth."
         action={
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] px-3 py-2 text-xs text-slate-500 dark:text-[#97a49b]">
-              <Clock size={13} className="text-slate-400 dark:text-[#77857c]" />
-              {lastUpdatedAt ? (
-                <>
-                  <span className="text-slate-400 dark:text-[#77857c]">Last updated</span>
-                  <span className="font-medium text-slate-600 dark:text-[#b6c2ba]">{formatDateTime(lastUpdatedAt)}</span>
-                </>
-              ) : (
-                <span className="text-slate-400 dark:text-[#77857c]">No stock movements yet</span>
-              )}
-            </span>
-            <Button icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
-              Add Product
-            </Button>
-          </div>
+          <HeroButton icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+            Add Product
+          </HeroButton>
         }
+        lead={{
+          label: 'Total stock value (at cost)',
+          value: tzs(totalStockValue),
+          hint: lastUpdatedAt ? `Last stock movement ${formatDateTime(lastUpdatedAt)}` : 'No stock movements yet',
+        }}
+        stats={[
+          { label: 'Products', value: rows.length, hint: `${categories.length} categories` },
+          { label: 'Healthy', value: Math.max(rows.length - lowStockCount - outOfStockCount, 0), hint: 'Comfortably stocked' },
+          { label: 'Low stock', value: lowStockCount, hint: lowStockCount > 0 ? 'Reorder soon' : 'None', tone: lowStockCount > 0 ? 'warn' : 'default' },
+          { label: 'Out of stock', value: outOfStockCount, hint: outOfStockCount > 0 ? "Can't be sold" : 'None', tone: outOfStockCount > 0 ? 'bad' : 'default' },
+        ]}
       />
-
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
-        <StatCard label="Total Products" value={rows.length} icon={<Package size={18} />} tone="blue" hint="Across all categories" />
-        <StatCard label="Total Stock Value" value={tzs(totalStockValue)} icon={<Wallet size={18} />} tone="green" hint="At current cost" />
-        <StatCard
-          label="Low Stock Items"
-          value={lowStockCount}
-          icon={<AlertTriangle size={18} />}
-          tone="amber"
-          hint={lowStockCount > 0 ? 'Need reordering soon' : 'All healthy'}
-        />
-        <StatCard
-          label="Out of Stock"
-          value={outOfStockCount}
-          icon={<PackageX size={18} />}
-          tone="red"
-          hint={outOfStockCount > 0 ? 'Can\'t be sold right now' : 'Nothing out of stock'}
-        />
-        <StatCard label="Total Categories" value={categories.length} icon={<Tags size={18} />} tone="purple" hint="Defined in the catalog" />
-      </div>
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -278,9 +240,9 @@ export default function InventoryPage() {
           <Table>
             <THead>
               <tr>
-                <Th>#</Th>
+                <Th className="hidden md:table-cell">#</Th>
                 <Th>Product</Th>
-                <Th>
+                <Th className="hidden md:table-cell">
                   <button onClick={() => toggleSort('category_name')} className="flex items-center gap-1">
                     Category {sortIcon('category_name')}
                   </button>
@@ -290,53 +252,71 @@ export default function InventoryPage() {
                     Current Stock {sortIcon('current_stock')}
                   </button>
                 </Th>
-                <Th className="text-right">
+                <Th className="hidden text-right md:table-cell">
                   <button onClick={() => toggleSort('minimum_stock')} className="ml-auto flex items-center gap-1">
                     Min. Stock {sortIcon('minimum_stock')}
                   </button>
                 </Th>
-                <Th className="text-right">
+                <Th className="hidden text-right md:table-cell">
                   <button onClick={() => toggleSort('active_price')} className="ml-auto flex items-center gap-1">
                     Selling Price {sortIcon('active_price')}
                   </button>
                 </Th>
-                <Th className="text-right">
+                <Th className="hidden text-right lg:table-cell">
                   <button onClick={() => toggleSort('stock_value_cost')} className="ml-auto flex items-center gap-1">
                     Stock Value (Cost) {sortIcon('stock_value_cost')}
                   </button>
                 </Th>
-                <Th>Status</Th>
+                <Th className="hidden sm:table-cell">Status</Th>
                 <Th></Th>
               </tr>
             </THead>
             <tbody>
               {pageItems.map((r, i) => (
                 <Tr key={r.id}>
-                  <Td className="text-slate-400 dark:text-[#77857c]">{(pageSafe - 1) * pageSize + i + 1}</Td>
+                  <Td className="hidden text-slate-400 dark:text-[#77857c] md:table-cell">{(pageSafe - 1) * pageSize + i + 1}</Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-600 text-[11px] font-bold text-white">
+                      <div className="hidden h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-600 text-[11px] font-bold text-white sm:flex">
                         {initials(r.name)}
                       </div>
-                      <div>
+                      <div className="min-w-0 whitespace-normal">
                         <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{r.name}</p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">PRD-{String(r.id).padStart(3, '0')}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                          <span className="hidden md:inline">PRD-{String(r.id).padStart(3, '0')}</span>
+                          <span className="md:hidden">{`${r.category_name ?? 'No category'} · ${r.active_price ? tzs(r.active_price) : 'No price'}`}</span>
+                          </p>
+                          <p className="mt-1 sm:hidden">
+                            <Badge tone={STATUS_TONE[r.status]} className="whitespace-nowrap">{STATUS_LABEL[r.status] ?? r.status.replace(/_/g, ' ')}</Badge>
+                        </p>
                       </div>
                     </div>
                   </Td>
-                  <Td>{r.category_name ? <Badge tone="blue">{r.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
+                  <Td className="hidden md:table-cell">{r.category_name ? <Badge tone="blue">{r.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
                   <Td className="text-right">
-                    {r.current_stock} {r.unit}
+                    <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      {r.current_stock} {r.unit}
+                    </span>
+                    <span
+                      role="img"
+                      aria-label={`${r.current_stock} of ${r.minimum_stock * 3} ${r.unit} target`}
+                      className="mt-1 ml-auto block h-1.5 w-20 overflow-hidden rounded-full bg-slate-100 dark:bg-[rgba(255,255,255,0.08)]"
+                    >
+                      <span
+                        className={`block h-full rounded-full ${r.status === 'OUT_OF_STOCK' ? 'bg-danger-500' : r.status === 'LOW' ? 'bg-amber-500' : 'bg-green-600'}`}
+                        style={{ width: `${Math.min(100, Math.max(r.current_stock > 0 ? 6 : 0, (r.current_stock / Math.max(r.minimum_stock * 3, 1)) * 100))}%` }}
+                      />
+                    </span>
                   </Td>
-                  <Td className="text-right text-slate-400 dark:text-[#77857c]">
+                  <Td className="hidden text-right text-slate-400 dark:text-[#77857c] md:table-cell">
                     {r.minimum_stock} {r.unit}
                   </Td>
-                  <Td className="text-right">{r.active_price ? tzs(r.active_price) : <Badge tone="amber">No price</Badge>}</Td>
-                  <Td className="text-right">{tzs(r.stock_value_cost)}</Td>
-                  <Td>
+                  <Td className="hidden text-right md:table-cell">{r.active_price ? tzs(r.active_price) : <Badge tone="amber">No price</Badge>}</Td>
+                  <Td className="hidden text-right lg:table-cell">{tzs(r.stock_value_cost)}</Td>
+                  <Td className="hidden sm:table-cell">
                     <Badge tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status] ?? r.status.replace(/_/g, ' ')}</Badge>
                   </Td>
-                  <Td>
+                  <Td className="!px-2 md:!px-4">
                     <div className="flex items-center gap-3">
                       <button onClick={() => openHistory(r)} className="text-slate-400 dark:text-[#77857c] hover:text-blue-600" title="Stock history">
                         <History size={16} />

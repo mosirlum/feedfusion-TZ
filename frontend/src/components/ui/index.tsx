@@ -288,6 +288,94 @@ export function PageHeader({
   );
 }
 
+
+// ---------------------------------------------------------------------------
+// SummaryHero (2026-10-10 UI pass) — the brand-gradient header card used on
+// list/record pages: icon + title + one-line purpose on the left, the primary
+// action on the right, then ONE lead number and up to four supporting
+// numbers. Replaces PageHeader + a row of equal StatCards so every page opens
+// with the figure that matters most, the way Dashboard does.
+// ---------------------------------------------------------------------------
+export interface HeroStatItem {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  /** 'warn' (amber) / 'bad' (red) tint the value so attention items read at a glance. */
+  tone?: 'default' | 'warn' | 'bad';
+}
+
+export function HeroButton({ icon, children, className, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { icon?: ReactNode }) {
+  return (
+    <button
+      type="button"
+      {...rest}
+      className={clsx(
+        'inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-green-800 shadow-sm transition active:scale-[0.98] hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-green-800 disabled:opacity-60',
+        className
+      )}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+export function SummaryHero({
+  icon,
+  title,
+  subtitle,
+  action,
+  lead,
+  stats,
+}: {
+  icon?: ReactNode;
+  title: string;
+  subtitle?: ReactNode;
+  action?: ReactNode;
+  lead: { label: string; value: ReactNode; hint?: ReactNode };
+  stats?: HeroStatItem[];
+}) {
+  const tone = (t?: HeroStatItem['tone']) => (t === 'bad' ? 'text-red-200' : t === 'warn' ? 'text-amber-200' : 'text-white');
+  return (
+    <section aria-label={`${title} summary`} className="mb-5 overflow-hidden rounded-card bg-brand-gradient p-5 text-white shadow-panel sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          {icon && <span className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">{icon}</span>}
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl font-extrabold leading-tight">{title}</h1>
+            {subtitle && <p className="mt-0.5 text-sm text-green-100/80">{subtitle}</p>}
+          </div>
+        </div>
+        {action && <div className="flex flex-shrink-0 flex-wrap items-center gap-2.5">{action}</div>}
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:items-end">
+        <div>
+          <p className="text-sm text-green-100/80">{lead.label}</p>
+          <p className="mt-1 break-words font-display text-3xl font-extrabold tabular-nums sm:text-4xl">{lead.value}</p>
+          {lead.hint && <p className="mt-1 text-sm text-green-100/75">{lead.hint}</p>}
+        </div>
+        {stats && stats.length > 0 && (
+          <dl
+            className={clsx(
+              'grid grid-cols-2 gap-x-4 gap-y-4 border-t border-white/10 pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0',
+              stats.length >= 4 ? 'sm:grid-cols-4' : stats.length === 3 ? 'sm:grid-cols-3' : ''
+            )}
+          >
+            {stats.map((st) => (
+              <div key={st.label} className="min-w-0">
+                <dt className="text-xs text-green-100/75">{st.label}</dt>
+                <dd className={clsx('mt-0.5 break-words font-display text-lg font-bold tabular-nums sm:text-xl', tone(st.tone))}>{st.value}</dd>
+                {st.hint && <p className="mt-0.5 text-[11px] text-green-100/65">{st.hint}</p>}
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function StatCard({
   label,
   value,
