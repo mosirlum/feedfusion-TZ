@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Printer, ArrowLeft, CheckCircle2, XCircle, Link2, Undo2 } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Printer, ArrowLeft, CheckCircle2, XCircle, Link2, Undo2, Trash2 } from 'lucide-react';
 import { deliveryNotesApi, settingsApi, apiErrorMessage } from '../lib/api';
 import { DeliveryNote, BusinessSettings, DeliveryNoteStatus } from '../types';
 import { formatDate } from '../lib/format';
-import { Badge, Button, FullPageSpinner, Input } from '../components/ui';
+import { Badge, Button, FullPageSpinner, Input, Modal } from '../components/ui';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/Toast';
 
 // Delivery Note view/print page (2026-10-16) — same document family as the
@@ -21,6 +22,9 @@ const STATUS_TONE: Record<DeliveryNoteStatus, 'blue' | 'green' | 'red'> = {
 export default function DeliveryNoteViewPage() {
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
+  const navigate = useNavigate();
+  const { isOwner } = useAuth();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [note, setNote] = useState<DeliveryNote | null>(null);
   const [settings, setSettings] = useState<BusinessSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +59,20 @@ export default function DeliveryNoteViewPage() {
       toast.error(apiErrorMessage(err, 'Could not update the status.'));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function deleteNote() {
+    if (!note) return;
+    setBusy(true);
+    try {
+      await deliveryNotesApi.remove(note.id);
+      toast.success(`${note.delivery_note_number} deleted.`);
+      navigate('/delivery-notes');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Could not delete the delivery note.'));
+      setBusy(false);
+      setConfirmDelete(false);
     }
   }
 
@@ -101,6 +119,11 @@ export default function DeliveryNoteViewPage() {
           {note.status === 'DELIVERED' && (
             <Button size="sm" variant="ghost" icon={<Undo2 size={14} />} loading={busy} onClick={() => changeStatus('ISSUED', 'Moved back to issued.')}>
               Undo Delivered
+            </Button>
+          )}
+          {note.status === 'CANCELLED' && isOwner && (
+            <Button size="sm" variant="danger" icon={<Trash2 size={14} />} onClick={() => setConfirmDelete(true)}>
+              Delete
             </Button>
           )}
           <Button size="sm" variant="outline" icon={<Printer size={15} />} onClick={() => window.print()}>
@@ -171,8 +194,6 @@ export default function DeliveryNoteViewPage() {
             <p><span className="font-semibold">Date:</span> {formatDate(note.delivery_date)}</p>
             {note.linked_invoice_number && <p><span className="font-semibold">Invoice No.:</span> {note.linked_invoice_number}</p>}
             {note.reference && <p><span className="font-semibold">Our Ref:</span> {note.reference}</p>}
-            {note.driver_name && <p><span className="font-semibold">Driver:</span> {note.driver_name}</p>}
-            {note.vehicle_number && <p><span className="font-semibold">Vehicle:</span> {note.vehicle_number}</p>}
           </div>
         </div>
 
@@ -228,6 +249,27 @@ export default function DeliveryNoteViewPage() {
 
         <p className="mt-6 text-center text-[11px] italic text-slate-400">Thank you for your business!</p>
       </div>
+
+      <Modal
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title="Delete delivery note"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+              Keep it
+            </Button>
+            <Button variant="danger" loading={busy} onClick={deleteNote}>
+              Delete permanently
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-slate-600 dark:text-[#b6c2ba]">
+          {note.delivery_note_number} for {note.customer_name} will be removed for good. Stock and sales are not affected.
+          The deletion is recorded in the Audit Log.
+        </p>
+      </Modal>
     </div>
   );
 }

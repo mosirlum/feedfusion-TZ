@@ -48,8 +48,6 @@ export default function DeliveryNoteFormPage() {
 
   const [reference, setReference] = useState('');
   const [deliveryDate, setDeliveryDate] = useState(todayIso());
-  const [driverName, setDriverName] = useState('');
-  const [vehicleNumber, setVehicleNumber] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -166,8 +164,6 @@ export default function DeliveryNoteFormPage() {
         customerPhone: customerPhone.trim() || null,
         deliveryAddress: customerAddress.trim() || null,
         deliveryDate: deliveryDate || null,
-        driverName: driverName.trim() || null,
-        vehicleNumber: vehicleNumber.trim() || null,
         reference: reference.trim() || null,
         notes: notes.trim() || null,
         invoiceNumber: invoiceNumber.trim() || null,
@@ -372,7 +368,7 @@ export default function DeliveryNoteFormPage() {
           </Card>
 
           <Card className="p-5">
-            <FormField label="Notes" hint="Anything the driver or customer should know about this delivery.">
+            <FormField label="Notes" hint="Anything the customer should know about this delivery.">
               <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
             </FormField>
           </Card>
@@ -385,12 +381,6 @@ export default function DeliveryNoteFormPage() {
             <div className="flex flex-col gap-3">
               <FormField label="Delivery date">
                 <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
-              </FormField>
-              <FormField label="Driver name (optional)">
-                <Input value={driverName} onChange={(e) => setDriverName(e.target.value)} />
-              </FormField>
-              <FormField label="Vehicle number (optional)">
-                <Input value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())} placeholder="e.g. T 123 ABC" />
               </FormField>
               <FormField label="Invoice no. (optional)" hint="Link an existing sale now, or leave blank and link it later once the sale is done.">
                 <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. INV-2026-0001" />

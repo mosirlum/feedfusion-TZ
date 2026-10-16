@@ -27,8 +27,6 @@ export interface CreateDeliveryNoteInput {
   customerPhone: string | null;
   deliveryAddress: string | null;
   deliveryDate: string | null; // YYYY-MM-DD; null → DB default (today)
-  driverName: string | null;
-  vehicleNumber: string | null;
   reference: string | null;
   notes: string | null;
   linkedSaleId: number | null;
@@ -40,8 +38,8 @@ export async function insertDeliveryNote(input: CreateDeliveryNoteInput, client:
   const { rows } = await client.query(
     `INSERT INTO delivery_notes
        (delivery_note_number, customer_id, customer_name, customer_phone, delivery_address,
-        delivery_date, driver_name, vehicle_number, reference, notes, linked_sale_id, created_by)
-     VALUES ($1, $2, $3, $4, $5, COALESCE($6::date, CURRENT_DATE), $7, $8, $9, $10, $11, $12)
+        delivery_date, reference, notes, linked_sale_id, created_by)
+     VALUES ($1, $2, $3, $4, $5, COALESCE($6::date, CURRENT_DATE), $7, $8, $9, $10)
      RETURNING *`,
     [
       input.deliveryNoteNumber,
@@ -50,8 +48,6 @@ export async function insertDeliveryNote(input: CreateDeliveryNoteInput, client:
       input.customerPhone,
       input.deliveryAddress,
       input.deliveryDate,
-      input.driverName,
-      input.vehicleNumber,
       input.reference,
       input.notes,
       input.linkedSaleId,
@@ -102,6 +98,13 @@ export async function findDeliveryNoteById(id: number) {
 export async function updateDeliveryNoteStatus(id: number, status: string) {
   const { rows } = await pool.query(`UPDATE delivery_notes SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
   return rows[0] ?? null;
+}
+
+export async function deleteDeliveryNote(id: number) {
+  // delivery_note_items go with it (ON DELETE CASCADE). Nothing else
+  // references a delivery note, and it never touched stock.
+  const { rowCount } = await pool.query(`DELETE FROM delivery_notes WHERE id = $1`, [id]);
+  return (rowCount ?? 0) > 0;
 }
 
 export async function setLinkedSale(id: number, saleId: number | null) {

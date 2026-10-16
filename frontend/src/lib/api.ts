@@ -186,6 +186,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   QUOTATION_NOT_FOUND: 'This quotation no longer exists.',
   DELIVERY_NOTE_NOT_FOUND: 'This delivery note no longer exists.',
   DELIVERY_NOTE_NUMBER_COLLISION: 'Another delivery note was created at the same moment — please try again.',
+  DELIVERY_NOTE_MUST_BE_CANCELLED_FIRST: 'Cancel this delivery note first, then you can delete it.',
   DELIVERY_NOTE_ALREADY_CANCELLED: 'This delivery note is cancelled and can no longer be changed.',
   INVALID_DELIVERY_NOTE_ITEM: 'Every item needs a product and a quantity greater than zero.',
   INVALID_DELIVERY_NOTE_STATUS: 'That is not a valid delivery note status.',
@@ -565,14 +566,13 @@ export const deliveryNotesApi = {
     customerPhone?: string | null;
     deliveryAddress?: string | null;
     deliveryDate?: string | null;
-    driverName?: string | null;
-    vehicleNumber?: string | null;
     reference?: string | null;
     notes?: string | null;
     invoiceNumber?: string | null;
     items: Array<{ productId: number; quantity: number }>;
   }) => http.post<DeliveryNote>('/delivery-notes', input),
   updateStatus: (id: number, status: DeliveryNoteStatus) => http.patch<DeliveryNote>(`/delivery-notes/${id}/status`, { status }),
+  remove: (id: number) => http.delete<{ deleted: boolean; deliveryNoteNumber: string }>(`/delivery-notes/${id}`),
   linkSale: (id: number, invoiceNumber: string | null) => http.patch<DeliveryNote>(`/delivery-notes/${id}/link-sale`, { invoiceNumber }),
 };
 

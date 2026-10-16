@@ -20,11 +20,11 @@ export async function createDeliveryNoteHandler(req: Request, res: Response, nex
   try {
     const {
       customerId, customerName, customerPhone, deliveryAddress, deliveryDate,
-      driverName, vehicleNumber, reference, notes, invoiceNumber, items,
+      reference, notes, invoiceNumber, items,
     } = req.body ?? {};
     res.status(201).json(
       await deliveryNotesService.createDeliveryNote(
-        { customerId, customerName, customerPhone, deliveryAddress, deliveryDate, driverName, vehicleNumber, reference, notes, invoiceNumber, items },
+        { customerId, customerName, customerPhone, deliveryAddress, deliveryDate, reference, notes, invoiceNumber, items },
         req.user!
       )
     );
@@ -52,6 +52,14 @@ export async function getDeliveryNoteHandler(req: Request, res: Response, next: 
 export async function updateDeliveryNoteStatusHandler(req: Request, res: Response, next: NextFunction) {
   try {
     res.status(200).json(await deliveryNotesService.updateDeliveryNoteStatus(parseId(req), req.body?.status, req.user!));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteDeliveryNoteHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.status(200).json(await deliveryNotesService.deleteDeliveryNote(parseId(req), req.user!));
   } catch (err) {
     next(err);
   }

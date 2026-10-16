@@ -4,6 +4,7 @@ import {
   listDeliveryNotes,
   updateDeliveryNoteStatus,
   linkDeliveryNoteToSale,
+  deleteDeliveryNote,
   previewNextDeliveryNoteNumber,
 } from '../../src/services/deliveryNotes.service';
 import { completeSale } from '../../src/services/sales.service';
@@ -48,7 +49,7 @@ describe('Delivery Notes — standalone, no stock effect', () => {
   it('creates a delivery note without any sale, numbers it DN-YYYY-0001, and leaves stock untouched', async () => {
     const { product, actor } = await seed();
     const note = await createDeliveryNote(
-      { customerName: 'Mzee Juma', deliveryAddress: 'Kibaha', driverName: 'Ali', vehicleNumber: 'T 123 ABC', items: [{ productId: product.id, quantity: 30 }] },
+      { customerName: 'Mzee Juma', deliveryAddress: 'Kibaha', items: [{ productId: product.id, quantity: 30 }] },
       actor
     );
     expect(note!.delivery_note_number).toMatch(/^DN-\d{4}-0001$/);
@@ -128,5 +129,46 @@ describe('Delivery Notes — standalone, no stock effect', () => {
     const { rows } = await pool.query(`SELECT action FROM audit_logs WHERE entity_type = 'delivery_note' ORDER BY id`);
     expect(rows.map((r) => r.action)).toEqual(['DELIVERY_NOTE_CREATED', 'DELIVERY_NOTE_STATUS_CHANGED']);
     await expect(getDeliveryNote(99999)).rejects.toMatchObject({ message: 'DELIVERY_NOTE_NOT_FOUND' });
+  });
+
+  it('delete: only a cancelled note can be deleted, it disappears with its items, is audited, and stock is untouched', async () => {
+    const { product, actor } = await seed();
+    const note = await createDeliveryNote({ customerName: 'Mzee Juma', items: [{ productId: product.id, quantity: 5 }] }, actor);
+
+    // A live (ISSUED) note must be cancelled first.
+    await expect(deleteDeliveryNote(note!.id, actor)).rejects.toMatchObject({ message: 'DELIVERY_NOTE_MUST_BE_CANCELLED_FIRST' });
+    expect(await listDeliveryNotes()).toHaveLength(1);
+
+    await updateDeliveryNoteStatus(note!.id, 'CANCELLED', actor);
+    const result = await deleteDeliveryNote(note!.id, actor);
+    expect(result).toEqual({ deleted: true, deliveryNoteNumber: note!.delivery_note_number });
+
+    expect(await listDeliveryNotes()).toHaveLength(0);
+    await expect(getDeliveryNote(note!.id)).rejects.toMatchObject({ message: 'DELIVERY_NOTE_NOT_FOUND' });
+    const items = await pool.query('SELECT 1 FROM delivery_note_items WHERE delivery_note_id = $1', [note!.id]);
+    expect(items.rowCount).toBe(0);
+
+    const { rows } = await pool.query(`SELECT action, details FROM audit_logs WHERE entity_type = 'delivery_note' ORDER BY id`);
+    expect(rows.map((r) => r.action)).toEqual(['DELIVERY_NOTE_CREATED', 'DELIVERY_NOTE_STATUS_CHANGED', 'DELIVERY_NOTE_DELETED']);
+    expect(rows[2].details).toMatchObject({ deliveryNoteNumber: note!.delivery_note_number, customerName: 'Mzee Juma', itemCount: 1 });
+
+    expect(await stockOf(product.id)).toBe(100);
+    await expect(deleteDeliveryNote(note!.id, actor)).rejects.toMatchObject({ message: 'DELIVERY_NOTE_NOT_FOUND' });
+  });
+
+  it('delete leaves a linked sale completely untouched', async () => {
+    const { product, actor } = await seed();
+    const sale: any = await completeSale({
+      items: [{ productId: product.id, quantity: 4 }],
+      paymentMethod: 'CASH',
+      paymentAmount: 8000,
+      servedBy: { id: actor.id, role: 'owner' },
+    });
+    const note = await createDeliveryNote({ customerName: 'A', invoiceNumber: sale.invoice_number, items: [{ productId: product.id, quantity: 4 }] }, actor);
+    await updateDeliveryNoteStatus(note!.id, 'CANCELLED', actor);
+    await deleteDeliveryNote(note!.id, actor);
+    const { rows } = await pool.query('SELECT status FROM sales WHERE id = $1', [sale.id]);
+    expect(rows[0].status).toBe('COMPLETED');
+    expect(await stockOf(product.id)).toBe(96);
   });
 });

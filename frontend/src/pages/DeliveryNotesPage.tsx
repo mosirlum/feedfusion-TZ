@@ -42,8 +42,6 @@ export default function DeliveryNotesPage() {
       return (
         n.delivery_note_number.toLowerCase().includes(q) ||
         n.customer_name.toLowerCase().includes(q) ||
-        (n.vehicle_number ?? '').toLowerCase().includes(q) ||
-        (n.driver_name ?? '').toLowerCase().includes(q) ||
         (n.linked_invoice_number ?? '').toLowerCase().includes(q)
       );
     });
@@ -83,7 +81,7 @@ export default function DeliveryNotesPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by number, customer, driver, vehicle or invoice…"
+            placeholder="Search by number, customer or invoice…"
             className="pl-9"
           />
         </div>
@@ -117,7 +115,6 @@ export default function DeliveryNotesPage() {
                 <Th>Delivery Note</Th>
                 <Th>Customer</Th>
                 <Th className="hidden md:table-cell">Date</Th>
-                <Th className="hidden lg:table-cell">Driver / Vehicle</Th>
                 <Th className="hidden md:table-cell text-right">Items</Th>
                 <Th className="hidden lg:table-cell">Invoice</Th>
                 <Th className="hidden md:table-cell">Status</Th>
@@ -139,9 +136,6 @@ export default function DeliveryNotesPage() {
                     </span>
                   </Td>
                   <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{formatDate(n.delivery_date)}</Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] lg:table-cell">
-                    {n.driver_name || n.vehicle_number ? [n.driver_name, n.vehicle_number].filter(Boolean).join(' · ') : '—'}
-                  </Td>
                   <Td className="hidden text-right text-slate-500 dark:text-[#97a49b] md:table-cell">{n.item_count ?? 0}</Td>
                   <Td className="hidden text-slate-500 dark:text-[#97a49b] lg:table-cell">{n.linked_invoice_number ?? '—'}</Td>
                   <Td className="hidden md:table-cell">

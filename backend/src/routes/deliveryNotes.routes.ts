@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
+import { requireRole } from '../middleware/requireRole';
 import {
   previewNextDeliveryNoteNumberHandler,
   createDeliveryNoteHandler,
@@ -7,6 +8,7 @@ import {
   getDeliveryNoteHandler,
   updateDeliveryNoteStatusHandler,
   linkDeliveryNoteHandler,
+  deleteDeliveryNoteHandler,
 } from '../controllers/deliveryNotes.controller';
 
 const router = Router();
@@ -20,5 +22,7 @@ router.post('/', authenticate, createDeliveryNoteHandler);
 router.get('/:id', authenticate, getDeliveryNoteHandler);
 router.patch('/:id/status', authenticate, updateDeliveryNoteStatusHandler);
 router.patch('/:id/link-sale', authenticate, linkDeliveryNoteHandler);
+// Delete = owner only, and only for a cancelled note (enforced in the service).
+router.delete('/:id', authenticate, requireRole('owner'), deleteDeliveryNoteHandler);
 
 export default router;

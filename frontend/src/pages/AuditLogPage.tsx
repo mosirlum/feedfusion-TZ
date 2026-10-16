@@ -134,6 +134,7 @@ const ACTION_META: Record<string, { label: string; tone: 'green' | 'blue' | 'red
   QUOTATION_CONVERTED: { label: 'Quotation Converted', tone: 'green' },
   DELIVERY_NOTE_CREATED: { label: 'Delivery Note Created', tone: 'green' },
   DELIVERY_NOTE_STATUS_CHANGED: { label: 'Delivery Note Status Changed', tone: 'blue' },
+  DELIVERY_NOTE_DELETED: { label: 'Delivery Note Deleted', tone: 'red' },
   DELIVERY_NOTE_LINKED: { label: 'Delivery Note Linked to Sale', tone: 'blue' },
   BUSINESS_SETTINGS_UPDATED: { label: 'Business Settings Updated', tone: 'amber' },
 };

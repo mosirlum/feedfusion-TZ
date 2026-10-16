@@ -22,8 +22,6 @@ export interface CreateDeliveryNoteLineInput {
   customerPhone?: string | null;
   deliveryAddress?: string | null;
   deliveryDate?: string | null; // YYYY-MM-DD, defaults to today
-  driverName?: string | null;
-  vehicleNumber?: string | null;
   reference?: string | null;
   notes?: string | null;
   invoiceNumber?: string | null; // optional link to an existing sale
@@ -96,8 +94,6 @@ export async function createDeliveryNote(input: CreateDeliveryNoteLineInput, act
             customerPhone: input.customerPhone?.trim() || customer?.phone || null,
             deliveryAddress: input.deliveryAddress?.trim() || customer?.address || null,
             deliveryDate: input.deliveryDate || null,
-            driverName: input.driverName?.trim() || null,
-            vehicleNumber: input.vehicleNumber?.trim() || null,
             reference: input.reference?.trim() || null,
             notes: input.notes?.trim() || null,
             linkedSaleId,
@@ -155,6 +151,32 @@ export async function updateDeliveryNoteStatus(id: number, status: string, actor
     details: { deliveryNoteNumber: updated.delivery_note_number, from: note.status, status },
   });
   return deliveryNotesRepo.findDeliveryNoteById(id);
+}
+
+/**
+ * Permanently removes a delivery note. Only a CANCELLED note can be deleted
+ * (cancel first, then delete) so a live note a customer may be holding can't
+ * vanish by accident. The deletion itself is recorded in the audit log with
+ * a snapshot of what was removed. Stock and sales are untouched.
+ */
+export async function deleteDeliveryNote(id: number, actor: AuthenticatedUser) {
+  const note = await deliveryNotesRepo.findDeliveryNoteById(id);
+  if (!note) throw new HttpError(404, 'DELIVERY_NOTE_NOT_FOUND');
+  if (note.status !== 'CANCELLED') throw new HttpError(400, 'DELIVERY_NOTE_MUST_BE_CANCELLED_FIRST');
+  await deliveryNotesRepo.deleteDeliveryNote(id);
+  await writeAuditLog({
+    userId: actor.id,
+    action: 'DELIVERY_NOTE_DELETED',
+    entityType: 'delivery_note',
+    entityId: id,
+    details: {
+      deliveryNoteNumber: note.delivery_note_number,
+      customerName: note.customer_name,
+      itemCount: note.items.length,
+      linkedInvoiceNumber: note.linked_invoice_number ?? null,
+    },
+  });
+  return { deleted: true, deliveryNoteNumber: note.delivery_note_number };
 }
 
 /** Link (or unlink with an empty invoiceNumber) the sale that later covers this delivery. */

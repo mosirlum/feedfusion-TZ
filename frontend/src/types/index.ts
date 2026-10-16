@@ -719,8 +719,6 @@ export interface DeliveryNote {
   customer_phone: string | null;
   delivery_address: string | null;
   delivery_date: string;
-  driver_name: string | null;
-  vehicle_number: string | null;
   reference: string | null;
   notes: string | null;
   status: DeliveryNoteStatus;
