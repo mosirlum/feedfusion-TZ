@@ -59,6 +59,7 @@ const FEATURE_ACTIONS: Record<string, string[]> = {
   // Customers + Quotations (2026-09-12, CLAUDE.md #49).
   Customers: ['CUSTOMER_CREATED', 'CUSTOMER_UPDATED'],
   Quotations: ['QUOTATION_CREATED', 'QUOTATION_STATUS_CHANGED', 'QUOTATION_CONVERTED'],
+  'Delivery Notes': ['DELIVERY_NOTE_CREATED', 'DELIVERY_NOTE_STATUS_CHANGED', 'DELIVERY_NOTE_LINKED'],
   Settings: ['BUSINESS_SETTINGS_UPDATED'],
 };
 export const AUDIT_FEATURES = [
@@ -72,6 +73,7 @@ export const AUDIT_FEATURES = [
   'Users',
   'Customers',
   'Quotations',
+  'Delivery Notes',
   'Settings',
   'Others',
 ] as const;

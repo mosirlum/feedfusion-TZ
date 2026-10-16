@@ -26,6 +26,9 @@ import MyProfilePage from './pages/MyProfilePage';
 import QuotationsPage from './pages/QuotationsPage';
 import QuotationFormPage from './pages/QuotationFormPage';
 import QuotationViewPage from './pages/QuotationViewPage';
+import DeliveryNotesPage from './pages/DeliveryNotesPage';
+import DeliveryNoteFormPage from './pages/DeliveryNoteFormPage';
+import DeliveryNoteViewPage from './pages/DeliveryNoteViewPage';
 import CustomersPage from './pages/CustomersPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -67,6 +70,10 @@ export default function App() {
         <Route path="/quotations" element={<QuotationsPage />} />
         <Route path="/quotations/new" element={<QuotationFormPage />} />
         <Route path="/quotations/:id" element={<QuotationViewPage />} />
+        {/* Delivery Notes (2026-10-16) — /new before the dynamic /:id. */}
+        <Route path="/delivery-notes" element={<DeliveryNotesPage />} />
+        <Route path="/delivery-notes/new" element={<DeliveryNoteFormPage />} />
+        <Route path="/delivery-notes/:id" element={<DeliveryNoteViewPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route
           path="/inventory"

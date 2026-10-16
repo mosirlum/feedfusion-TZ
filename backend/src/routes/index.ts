@@ -17,6 +17,7 @@ import reportsRoutes from './reports.routes';
 import auditLogsRoutes from './auditLogs.routes';
 import customersRoutes from './customers.routes';
 import quotationsRoutes from './quotations.routes';
+import deliveryNotesRoutes from './deliveryNotes.routes';
 import settingsRoutes from './settings.routes';
 import businessGrowthRoutes from './businessGrowth.routes';
 
@@ -47,6 +48,8 @@ router.use('/audit-logs', auditLogsRoutes);
 // Customers + Quotations (2026-09-12, CLAUDE.md #49).
 router.use('/customers', customersRoutes);
 router.use('/quotations', quotationsRoutes);
+// Delivery Notes (2026-10-16) — standalone, never touches stock.
+router.use('/delivery-notes', deliveryNotesRoutes);
 // Business Settings (2026-09-12, CLAUDE.md #49) — updateBusinessSettings()
 // in businessSettingsRepo.ts existed since the original build but had no
 // route ever calling it; this is the first UI for it.

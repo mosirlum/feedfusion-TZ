@@ -6,6 +6,7 @@ import {
   PackageSearch,
   BadgeCheck,
   Truck,
+  PackageCheck,
   Building2,
   ClipboardList,
   SlidersHorizontal,
@@ -45,6 +46,8 @@ export const navSections: { title: string; items: NavItem[] }[] = [
       // role, same as the POS itself: any role can quote a customer a
       // price before a sale happens.
       { to: '/quotations', label: 'Quotations', icon: FileText, roles: ['owner', 'sales', 'manager'] },
+      // Delivery Notes (2026-10-16) — standalone, any role that sells.
+      { to: '/delivery-notes', label: 'Delivery Notes', icon: PackageCheck, roles: ['owner', 'sales', 'manager'] },
       { to: '/customers', label: 'Customers', icon: Users, roles: ['owner', 'sales', 'manager'] },
     ],
   },

@@ -70,6 +70,7 @@ const FEATURES = [
   'Users',
   'Customers',
   'Quotations',
+  'Delivery Notes',
   'Settings',
   'Others',
 ] as const;
@@ -87,6 +88,7 @@ const FEATURE_ICON: Record<string, typeof ShoppingCart> = {
   // Customers + Quotations + Settings (2026-09-12, CLAUDE.md #49).
   Customers: Contact,
   Quotations: FileText,
+  'Delivery Notes': Truck,
   Settings: Settings2,
   Others: MoreHorizontal,
 };
@@ -130,6 +132,9 @@ const ACTION_META: Record<string, { label: string; tone: 'green' | 'blue' | 'red
   QUOTATION_CREATED: { label: 'Quotation Created', tone: 'green' },
   QUOTATION_STATUS_CHANGED: { label: 'Quotation Status Changed', tone: 'blue' },
   QUOTATION_CONVERTED: { label: 'Quotation Converted', tone: 'green' },
+  DELIVERY_NOTE_CREATED: { label: 'Delivery Note Created', tone: 'green' },
+  DELIVERY_NOTE_STATUS_CHANGED: { label: 'Delivery Note Status Changed', tone: 'blue' },
+  DELIVERY_NOTE_LINKED: { label: 'Delivery Note Linked to Sale', tone: 'blue' },
   BUSINESS_SETTINGS_UPDATED: { label: 'Business Settings Updated', tone: 'amber' },
 };
 

@@ -29,6 +29,8 @@ import type {
   ProposedSaleItem,
   PublicUser,
   Quotation,
+  DeliveryNote,
+  DeliveryNoteStatus,
   Sale,
   SaleEditRequest,
   SalesStats,
@@ -182,6 +184,14 @@ const ERROR_MESSAGES: Record<string, string> = {
   DISCOUNT_PCT_OUT_OF_RANGE: 'Discount must be between 0 and 100%.',
   PRODUCT_NOT_FOUND: 'That product no longer exists.',
   QUOTATION_NOT_FOUND: 'This quotation no longer exists.',
+  DELIVERY_NOTE_NOT_FOUND: 'This delivery note no longer exists.',
+  DELIVERY_NOTE_NUMBER_COLLISION: 'Another delivery note was created at the same moment — please try again.',
+  DELIVERY_NOTE_ALREADY_CANCELLED: 'This delivery note is cancelled and can no longer be changed.',
+  INVALID_DELIVERY_NOTE_ITEM: 'Every item needs a product and a quantity greater than zero.',
+  INVALID_DELIVERY_NOTE_STATUS: 'That is not a valid delivery note status.',
+  INVALID_DELIVERY_DATE: 'Enter a valid delivery date.',
+  LINKED_SALE_NOT_FOUND: 'No sale found with that invoice number.',
+  LINKED_SALE_VOIDED: 'That sale has been voided, so it cannot be linked.',
   QUOTATION_NUMBER_COLLISION: 'Another quotation was created at the same moment — please try again.',
   QUOTATION_ALREADY_CONVERTED: 'This quotation has already been converted to a sale.',
   INVALID_QUOTATION_STATUS: 'That is not a valid quotation status.',
@@ -542,6 +552,28 @@ export const quotationsApi = {
   // Called right after POS completes the real sale pre-filled from this
   // quotation's items (see PosPage.tsx) — links the two records.
   convert: (id: number, saleId: number) => http.post<Quotation>(`/quotations/${id}/convert`, { saleId }),
+};
+
+// Delivery Notes (2026-10-16) — standalone goods-out document, no stock effect.
+export const deliveryNotesApi = {
+  nextNumber: () => http.get<{ deliveryNoteNumber: string }>('/delivery-notes/next-number'),
+  list: () => http.get<DeliveryNote[]>('/delivery-notes'),
+  get: (id: number) => http.get<DeliveryNote>(`/delivery-notes/${id}`),
+  create: (input: {
+    customerId?: number | null;
+    customerName: string;
+    customerPhone?: string | null;
+    deliveryAddress?: string | null;
+    deliveryDate?: string | null;
+    driverName?: string | null;
+    vehicleNumber?: string | null;
+    reference?: string | null;
+    notes?: string | null;
+    invoiceNumber?: string | null;
+    items: Array<{ productId: number; quantity: number }>;
+  }) => http.post<DeliveryNote>('/delivery-notes', input),
+  updateStatus: (id: number, status: DeliveryNoteStatus) => http.patch<DeliveryNote>(`/delivery-notes/${id}/status`, { status }),
+  linkSale: (id: number, invoiceNumber: string | null) => http.patch<DeliveryNote>(`/delivery-notes/${id}/link-sale`, { invoiceNumber }),
 };
 
 // ---------------------------------------------------------------------------

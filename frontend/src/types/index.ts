@@ -697,6 +697,43 @@ export interface Quotation {
   items?: QuotationItem[];
 }
 
+// New Delivery Notes module (2026-10-16) — standalone, printable goods-out
+// document. Quantities only (no prices) and never touches stock.
+export type DeliveryNoteStatus = 'ISSUED' | 'DELIVERED' | 'CANCELLED';
+
+export interface DeliveryNoteItem {
+  id: number;
+  delivery_note_id: number;
+  product_id: number | null;
+  description: string;
+  unit: string | null;
+  quantity: string;
+  sort_order: number;
+}
+
+export interface DeliveryNote {
+  id: number;
+  delivery_note_number: string;
+  customer_id: number | null;
+  customer_name: string;
+  customer_phone: string | null;
+  delivery_address: string | null;
+  delivery_date: string;
+  driver_name: string | null;
+  vehicle_number: string | null;
+  reference: string | null;
+  notes: string | null;
+  status: DeliveryNoteStatus;
+  linked_sale_id: number | null;
+  linked_invoice_number?: string | null;
+  created_by: number;
+  created_by_name?: string;
+  created_at: string;
+  // List endpoint attaches item_count; the detail endpoint attaches items.
+  item_count?: number;
+  items?: DeliveryNoteItem[];
+}
+
 // Business Settings (2026-09-12, CLAUDE.md #49) — the very first UI for
 // business_settings; every field here already existed in the database
 // except the bank/VAT/validity ones added alongside Quotations.
