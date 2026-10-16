@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   History,
@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   TriangleAlert,
+  PackageCheck,
 } from 'lucide-react';
 import { salesApi, productsApi, apiErrorMessage } from '../lib/api';
 import { Sale, SalesStats, Product, PaymentMethod } from '../types';
@@ -289,6 +290,35 @@ export default function SalesHistoryPage() {
     setSearch('');
   }
 
+  // "Create Delivery Note" shortcut (2026-10-16): loads the sale's items and
+  // opens the standalone Delivery Note form pre-filled from it. Quantities
+  // only — no prices are carried over, and nothing here touches stock.
+  const navigate = useNavigate();
+  const [dnLoadingId, setDnLoadingId] = useState<number | null>(null);
+  async function createDeliveryNoteFromSale(saleId: number) {
+    setDnLoadingId(saleId);
+    try {
+      const res = await salesApi.get(saleId);
+      const sale = res.data;
+      navigate('/delivery-notes/new', {
+        state: {
+          fromSale: {
+            invoiceNumber: sale.invoice_number,
+            customerId: sale.customer_id ?? null,
+            customerName: sale.customer_name ?? '',
+            customerPhone: sale.customer_phone ?? '',
+            customerAddress: sale.customer_address ?? '',
+            items: sale.items.map((it) => ({ productId: it.product_id, quantity: Number(it.quantity) })),
+          },
+        },
+      });
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Could not load this sale.'));
+    } finally {
+      setDnLoadingId(null);
+    }
+  }
+
   const iconBtn =
     'inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-[#77857c]';
 
@@ -303,6 +333,18 @@ export default function SalesHistoryPage() {
         <button type="button" onClick={() => setViewSaleId(s.id)} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="Print receipt" aria-label={`Print receipt ${s.invoice_number}`}>
           <Printer size={16} />
         </button>
+        {s.status === 'COMPLETED' && (
+          <button
+            type="button"
+            disabled={dnLoadingId === s.id}
+            onClick={() => createDeliveryNoteFromSale(s.id)}
+            className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50 dark:hover:bg-blue-900/30')}
+            title="Create delivery note"
+            aria-label={`Create delivery note for ${s.invoice_number}`}
+          >
+            <PackageCheck size={16} />
+          </button>
+        )}
         {s.status === 'COMPLETED' && s.payment_status === 'PARTIAL' ? (
           <button
             type="button"

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { PackageCheck, Search, Plus, Trash2, User, UserPlus, Check, X as XIcon } from 'lucide-react';
 import { productsApi, customersApi, deliveryNotesApi, apiErrorMessage } from '../lib/api';
 import { Product, Customer } from '../types';
@@ -20,6 +20,16 @@ interface DeliveryLine {
 // Customers; typing a name without selecting one keeps it a one-off.
 export default function DeliveryNoteFormPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Pre-fill from a completed sale (Sales History → "Create delivery note").
+  const fromSaleRef = useRef<{
+    invoiceNumber: string;
+    customerId: number | null;
+    customerName: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: Array<{ productId: number; quantity: number }>;
+  } | null>((location.state as { fromSale?: any } | null)?.fromSale ?? null);
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -50,8 +60,28 @@ export default function DeliveryNoteFormPage() {
   useEffect(() => {
     Promise.all([productsApi.list(), deliveryNotesApi.nextNumber()])
       .then(([products, numberRes]) => {
-        setCatalog(products.data.filter((p) => p.status === 'active'));
+        const active = products.data.filter((p) => p.status === 'active');
+        setCatalog(active);
         setNextNumber(numberRes.data.deliveryNoteNumber);
+        const fromSale = fromSaleRef.current;
+        if (fromSale) {
+          fromSaleRef.current = null; // consume once
+          setCustomerId(fromSale.customerId);
+          setCustomerName(fromSale.customerName);
+          setCustomerPhone(fromSale.customerPhone);
+          setCustomerAddress(fromSale.customerAddress);
+          setInvoiceNumber(fromSale.invoiceNumber);
+          const lines = fromSale.items
+            .map((it) => {
+              const product = active.find((p) => p.id === it.productId);
+              return product ? { key: `${product.id}-${Date.now()}`, product, quantity: it.quantity } : null;
+            })
+            .filter((l): l is DeliveryLine => l !== null);
+          setItems(lines);
+          if (lines.length < fromSale.items.length) {
+            toast.error('Some products from that sale are inactive and were not added — add them manually if needed.');
+          }
+        }
       })
       .catch((err) => toast.error(apiErrorMessage(err, 'Could not load the form.')))
       .finally(() => setLoading(false));
