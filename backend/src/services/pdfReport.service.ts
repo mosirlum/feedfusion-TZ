@@ -150,11 +150,37 @@ function pctLabel(p: number | null, goodWhenUp: boolean): { text: string; good: 
 // this mirrors the on-screen Sales tab's own stat cards (revenue,
 // transactions, discounts, voided — each with its vs-previous-period trend)
 // as a small dashboard-style row before the narrative gets into detail.
+// Shrinks a single-line text's font size until it fits `maxWidth`, never
+// below `minSize`. KPI values are money (e.g. "TZS 16,400,000" at 14.5pt is
+// ~120pt wide) but a 4-up tile only has ~96pt of text room, so a fixed font
+// size wrapped to two lines and overprinted the trend line underneath
+// (owner's screenshot, 2026-10-17). Fitting per tile keeps every tile on
+// one line however large the figure gets, while short values keep the full
+// size so the row still reads as one set.
+function fitFontSize(
+  doc: PDFKit.PDFDocument,
+  text: string,
+  font: string,
+  maxSize: number,
+  minSize: number,
+  maxWidth: number
+): number {
+  let size = maxSize;
+  doc.font(font);
+  while (size > minSize) {
+    doc.fontSize(size);
+    if (doc.widthOfString(text) <= maxWidth) return size;
+    size -= 0.25;
+  }
+  return minSize;
+}
+
 function drawKpiTiles(doc: PDFKit.PDFDocument, tiles: KpiTile[]) {
   const width = contentWidth(doc);
   const gap = 10;
   const tileWidth = (width - gap * (tiles.length - 1)) / tiles.length;
   const tileHeight = 56;
+  const textWidth = tileWidth - 20;
   ensureSpace(doc, tileHeight + 16);
   const startX = doc.page.margins.left;
   const startY = doc.y;
@@ -166,13 +192,25 @@ function drawKpiTiles(doc: PDFKit.PDFDocument, tiles: KpiTile[]) {
       .font('Helvetica')
       .fontSize(7.5)
       .fillColor(MUTED)
-      .text(t.label.toUpperCase(), x + 10, startY + 9, { width: tileWidth - 20, characterSpacing: 0.3 });
-    doc.font('Helvetica-Bold').fontSize(14.5).fillColor(INK).text(t.value, x + 10, startY + 21, { width: tileWidth - 20 });
+      .text(t.label.toUpperCase(), x + 10, startY + 9, { width: textWidth, characterSpacing: 0.3, lineBreak: false });
+
+    // Value: one line, font shrunk to fit; baseline nudged down a little
+    // when shrunk so smaller figures stay vertically centred in their slot.
+    const valueSize = fitFontSize(doc, t.value, 'Helvetica-Bold', 14.5, 8.5, textWidth);
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(valueSize)
+      .fillColor(INK)
+      .text(t.value, x + 10, startY + 21 + (14.5 - valueSize) / 2, { width: textWidth, lineBreak: false });
+
+    // Trend line: same treatment ("-100.0% vs previous period" is close to
+    // the limit on the narrowest tiles).
+    const changeSize = fitFontSize(doc, t.changeText, 'Helvetica', 7.5, 6, textWidth);
     doc
       .font('Helvetica')
-      .fontSize(7.5)
+      .fontSize(changeSize)
       .fillColor(t.changeGood === null ? MUTED : t.changeGood ? GREEN_DARK : BAD)
-      .text(t.changeText, x + 10, startY + 40, { width: tileWidth - 20 });
+      .text(t.changeText, x + 10, startY + 40, { width: textWidth, lineBreak: false });
   });
 
   doc.y = startY + tileHeight + 16;
