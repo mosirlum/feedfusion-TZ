@@ -227,3 +227,28 @@ h1, h2, h3, h4 {
 .animate-fade-in {
   animation: fade-in 0.18s ease-out;
 }
+
+/* Print animation (2026-10-22, CLAUDE.md #78) — see components/PrintAnimation.tsx.
+   The paper starts hidden behind the printer body and feeds down out of the
+   slot; the LED blinks while "printing"; the tick pops in when done. */
+@keyframes print-paper-feed {
+  from { transform: translateY(0); }
+  to { transform: translateY(70px); }
+}
+@keyframes print-led {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+@keyframes print-pop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.print-anim-paper { animation: print-paper-feed 1.05s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
+.print-anim-led { animation: print-led 0.5s ease-in-out infinite; }
+.print-anim-pop { animation: print-pop 0.32s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .print-anim-paper { animation: none; transform: translateY(70px); }
+  .print-anim-led { animation: none; }
+  .print-anim-pop { animation: none; }
+}

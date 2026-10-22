@@ -48,6 +48,7 @@ import {
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
+import { usePrintAnimation } from '../components/PrintAnimation';
 import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
@@ -140,6 +141,7 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
+  const { startPrint, printOverlay } = usePrintAnimation();
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -208,14 +210,17 @@ export default function SalesHistoryPage() {
   // Invoice print tracking (2026-09-12, CLAUDE.md #47) — non-blocking:
   // window.print() always fires regardless of whether the mark-printed call
   // succeeds. Updates the row's badge locally rather than a full reload.
-  async function handlePrint(saleId: number) {
-    try {
-      const res = await salesApi.markPrinted(saleId);
-      setSales((prev) => prev.map((s) => (s.id === saleId ? { ...s, printed_at: res.data.printed_at } : s)));
-    } catch {
-      // Printing itself must never be blocked by this.
-    }
-    window.print();
+  // Print animation (CLAUDE.md #78): the mark-printed call now runs alongside
+  // the ~1.6s animation instead of before it; startPrint() calls window.print()
+  // itself when the animation ends, so printing still never depends on it.
+  function handlePrint(saleId: number) {
+    salesApi
+      .markPrinted(saleId)
+      .then((res) => setSales((prev) => prev.map((s) => (s.id === saleId ? { ...s, printed_at: res.data.printed_at } : s))))
+      .catch(() => {
+        // Printing itself must never be blocked by this.
+      });
+    startPrint();
   }
 
   async function confirmPayment() {
@@ -681,6 +686,7 @@ export default function SalesHistoryPage() {
       >
         {viewSaleId !== null && <ReceiptView saleId={viewSaleId} />}
       </Modal>
+      {printOverlay}
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 
