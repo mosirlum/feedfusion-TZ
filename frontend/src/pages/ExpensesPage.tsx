@@ -373,7 +373,12 @@ export default function ExpensesPage() {
           </div>
         </Card>
 
-        <div>
+        {/* min-w-0: a grid `1fr` track has an automatic minimum of its content's
+            width, so the 6-column history table used to stretch this column past
+            the page edge on screens under ~1700px (page scrolled sideways, cards
+            slid under the fixed sidebar). With min-w-0 the table scrolls inside
+            its own card instead (CLAUDE.md #80). */}
+        <div className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-slate-800 dark:text-[#eef3ef]">Expense History</h3>
