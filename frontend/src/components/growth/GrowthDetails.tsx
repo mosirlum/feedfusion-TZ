@@ -43,7 +43,7 @@ function periodTitle(point: GrowthTrendPoint, kind: 'weekly' | 'monthly'): strin
 // ---------------------------------------------------------------------------
 // Section wrapper
 // ---------------------------------------------------------------------------
-function Section({
+export function Section({
   id,
   icon,
   tone,

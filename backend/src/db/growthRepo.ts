@@ -116,3 +116,43 @@ export async function customerDebts(limit: number): Promise<{ rows: CustomerDebt
   const totalOutstanding = rows.reduce((sum, r) => sum + Number(r.balance_due), 0);
   return { rows: rows.slice(0, limit), totalOutstanding, debtorCount: rows.length };
 }
+
+export interface RangeMetricsRow {
+  revenue: number;
+  sales_count: number;
+  gross_profit: number;
+  /** Distinct named customers (saved or typed-name) with a completed sale in the range. */
+  customers_served: number;
+  /** Of those, customers whose FIRST-EVER completed sale falls inside the range. */
+  new_customers: number;
+}
+
+/**
+ * Month-comparison building block (2026-10-26): one round trip for the sales
+ * side of a date range. Same rules as the Reports/Growth queries — COMPLETED
+ * sales only, `sale_date::date`, revenue = SUM(total), gross profit from the
+ * sale_items cost snapshot, customers keyed exactly like `topCustomers`
+ * (saved id, else normalised typed name; unnamed walk-ins are not counted).
+ */
+export async function rangeMetrics(from: string, to: string): Promise<RangeMetricsRow> {
+  const { rows } = await pool.query(
+    `WITH s AS (
+       SELECT id, total, sale_date::date AS d,
+              COALESCE(customer_id::text, 'n:' || LOWER(TRIM(customer_name))) AS ckey,
+              (customer_id IS NOT NULL OR NULLIF(TRIM(customer_name), '') IS NOT NULL) AS named
+       FROM sales
+       WHERE status = 'COMPLETED'
+     ),
+     inr AS (SELECT * FROM s WHERE d BETWEEN $1::date AND $2::date),
+     firsts AS (SELECT ckey, MIN(d) AS first_d FROM s WHERE named GROUP BY ckey)
+     SELECT
+       (SELECT COALESCE(SUM(total), 0)::float FROM inr) AS revenue,
+       (SELECT COUNT(*)::int FROM inr) AS sales_count,
+       (SELECT COALESCE(SUM(si.line_total - si.unit_cost_snapshot * si.quantity), 0)::float
+          FROM sale_items si JOIN inr ON inr.id = si.sale_id) AS gross_profit,
+       (SELECT COUNT(DISTINCT ckey)::int FROM inr WHERE named) AS customers_served,
+       (SELECT COUNT(*)::int FROM firsts WHERE first_d BETWEEN $1::date AND $2::date) AS new_customers`,
+    [from, to]
+  );
+  return rows[0];
+}

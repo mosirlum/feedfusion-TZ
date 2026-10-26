@@ -862,3 +862,33 @@ export interface BusinessGrowthDetails {
     debts: { items: GrowthCustomerDebt[]; totalOutstanding: number; debtorCount: number };
   };
 }
+
+// Business Growth month-vs-month comparison (2026-10-26) — mirrors
+// businessGrowthMonths.service.ts exactly.
+export interface GrowthMonthMetrics {
+  revenue: number;
+  grossProfit: number;
+  expenses: number;
+  netProfit: number;
+  salesCount: number;
+  avgSale: number | null;
+  customersServed: number;
+  newCustomers: number;
+}
+
+export type GrowthMonthChanges = { [K in keyof GrowthMonthMetrics]: number | null };
+
+export interface GrowthMonthWindow {
+  /** 'YYYY-MM' */
+  month: string;
+  from: string;
+  to: string;
+}
+
+export interface GrowthMonthComparison {
+  asOf: string;
+  current: GrowthMonthWindow & { daysElapsed: number; daysInMonth: number; isPartial: boolean; metrics: GrowthMonthMetrics };
+  previousSamePeriod: GrowthMonthWindow & { isFullMonth: boolean; metrics: GrowthMonthMetrics };
+  previousFull: GrowthMonthWindow & { metrics: GrowthMonthMetrics };
+  changes: GrowthMonthChanges;
+}

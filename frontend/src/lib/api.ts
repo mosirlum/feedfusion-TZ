@@ -11,6 +11,7 @@ import type {
   AuditLogListResponse,
   BusinessGrowthAnalysis,
   BusinessGrowthDetails,
+  GrowthMonthComparison,
   BusinessSettings,
   Category,
   Customer,
@@ -519,6 +520,8 @@ export const businessGrowthApi = {
   get: () => http.get<BusinessGrowthAnalysis>('/business-growth'),
   // Heavier detail tables load separately so a slow query here never blanks the advice cards.
   details: () => http.get<BusinessGrowthDetails>('/business-growth/details'),
+  // Month-vs-month comparison (2026-10-26) — its own request so it loads/fails independently.
+  monthComparison: () => http.get<GrowthMonthComparison>('/business-growth/month-comparison'),
 };
 
 export const customersApi = {
