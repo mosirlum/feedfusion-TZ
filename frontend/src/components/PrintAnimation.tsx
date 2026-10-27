@@ -17,43 +17,46 @@ import { ReceiptDocument, type ReceiptData } from './ReceiptView';
  *   <Button onClick={() => startPrint({ invoiceNumber, total, customer })}>Print</Button>
  *   <PrintOverlay phase={phase} info={info} />
  *
- * Sequence: 'printing' (paper feeds out) → 'done' (stamp lands) → two
- * animation frames later `window.print()` with the finished paper still on
- * screen behind the dialog → 'idle' (overlay removed) once the dialog closes.
- * The overlay is `no-print`, portalled outside every `.print-area*` and its
- * invoice copy has no print hooks, so print.css hides it: it can never end up
- * on the paper (checked with a print-media PDF in the dev harness). Under
- * `prefers-reduced-motion` it is shortened and the paper just appears.
+ * Sequence: 'printing' (paper feeds out) → 'done' (stamp lands, the finished
+ * invoice stays on screen with Cancel / Print buttons under it). Nothing prints
+ * by itself: **Print** calls `window.print()` (the finished paper stays behind
+ * the browser's dialog and is removed once the dialog closes); **Cancel** (or
+ * Esc) removes the overlay. This is what the owner asked for ("it ends here,
+ * then I press Print for real"). The overlay is `no-print`, portalled outside
+ * every `.print-area*` and its invoice copy has no print hooks, so print.css
+ * hides it: it can never end up on the paper (checked with a print-media PDF
+ * in the dev harness). Under `prefers-reduced-motion` the feed is ~0.25s and
+ * the paper just appears.
  */
 
 const FEED_MS = 2400;
-const DONE_MS = 1000;
 const REDUCED_FEED_MS = 250;
-const REDUCED_DONE_MS = 250;
 
 export type PrintPhase = 'idle' | 'printing' | 'done';
 
 export function usePrintAnimation(): {
   startPrint: (data?: ReceiptData | null) => void;
+  confirmPrint: () => void;
+  cancelPrint: () => void;
   phase: PrintPhase;
   data: ReceiptData | null;
   isPrinting: boolean;
 } {
   const [phase, setPhase] = useState<PrintPhase>('idle');
   const [data, setData] = useState<ReceiptData | null>(null);
-  const timers = useRef<number[]>([]);
+  const timer = useRef<number | null>(null);
   const running = useRef(false);
 
-  const clearTimers = () => {
-    timers.current.forEach((t) => window.clearTimeout(t));
-    timers.current = [];
+  const clearTimer = () => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+    timer.current = null;
   };
 
-  // If the page/modal unmounts mid-animation, drop the pending print rather
-  // than opening a print dialog for something the person has navigated from.
+  // If the page/modal unmounts mid-animation, just stop; never print for
+  // something the person has navigated away from.
   useEffect(
     () => () => {
-      clearTimers();
+      clearTimer();
       running.current = false;
     },
     []
@@ -64,50 +67,79 @@ export function usePrintAnimation(): {
     running.current = true;
     const reduced =
       typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const feed = reduced ? REDUCED_FEED_MS : FEED_MS;
-    const done = reduced ? REDUCED_DONE_MS : DONE_MS;
-
     setData(next ?? null);
     setPhase('printing');
-    timers.current.push(window.setTimeout(() => setPhase('done'), feed));
-    timers.current.push(
-      window.setTimeout(() => {
-        // The finished invoice STAYS on screen behind the browser's print
-        // dialog (owner's request, 2026-10-27); it is removed when the dialog
-        // closes. Chrome/Edge block inside window.print() until then; a
-        // browser that returns immediately simply removes it straight away.
-        // Two frames first so the stamped paper is painted before the dialog.
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            try {
-              window.print();
-            } finally {
-              running.current = false;
-              setPhase('idle');
-            }
-          })
-        );
-      }, feed + done)
+    timer.current = window.setTimeout(() => setPhase('done'), reduced ? REDUCED_FEED_MS : FEED_MS);
+  }, []);
+
+  const cancelPrint = useCallback(() => {
+    clearTimer();
+    running.current = false;
+    setPhase('idle');
+  }, []);
+
+  // Only valid once the paper is out ('done'). Two frames first so the stamped
+  // paper is painted before the dialog; the overlay stays behind the dialog and
+  // is removed when window.print() returns (Chrome/Edge block until the dialog
+  // closes; a browser that returns at once simply removes it straight away).
+  const confirmPrint = useCallback(() => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        try {
+          window.print();
+        } finally {
+          running.current = false;
+          setPhase('idle');
+        }
+      })
     );
   }, []);
 
-  return { startPrint, phase, data, isPrinting: phase !== 'idle' };
+  return { startPrint, confirmPrint, cancelPrint, phase, data, isPrinting: phase !== 'idle' };
 }
 
 const PAPER_W = 760; // natural width of ReceiptDocument when not printable
 
-export function PrintOverlay({ phase, data }: { phase: PrintPhase; data: ReceiptData | null }): JSX.Element | null {
+export function PrintOverlay({
+  phase,
+  data,
+  onPrint,
+  onCancel,
+}: {
+  phase: PrintPhase;
+  data: ReceiptData | null;
+  onPrint: () => void;
+  onCancel: () => void;
+}): JSX.Element | null {
+  useEffect(() => {
+    if (phase === 'idle') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase, onCancel]);
   if (phase === 'idle') return null;
   return createPortal(
     <div className="no-print fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div className="absolute inset-0 animate-fade-in bg-[radial-gradient(ellipse_at_center,#0f2a1c_0%,#06130d_70%)]" />
-      <Stage phase={phase} data={data} />
+      <Stage phase={phase} data={data} onPrint={onPrint} onCancel={onCancel} />
     </div>,
     document.body
   );
 }
 
-function Stage({ phase, data }: { phase: PrintPhase; data: ReceiptData | null }) {
+function Stage({
+  phase,
+  data,
+  onPrint,
+  onCancel,
+}: {
+  phase: PrintPhase;
+  data: ReceiptData | null;
+  onPrint: () => void;
+  onCancel: () => void;
+}) {
   const done = phase === 'done';
   const innerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ scale: number; w: number; h: number }>({ scale: 0.5, w: PAPER_W / 2, h: 0 });
@@ -120,7 +152,7 @@ function Stage({ phase, data }: { phase: PrintPhase; data: ReceiptData | null })
     if (!el) return;
     const natH = el.offsetHeight;
     const availW = Math.min(window.innerWidth - 32, 460);
-    const availH = window.innerHeight - 32 - 84; // printer card + gaps
+    const availH = window.innerHeight - 32 - 84 - 64; // printer card + buttons + gaps
     const scale = Math.min(1, availW / PAPER_W, availH / natH);
     setSize({ scale, w: PAPER_W * scale, h: natH * scale });
   }, [data]);
@@ -175,6 +207,26 @@ function Stage({ phase, data }: { phase: PrintPhase; data: ReceiptData | null })
           )}
         </div>
       )}
+
+      {/* Actions: nothing prints until Print is pressed */}
+      <div className="mt-3 flex gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="h-11 flex-1 rounded-xl border border-white/25 bg-white/5 text-sm font-semibold text-white transition-colors hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onPrint}
+          disabled={!done}
+          className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-sm font-bold text-green-800 transition-opacity hover:bg-green-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Printer size={16} />
+          Print
+        </button>
+      </div>
     </div>
   );
 }

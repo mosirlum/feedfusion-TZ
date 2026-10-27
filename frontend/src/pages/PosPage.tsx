@@ -76,7 +76,7 @@ interface FromQuotationState {
 export default function PosPage() {
   const { user } = useAuth();
   const toast = useToast();
-  const { startPrint, phase: printPhase, data: printData } = usePrintAnimation();
+  const { startPrint, confirmPrint, cancelPrint, phase: printPhase, data: printData } = usePrintAnimation();
   // The real receipt open in the Sale Complete modal; feeds the animation's paper.
   const receiptInfoRef = useRef<ReceiptData | null>(null);
   const location = useLocation();
@@ -1090,7 +1090,7 @@ export default function PosPage() {
           />
         )}
       </Modal>
-      <PrintOverlay phase={printPhase} data={printData} />
+      <PrintOverlay phase={printPhase} data={printData} onPrint={confirmPrint} onCancel={cancelPrint} />
     </div>
   );
 }

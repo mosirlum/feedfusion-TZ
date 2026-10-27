@@ -142,7 +142,7 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
-  const { startPrint, phase: printPhase, data: printData } = usePrintAnimation();
+  const { startPrint, confirmPrint, cancelPrint, phase: printPhase, data: printData } = usePrintAnimation();
   // The real receipt currently open in the modal; feeds the animation's paper.
   const receiptInfoRef = useRef<ReceiptData | null>(null);
   // Printer icon in a row = open the receipt AND start printing as soon as it
@@ -708,7 +708,7 @@ export default function SalesHistoryPage() {
           </>
         )}
       </Modal>
-      <PrintOverlay phase={printPhase} data={printData} />
+      <PrintOverlay phase={printPhase} data={printData} onPrint={confirmPrint} onCancel={cancelPrint} />
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 
