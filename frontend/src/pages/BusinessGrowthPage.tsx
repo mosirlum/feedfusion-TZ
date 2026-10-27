@@ -29,6 +29,7 @@ import {
   TrendSection,
 } from '../components/growth/GrowthDetails';
 import { MonthComparisonSection } from '../components/growth/MonthComparison';
+import { MonthlyOverviewSection } from '../components/growth/MonthlyOverview';
 
 // Business Growth (2026-10-03, CLAUDE.md #73) — the owner's own ask: "kuna
 // feature 1 naomba tuiweke ambayo ni business growth... ili mteja asije
@@ -130,6 +131,8 @@ export default function BusinessGrowthPage() {
           </div>
         )}
       </section>
+
+      <MonthlyOverviewSection />
 
       <MonthComparisonSection />
 

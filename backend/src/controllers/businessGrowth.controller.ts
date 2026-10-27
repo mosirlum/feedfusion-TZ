@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as businessGrowthService from '../services/businessGrowth.service';
 import * as businessGrowthDetailsService from '../services/businessGrowthDetails.service';
 import * as businessGrowthMonthsService from '../services/businessGrowthMonths.service';
+import * as businessGrowthOverviewService from '../services/businessGrowthOverview.service';
 
 // Business Growth (2026-10-03, CLAUDE.md #73) — single read-only endpoint;
 // all the analysis logic lives in the service, same thin-controller
@@ -29,6 +30,15 @@ export async function businessGrowthDetailsHandler(req: Request, res: Response, 
 export async function monthComparisonHandler(req: Request, res: Response, next: NextFunction) {
   try {
     res.status(200).json(await businessGrowthMonthsService.getMonthComparison());
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Six-month performance overview (2026-10-27) — profit/loss per month and trajectory.
+export async function monthlyOverviewHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.status(200).json(await businessGrowthOverviewService.getMonthlyOverview());
   } catch (err) {
     next(err);
   }

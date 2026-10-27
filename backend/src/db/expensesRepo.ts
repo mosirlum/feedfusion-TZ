@@ -131,3 +131,58 @@ export async function sumExpensesForRange(from: string, to: string): Promise<num
 export async function sumExpensesForDate(date: string): Promise<number> {
   return sumExpensesForRange(date, date);
 }
+
+/**
+ * Expenses for several date windows in two queries (2026-10-27, Business Growth
+ * monthly overview). Returns, per window and in the same order, exactly what
+ * `sumExpensesForRange(from, to)` would return for that window — same rules
+ * (MONTHLY prorated by day inside its own calendar month, everything else
+ * counted in full on its date) — without a round trip per month.
+ */
+export async function sumExpensesByWindows(windows: Array<{ from: string; to: string }>): Promise<number[]> {
+  if (windows.length === 0) return [];
+  const minFrom = windows.map((w) => w.from).sort()[0];
+  const maxTo = windows.map((w) => w.to).sort().slice(-1)[0];
+  const [lumpResult, monthlyResult] = await Promise.all([
+    pool.query(
+      `SELECT expense_date, SUM(amount) AS total FROM expenses
+       WHERE expense_type != 'MONTHLY' AND expense_date BETWEEN $1 AND $2
+       GROUP BY expense_date`,
+      [minFrom, maxTo]
+    ),
+    pool.query(
+      `SELECT amount, expense_date FROM expenses
+       WHERE expense_type = 'MONTHLY'
+         AND expense_date >= ($1::date - INTERVAL '31 days')
+         AND expense_date <= ($2::date + INTERVAL '31 days')`,
+      [minFrom, maxTo]
+    ),
+  ]);
+  const lump = lumpResult.rows.map((r: { expense_date: string | Date; total: string }) => ({ date: toDateOnlyIso(r.expense_date), total: Number(r.total) }));
+  const monthly = monthlyResult.rows.map((r: { expense_date: string | Date; amount: string }) => ({ date: toDateOnlyIso(r.expense_date), amount: Number(r.amount) }));
+  return windows.map((w) => {
+    const lumpTotal = lump.reduce((sum: number, r: { date: string; total: number }) => (r.date >= w.from && r.date <= w.to ? sum + r.total : sum), 0);
+    const monthlyTotal = monthly.reduce((sum: number, r: { date: string; amount: number }) => sum + proratedMonthlyAmount(r.date, r.amount, w.from, w.to), 0);
+    return lumpTotal + monthlyTotal;
+  });
+}
+
+/**
+ * Categories of MONTHLY expenses recorded in the previous calendar month but
+ * not (yet) in the current one — e.g. "Staff Salary" is entered at month end,
+ * so mid-month the current month's net profit is overstated.
+ */
+export async function missingMonthlyCategories(prevFrom: string, prevTo: string, curFrom: string, curTo: string): Promise<string[]> {
+  const { rows } = await pool.query(
+    `SELECT DISTINCT p.category
+     FROM expenses p
+     WHERE p.expense_type = 'MONTHLY' AND p.expense_date BETWEEN $1 AND $2
+       AND NOT EXISTS (
+         SELECT 1 FROM expenses c
+         WHERE c.expense_type = 'MONTHLY' AND c.category = p.category AND c.expense_date BETWEEN $3 AND $4
+       )
+     ORDER BY p.category`,
+    [prevFrom, prevTo, curFrom, curTo]
+  );
+  return rows.map((r: { category: string }) => r.category);
+}

@@ -156,3 +156,48 @@ export async function rangeMetrics(from: string, to: string): Promise<RangeMetri
   );
   return rows[0];
 }
+
+export interface MonthSeriesRow {
+  month: string; // 'YYYY-MM'
+  revenue: number;
+  sales_count: number;
+  gross_profit: number;
+  customers_served: number;
+  new_customers: number;
+}
+
+/**
+ * One row per calendar month from `firstMonth` through `lastMonth` (both
+ * first-of-month dates), including months with no sales. Same definitions as
+ * `rangeMetrics` (COMPLETED sales, revenue = SUM(total), gross profit from the
+ * sale_items cost snapshot, customers keyed like `topCustomers`).
+ */
+export async function monthlySalesSeries(firstMonth: string, lastMonth: string): Promise<MonthSeriesRow[]> {
+  const { rows } = await pool.query(
+    `WITH months AS (
+       SELECT generate_series($1::date, $2::date, interval '1 month')::date AS m
+     ),
+     s AS (
+       SELECT id, total, date_trunc('month', sale_date::date)::date AS ms,
+              COALESCE(customer_id::text, 'n:' || LOWER(TRIM(customer_name))) AS ckey,
+              (customer_id IS NOT NULL OR NULLIF(TRIM(customer_name), '') IS NOT NULL) AS named,
+              sale_date::date AS d
+       FROM sales
+       WHERE status = 'COMPLETED'
+     ),
+     firsts AS (
+       SELECT ckey, date_trunc('month', MIN(d))::date AS first_ms FROM s WHERE named GROUP BY ckey
+     )
+     SELECT to_char(months.m, 'YYYY-MM') AS month,
+            (SELECT COALESCE(SUM(total), 0)::float FROM s WHERE s.ms = months.m) AS revenue,
+            (SELECT COUNT(*)::int FROM s WHERE s.ms = months.m) AS sales_count,
+            (SELECT COALESCE(SUM(si.line_total - si.unit_cost_snapshot * si.quantity), 0)::float
+               FROM sale_items si JOIN s ON s.id = si.sale_id WHERE s.ms = months.m) AS gross_profit,
+            (SELECT COUNT(DISTINCT ckey)::int FROM s WHERE s.ms = months.m AND named) AS customers_served,
+            (SELECT COUNT(*)::int FROM firsts WHERE firsts.first_ms = months.m) AS new_customers
+     FROM months
+     ORDER BY months.m`,
+    [firstMonth, lastMonth]
+  );
+  return rows;
+}

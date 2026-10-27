@@ -12,6 +12,7 @@ import type {
   BusinessGrowthAnalysis,
   BusinessGrowthDetails,
   GrowthMonthComparison,
+  GrowthMonthlyOverview,
   BusinessSettings,
   Category,
   Customer,
@@ -522,6 +523,8 @@ export const businessGrowthApi = {
   details: () => http.get<BusinessGrowthDetails>('/business-growth/details'),
   // Month-vs-month comparison (2026-10-26) — its own request so it loads/fails independently.
   monthComparison: () => http.get<GrowthMonthComparison>('/business-growth/month-comparison'),
+  // Six months side by side + profit/loss verdicts + trajectory (2026-10-27).
+  monthlyOverview: () => http.get<GrowthMonthlyOverview>('/business-growth/monthly-overview'),
 };
 
 export const customersApi = {

@@ -892,3 +892,39 @@ export interface GrowthMonthComparison {
   previousFull: GrowthMonthWindow & { metrics: GrowthMonthMetrics };
   changes: GrowthMonthChanges;
 }
+
+// Business Growth monthly performance overview (2026-10-27) — mirrors
+// businessGrowthOverview.service.ts exactly.
+export type GrowthVerdict = 'profit' | 'loss' | 'breakeven' | 'no_data';
+export type GrowthTrajectoryStatus = 'improving' | 'steady' | 'declining' | 'not_enough_data';
+
+export interface GrowthOverviewMonth {
+  month: string; // 'YYYY-MM'
+  from: string;
+  to: string;
+  isPartial: boolean;
+  metrics: GrowthMonthMetrics;
+  marginPct: number | null;
+  verdict: GrowthVerdict;
+}
+
+export interface GrowthTrajectory {
+  status: GrowthTrajectoryStatus;
+  recentMonths: string[];
+  earlierMonths: string[];
+  recentAvgNetProfit: number | null;
+  earlierAvgNetProfit: number | null;
+  netProfitChangePct: number | null;
+  recentAvgRevenue: number | null;
+  earlierAvgRevenue: number | null;
+  revenueChangePct: number | null;
+}
+
+export interface GrowthMonthlyOverview {
+  asOf: string;
+  months: GrowthOverviewMonth[];
+  lastFullMonth: string | null;
+  trajectory: GrowthTrajectory;
+  completeMonthsTotal: { netProfit: number; profitMonths: number; lossMonths: number };
+  missingMonthlyExpenses: { month: string; categories: string[] } | null;
+}
