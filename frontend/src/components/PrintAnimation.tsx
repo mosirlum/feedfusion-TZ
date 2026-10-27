@@ -17,10 +17,12 @@ import { ReceiptDocument, type ReceiptData } from './ReceiptView';
  *   <Button onClick={() => startPrint({ invoiceNumber, total, customer })}>Print</Button>
  *   <PrintOverlay phase={phase} info={info} />
  *
- * Sequence: 'printing' (paper feeds out) → 'done' (status turns green) →
- * 'idle' (overlay removed) → two animation frames later `window.print()`.
- * The overlay is `no-print`, portalled outside every `.print-area*` and gone
- * before the dialog opens, so it can never end up on the paper. Under
+ * Sequence: 'printing' (paper feeds out) → 'done' (stamp lands) → two
+ * animation frames later `window.print()` with the finished paper still on
+ * screen behind the dialog → 'idle' (overlay removed) once the dialog closes.
+ * The overlay is `no-print`, portalled outside every `.print-area*` and its
+ * invoice copy has no print hooks, so print.css hides it: it can never end up
+ * on the paper (checked with a print-media PDF in the dev harness). Under
  * `prefers-reduced-motion` it is shortened and the paper just appears.
  */
 
@@ -70,13 +72,19 @@ export function usePrintAnimation(): {
     timers.current.push(window.setTimeout(() => setPhase('done'), feed));
     timers.current.push(
       window.setTimeout(() => {
-        setPhase('idle');
-        // Let React remove the overlay and the browser paint once before the
-        // (blocking) print dialog opens.
+        // The finished invoice STAYS on screen behind the browser's print
+        // dialog (owner's request, 2026-10-27); it is removed when the dialog
+        // closes. Chrome/Edge block inside window.print() until then; a
+        // browser that returns immediately simply removes it straight away.
+        // Two frames first so the stamped paper is painted before the dialog.
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
-            running.current = false;
-            window.print();
+            try {
+              window.print();
+            } finally {
+              running.current = false;
+              setPhase('idle');
+            }
           })
         );
       }, feed + done)
