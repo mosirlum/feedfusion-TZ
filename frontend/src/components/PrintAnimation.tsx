@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Printer } from 'lucide-react';
-import clsx from 'clsx';
-import { tzs, formatDate } from '../lib/format';
-import type { ReceiptData } from './ReceiptView';
+import { ReceiptDocument, type ReceiptData } from './ReceiptView';
 
 /**
  * Print animation, v3 (2026-10-27, CLAUDE.md #84). History: v1 (#78) was a
@@ -33,47 +31,14 @@ const REDUCED_DONE_MS = 250;
 
 export type PrintPhase = 'idle' | 'printing' | 'done';
 
-/** What the paper shows. All optional: the animation works with none of it. */
-export interface PrintInfo {
-  invoiceNumber?: string;
-  dateLabel?: string;
-  customer?: string | null;
-  items?: Array<{ name: string; qty: string; amount: string }>;
-  subtotal?: string;
-  discount?: string;
-  total?: string;
-  paid?: boolean;
-  /** Unpaid balance (credit sale), shown as an amber stamp instead of PAID. */
-  balance?: string;
-}
-
-/** Build the paper's content from the real receipt the modal has loaded. */
-export function printInfoFromReceipt(d: ReceiptData): PrintInfo {
-  return {
-    invoiceNumber: d.invoice_number,
-    dateLabel: formatDate(d.sale_date),
-    customer: d.customer_name_or_walkin,
-    items: d.items.map((i) => ({
-      name: i.product_name,
-      qty: `${i.quantity}${i.unit ? ' ' + i.unit : ''}`,
-      amount: tzs(Number(i.line_subtotal) - Number(i.discount_amount || 0)),
-    })),
-    subtotal: tzs(d.subtotal),
-    discount: Number(d.total_discount) > 0 ? tzs(d.total_discount) : undefined,
-    total: tzs(d.total),
-    paid: d.payment_status === 'PAID',
-    balance: Number(d.balance_due) > 0 ? tzs(d.balance_due) : undefined,
-  };
-}
-
 export function usePrintAnimation(): {
-  startPrint: (info?: PrintInfo) => void;
+  startPrint: (data?: ReceiptData | null) => void;
   phase: PrintPhase;
-  info: PrintInfo;
+  data: ReceiptData | null;
   isPrinting: boolean;
 } {
   const [phase, setPhase] = useState<PrintPhase>('idle');
-  const [info, setInfo] = useState<PrintInfo>({});
+  const [data, setData] = useState<ReceiptData | null>(null);
   const timers = useRef<number[]>([]);
   const running = useRef(false);
 
@@ -92,7 +57,7 @@ export function usePrintAnimation(): {
     []
   );
 
-  const startPrint = useCallback((next?: PrintInfo) => {
+  const startPrint = useCallback((next?: ReceiptData | null) => {
     if (running.current) return; // ignore double-clicks
     running.current = true;
     const reduced =
@@ -100,7 +65,7 @@ export function usePrintAnimation(): {
     const feed = reduced ? REDUCED_FEED_MS : FEED_MS;
     const done = reduced ? REDUCED_DONE_MS : DONE_MS;
 
-    setInfo(next ?? {});
+    setData(next ?? null);
     setPhase('printing');
     timers.current.push(window.setTimeout(() => setPhase('done'), feed));
     timers.current.push(
@@ -118,148 +83,90 @@ export function usePrintAnimation(): {
     );
   }, []);
 
-  return { startPrint, phase, info, isPrinting: phase !== 'idle' };
+  return { startPrint, phase, data, isPrinting: phase !== 'idle' };
 }
 
-/** Deterministic barcode-style bars from a string (decorative, own drawing). */
-function bars(seed: string): number[] {
-  const digits = (seed.replace(/\D/g, '') || '2026').padEnd(12, '7');
-  const out: number[] = [];
-  for (let i = 0; i < 30; i++) {
-    const d = Number(digits[i % digits.length]) + i;
-    out.push(1 + (d % 3));
-  }
-  return out;
-}
+const PAPER_W = 760; // natural width of ReceiptDocument when not printable
 
-export function PrintOverlay({ phase, info }: { phase: PrintPhase; info: PrintInfo }): JSX.Element | null {
+export function PrintOverlay({ phase, data }: { phase: PrintPhase; data: ReceiptData | null }): JSX.Element | null {
   if (phase === 'idle') return null;
-  const done = phase === 'done';
   return createPortal(
     <div className="no-print fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div className="absolute inset-0 animate-fade-in bg-[radial-gradient(ellipse_at_center,#0f2a1c_0%,#06130d_70%)]" />
-      <div role="status" aria-live="polite" className="relative w-[19rem] max-w-full animate-fade-in sm:w-80">
-        {/* Printer */}
-        <div className="relative z-10 rounded-2xl bg-green-800 px-4 pb-4 pt-3.5 text-white shadow-panel">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-              <Printer size={17} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-display text-[13px] font-bold leading-tight">
-                {info.invoiceNumber ?? 'Receipt'}
-              </p>
-              <p className="truncate text-[11px] leading-tight text-green-100/80">
-                {done ? 'Receipt ready' : 'Printing your receipt'}
-              </p>
-            </div>
-            {done ? (
-              <span className="print-anim-pop h-3 w-3 rounded-full bg-green-300 shadow-[0_0_0_4px_rgba(134,239,172,0.25)]" />
-            ) : (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
-            )}
-          </div>
-          {/* Paper slot */}
-          <div className="absolute inset-x-5 -bottom-[3px] h-[7px] rounded-full bg-slate-950" />
-        </div>
-
-        {/* Paper feeding out from under the slot */}
-        <div className="-mt-0.5 overflow-hidden px-6 pb-2">
-          <div className="print-paper-out">
-            <Paper info={info} done={done} />
-          </div>
-        </div>
-      </div>
+      <Stage phase={phase} data={data} />
     </div>,
     document.body
   );
 }
 
-function Paper({ info, done }: { info: PrintInfo; done: boolean }) {
-  const b = bars(info.invoiceNumber ?? '');
-  const items = info.items ?? [];
-  const shown = items.slice(0, 5);
-  const more = items.length - shown.length;
+function Stage({ phase, data }: { phase: PrintPhase; data: ReceiptData | null }) {
+  const done = phase === 'done';
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ scale: number; w: number; h: number }>({ scale: 0.5, w: PAPER_W / 2, h: 0 });
+
+  // The paper is the real invoice (same markup as the receipt modal / print
+  // output), drawn at its natural 760px width and scaled to fit the screen —
+  // so what comes out of the printer is the document that is then printed.
+  useLayoutEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const natH = el.offsetHeight;
+    const availW = Math.min(window.innerWidth - 32, 460);
+    const availH = window.innerHeight - 32 - 84; // printer card + gaps
+    const scale = Math.min(1, availW / PAPER_W, availH / natH);
+    setSize({ scale, w: PAPER_W * scale, h: natH * scale });
+  }, [data]);
+
+  const unpaid = data && Number(data.balance_due) > 0;
   return (
-    <div
-      className={clsx(
-        'relative bg-white px-4 pb-6 pt-4 text-[#1a1a1a] shadow-lg',
-        '[clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),95%_100%,90%_calc(100%-8px),85%_100%,80%_calc(100%-8px),75%_100%,70%_calc(100%-8px),65%_100%,60%_calc(100%-8px),55%_100%,50%_calc(100%-8px),45%_100%,40%_calc(100%-8px),35%_100%,30%_calc(100%-8px),25%_100%,20%_calc(100%-8px),15%_100%,10%_calc(100%-8px),5%_100%,0_calc(100%-8px))]'
-      )}
-    >
-      <p className="text-center font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-green-800">
-        Feed Fusion Tanzania
-      </p>
-      <p className="mt-0.5 text-center text-[9px] uppercase tracking-widest text-slate-400">Invoice</p>
-      <div className="my-2.5 border-t border-dashed border-slate-300" />
-      <div className="flex justify-between gap-2 text-[10px] text-slate-500">
-        <span className="truncate">{info.customer || 'Walk-in Customer'}</span>
-        {info.dateLabel && <span className="shrink-0">{info.dateLabel}</span>}
+    <div role="status" aria-live="polite" className="relative animate-fade-in" style={{ width: size.w }}>
+      {/* Printer */}
+      <div className="relative z-10 rounded-2xl bg-green-800 px-4 pb-4 pt-3.5 text-white shadow-panel">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+            <Printer size={17} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-[13px] font-bold leading-tight">
+              {data?.invoice_number ?? 'Receipt'}
+            </p>
+            <p className="truncate text-[11px] leading-tight text-green-100/80">
+              {done ? 'Receipt ready' : 'Printing your receipt'}
+            </p>
+          </div>
+          {done ? (
+            <span className="print-anim-pop h-3 w-3 rounded-full bg-green-300 shadow-[0_0_0_4px_rgba(134,239,172,0.25)]" />
+          ) : (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
+          )}
+        </div>
+        {/* Paper slot */}
+        <div className="absolute inset-x-5 -bottom-[3px] h-[7px] rounded-full bg-slate-950" />
       </div>
-      {info.total && (
-        <p className="mt-1 font-display text-[22px] font-extrabold leading-none tabular-nums">{info.total}</p>
-      )}
-      {/* The stamp slams on once the paper is fully out ("pap"). */}
-      {done && info.paid && (
-        <span className="print-stamp absolute right-3 top-9 rounded border-[3px] border-green-700/80 px-2 py-0.5 font-display text-[15px] font-extrabold uppercase tracking-widest text-green-700/90">
-          Paid
-        </span>
-      )}
-      {done && !info.paid && info.balance && (
-        <span className="print-stamp absolute right-3 top-9 rounded border-[3px] border-amber-600/80 px-2 py-0.5 text-center font-display text-[10px] font-extrabold uppercase leading-tight tracking-wider text-amber-700/90">
-          Balance
-          <br />
-          {info.balance}
-        </span>
-      )}
-      <div className="my-2.5 border-t border-dashed border-slate-300" />
-      {shown.length > 0 ? (
-        <div className="space-y-1 text-[10px]">
-          {shown.map((it, i) => (
-            <div key={i} className="flex justify-between gap-2">
-              <span className="min-w-0 truncate">
-                {it.qty} × {it.name}
-              </span>
-              <span className="shrink-0 tabular-nums">{it.amount}</span>
+
+      {/* The real invoice feeding out from under the slot */}
+      {data && (
+        <div className="relative -mt-0.5 overflow-hidden" style={{ height: size.h || undefined }}>
+          <div className="print-paper-out shadow-lg" style={{ width: size.w, height: size.h || undefined }}>
+            <div ref={innerRef} style={{ width: PAPER_W, transform: `scale(${size.scale})`, transformOrigin: 'top left' }}>
+              <ReceiptDocument data={data} printable={false} />
             </div>
-          ))}
-          {more > 0 && <p className="text-slate-400">+ {more} more</p>}
-        </div>
-      ) : (
-        <div className="space-y-1.5">
-          <div className="h-1.5 w-full rounded bg-slate-200" />
-          <div className="h-1.5 w-4/5 rounded bg-slate-200" />
-          <div className="h-1.5 w-3/5 rounded bg-slate-200" />
+          </div>
+          {/* The stamp slams on once the paper is fully out ("pap"). */}
+          {done && !unpaid && (
+            <span className="print-stamp absolute left-[37%] top-[25%] rounded border-[3px] border-green-700/80 px-2.5 py-0.5 font-display text-[20px] font-extrabold uppercase tracking-widest text-green-700/90">
+              Paid
+            </span>
+          )}
+          {done && unpaid && data && (
+            <span className="print-stamp absolute left-[37%] top-[25%] rounded border-[3px] border-amber-600/80 bg-white/70 px-2.5 py-0.5 text-center font-display text-[13px] font-extrabold uppercase leading-tight tracking-wider text-amber-700/90">
+              Balance due
+              <br />
+              TZS {Number(data.balance_due).toLocaleString('en-TZ')}
+            </span>
+          )}
         </div>
       )}
-      {(info.subtotal || info.discount) && <div className="my-2.5 border-t border-dashed border-slate-300" />}
-      <div className="space-y-0.5 text-[10px] text-slate-500">
-        {info.subtotal && (
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span className="tabular-nums">{info.subtotal}</span>
-          </div>
-        )}
-        {info.discount && (
-          <div className="flex justify-between">
-            <span>Discount</span>
-            <span className="tabular-nums text-red-500">- {info.discount}</span>
-          </div>
-        )}
-      </div>
-      <div className="mt-2 flex items-baseline justify-between border-t border-slate-800 pt-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-wider">Grand total</span>
-        <span className="font-display text-[13px] font-extrabold tabular-nums">{info.total ?? '—'}</span>
-      </div>
-      <div className="mt-3 flex h-8 items-stretch justify-center gap-[2px]">
-        {b.map((w, i) => (
-          <span key={i} className="bg-slate-800" style={{ width: w }} />
-        ))}
-      </div>
-      <p className="mt-1 text-center font-mono text-[8px] tracking-widest text-slate-400">
-        {info.invoiceNumber ?? ''}
-      </p>
-      <p className="mt-1.5 text-center text-[9px] text-slate-400">Thank you for choosing Feed Fusion Tanzania</p>
     </div>
   );
 }

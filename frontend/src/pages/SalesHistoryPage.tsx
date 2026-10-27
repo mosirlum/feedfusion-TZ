@@ -48,7 +48,8 @@ import {
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
-import { PrintOverlay, printInfoFromReceipt, type PrintInfo, usePrintAnimation } from '../components/PrintAnimation';
+import { PrintOverlay, usePrintAnimation } from '../components/PrintAnimation';
+import type { ReceiptData } from '../components/ReceiptView';
 import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
@@ -141,9 +142,9 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
-  const { startPrint, phase: printPhase, info: printInfo } = usePrintAnimation();
+  const { startPrint, phase: printPhase, data: printData } = usePrintAnimation();
   // The real receipt currently open in the modal; feeds the animation's paper.
-  const receiptInfoRef = useRef<PrintInfo>({});
+  const receiptInfoRef = useRef<ReceiptData | null>(null);
   // Printer icon in a row = open the receipt AND start printing as soon as it
   // has loaded (CLAUDE.md #83). The Eye icon only views.
   const [autoPrintId, setAutoPrintId] = useState<number | null>(null);
@@ -697,7 +698,7 @@ export default function SalesHistoryPage() {
             <ReceiptView
               saleId={viewSaleId}
               onReady={(d) => {
-                receiptInfoRef.current = printInfoFromReceipt(d);
+                receiptInfoRef.current = d;
                 if (autoPrintId === viewSaleId) {
                   setAutoPrintId(null);
                   handlePrint(viewSaleId);
@@ -707,7 +708,7 @@ export default function SalesHistoryPage() {
           </>
         )}
       </Modal>
-      <PrintOverlay phase={printPhase} info={printInfo} />
+      <PrintOverlay phase={printPhase} data={printData} />
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 
