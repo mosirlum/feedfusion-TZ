@@ -26,8 +26,8 @@ import type { ReceiptData } from './ReceiptView';
  * `prefers-reduced-motion` it is shortened and the paper just appears.
  */
 
-const FEED_MS = 2000;
-const DONE_MS = 600;
+const FEED_MS = 2400;
+const DONE_MS = 1000;
 const REDUCED_FEED_MS = 250;
 const REDUCED_DONE_MS = 250;
 
@@ -43,6 +43,8 @@ export interface PrintInfo {
   discount?: string;
   total?: string;
   paid?: boolean;
+  /** Unpaid balance (credit sale), shown as an amber stamp instead of PAID. */
+  balance?: string;
 }
 
 /** Build the paper's content from the real receipt the modal has loaded. */
@@ -60,6 +62,7 @@ export function printInfoFromReceipt(d: ReceiptData): PrintInfo {
     discount: Number(d.total_discount) > 0 ? tzs(d.total_discount) : undefined,
     total: tzs(d.total),
     paid: d.payment_status === 'PAID',
+    balance: Number(d.balance_due) > 0 ? tzs(d.balance_due) : undefined,
   };
 }
 
@@ -134,8 +137,8 @@ export function PrintOverlay({ phase, info }: { phase: PrintPhase; info: PrintIn
   const done = phase === 'done';
   return createPortal(
     <div className="no-print fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div className="absolute inset-0 animate-fade-in bg-slate-900/55 backdrop-blur-[2px]" />
-      <div role="status" aria-live="polite" className="relative w-72 animate-fade-in">
+      <div className="absolute inset-0 animate-fade-in bg-[radial-gradient(ellipse_at_center,#0f2a1c_0%,#06130d_70%)]" />
+      <div role="status" aria-live="polite" className="relative w-[19rem] max-w-full animate-fade-in sm:w-80">
         {/* Printer */}
         <div className="relative z-10 rounded-2xl bg-green-800 px-4 pb-4 pt-3.5 text-white shadow-panel">
           <div className="flex items-center gap-2.5">
@@ -163,7 +166,7 @@ export function PrintOverlay({ phase, info }: { phase: PrintPhase; info: PrintIn
         {/* Paper feeding out from under the slot */}
         <div className="-mt-0.5 overflow-hidden px-6 pb-2">
           <div className="print-paper-out">
-            <Paper info={info} />
+            <Paper info={info} done={done} />
           </div>
         </div>
       </div>
@@ -172,7 +175,7 @@ export function PrintOverlay({ phase, info }: { phase: PrintPhase; info: PrintIn
   );
 }
 
-function Paper({ info }: { info: PrintInfo }) {
+function Paper({ info, done }: { info: PrintInfo; done: boolean }) {
   const b = bars(info.invoiceNumber ?? '');
   const items = info.items ?? [];
   const shown = items.slice(0, 5);
@@ -196,9 +199,17 @@ function Paper({ info }: { info: PrintInfo }) {
       {info.total && (
         <p className="mt-1 font-display text-[22px] font-extrabold leading-none tabular-nums">{info.total}</p>
       )}
-      {info.paid && (
-        <span className="absolute right-3 top-9 -rotate-12 rounded border-2 border-green-700/70 px-1.5 py-0.5 font-display text-[11px] font-extrabold uppercase tracking-widest text-green-700/80">
+      {/* The stamp slams on once the paper is fully out ("pap"). */}
+      {done && info.paid && (
+        <span className="print-stamp absolute right-3 top-9 rounded border-[3px] border-green-700/80 px-2 py-0.5 font-display text-[15px] font-extrabold uppercase tracking-widest text-green-700/90">
           Paid
+        </span>
+      )}
+      {done && !info.paid && info.balance && (
+        <span className="print-stamp absolute right-3 top-9 rounded border-[3px] border-amber-600/80 px-2 py-0.5 text-center font-display text-[10px] font-extrabold uppercase leading-tight tracking-wider text-amber-700/90">
+          Balance
+          <br />
+          {info.balance}
         </span>
       )}
       <div className="my-2.5 border-t border-dashed border-slate-300" />
