@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -48,7 +48,7 @@ import {
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
-import { PrintFeed, usePrintAnimation } from '../components/PrintAnimation';
+import { PrintOverlay, printInfoFromReceipt, type PrintInfo, usePrintAnimation } from '../components/PrintAnimation';
 import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
@@ -141,7 +141,9 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
-  const { startPrint, phase: printPhase } = usePrintAnimation();
+  const { startPrint, phase: printPhase, info: printInfo } = usePrintAnimation();
+  // The real receipt currently open in the modal; feeds the animation's paper.
+  const receiptInfoRef = useRef<PrintInfo>({});
   // Printer icon in a row = open the receipt AND start printing as soon as it
   // has loaded (CLAUDE.md #83). The Eye icon only views.
   const [autoPrintId, setAutoPrintId] = useState<number | null>(null);
@@ -223,7 +225,7 @@ export default function SalesHistoryPage() {
       .catch(() => {
         // Printing itself must never be blocked by this.
       });
-    startPrint();
+    startPrint(receiptInfoRef.current);
   }
 
   async function confirmPayment() {
@@ -691,19 +693,21 @@ export default function SalesHistoryPage() {
         }
       >
         {viewSaleId !== null && (
-          <PrintFeed phase={printPhase}>
+          <>
             <ReceiptView
               saleId={viewSaleId}
-              onReady={() => {
+              onReady={(d) => {
+                receiptInfoRef.current = printInfoFromReceipt(d);
                 if (autoPrintId === viewSaleId) {
                   setAutoPrintId(null);
                   handlePrint(viewSaleId);
                 }
               }}
             />
-          </PrintFeed>
+          </>
         )}
       </Modal>
+      <PrintOverlay phase={printPhase} info={printInfo} />
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 

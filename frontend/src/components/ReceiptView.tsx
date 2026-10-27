@@ -4,7 +4,7 @@ import { tzs, formatDateTime } from '../lib/format';
 import { Spinner } from './ui';
 import { useToast } from './ui/Toast';
 
-interface ReceiptData {
+export interface ReceiptData {
   invoice_number: string;
   sale_date: string;
   served_by_name: string;
@@ -66,19 +66,19 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
 // removed from the invoice entirely earlier in this project ("ondoa
 // kabisa") and that stands; only the Quotation (a document the customer
 // countersigns) keeps them.
-export function ReceiptView({ saleId, onReady }: { saleId: number; onReady?: () => void }) {
+export function ReceiptView({ saleId, onReady }: { saleId: number; onReady?: (data: ReceiptData) => void }) {
   const [data, setData] = useState<ReceiptData | null>(null);
   const toast = useToast();
 
-  // `onReady` fires once each time a receipt finishes loading (used by the
-  // Sales History printer icon to start the print animation the moment the
-  // receipt is there). Layout effect + ref: it runs before the first paint of
+  // `onReady(data)` fires once each time a receipt finishes loading (used by
+  // the pages to feed the print animation's paper with the real receipt, and
+  // by the Sales History printer icon to start printing the moment it is there). Layout effect + ref: it runs before the first paint of
   // the loaded receipt (so the print feed can clip it without a one-frame
   // flash) and a new callback identity never re-fires it.
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
   useLayoutEffect(() => {
-    if (data) onReadyRef.current?.();
+    if (data) onReadyRef.current?.(data);
   }, [data]);
 
   useEffect(() => {
