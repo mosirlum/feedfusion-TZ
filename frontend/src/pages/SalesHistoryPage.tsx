@@ -48,7 +48,7 @@ import {
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
-import { usePrintAnimation } from '../components/PrintAnimation';
+import { PrintFeed, usePrintAnimation } from '../components/PrintAnimation';
 import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
@@ -141,7 +141,7 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
-  const { startPrint, printOverlay } = usePrintAnimation();
+  const { startPrint, phase: printPhase } = usePrintAnimation();
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -684,9 +684,12 @@ export default function SalesHistoryPage() {
           </Button>
         }
       >
-        {viewSaleId !== null && <ReceiptView saleId={viewSaleId} />}
+        {viewSaleId !== null && (
+          <PrintFeed phase={printPhase}>
+            <ReceiptView saleId={viewSaleId} />
+          </PrintFeed>
+        )}
       </Modal>
-      {printOverlay}
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 

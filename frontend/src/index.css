@@ -228,12 +228,19 @@ h1, h2, h3, h4 {
   animation: fade-in 0.18s ease-out;
 }
 
-/* Print animation (2026-10-22, CLAUDE.md #78) — see components/PrintAnimation.tsx.
-   The paper starts hidden behind the printer body and feeds down out of the
-   slot; the LED blinks while "printing"; the tick pops in when done. */
-@keyframes print-paper-feed {
-  from { transform: translateY(0); }
-  to { transform: translateY(70px); }
+/* Print animation v2 (2026-10-27, CLAUDE.md #82) — see components/PrintAnimation.tsx.
+   The real receipt is revealed top-to-bottom (clip-path) as if feeding out of
+   the printer slot, with a few small pauses like a thermal printer; the LED
+   blinks while printing; the tick pops in when done. All of it is removed
+   (class dropped) before window.print() runs. */
+@keyframes print-feed {
+  0%   { clip-path: inset(0 0 100% 0); transform: translateY(-14px); }
+  18%  { clip-path: inset(0 0 82% 0);  transform: translateY(-10px); }
+  26%  { clip-path: inset(0 0 80% 0);  transform: translateY(-9px); }
+  50%  { clip-path: inset(0 0 46% 0);  transform: translateY(-5px); }
+  58%  { clip-path: inset(0 0 44% 0);  transform: translateY(-4px); }
+  82%  { clip-path: inset(0 0 12% 0);  transform: translateY(-1px); }
+  100% { clip-path: inset(0 0 0 0);    transform: translateY(0); }
 }
 @keyframes print-led {
   0%, 100% { opacity: 1; }
@@ -244,11 +251,11 @@ h1, h2, h3, h4 {
   70% { transform: scale(1.18); }
   100% { transform: scale(1); }
 }
-.print-anim-paper { animation: print-paper-feed 1.05s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
+.print-feed-paper { animation: print-feed 1.6s linear forwards; }
 .print-anim-led { animation: print-led 0.5s ease-in-out infinite; }
 .print-anim-pop { animation: print-pop 0.32s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
-  .print-anim-paper { animation: none; transform: translateY(70px); }
+  .print-feed-paper { animation: none; }
   .print-anim-led { animation: none; }
   .print-anim-pop { animation: none; }
 }

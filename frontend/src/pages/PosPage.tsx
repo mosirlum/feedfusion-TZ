@@ -29,7 +29,7 @@ import { Badge, Button, Card, FormField, IconChip, Input, Label, Modal, PageHead
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
-import { usePrintAnimation } from '../components/PrintAnimation';
+import { PrintFeed, usePrintAnimation } from '../components/PrintAnimation';
 import { CustomerFormModal } from '../components/CustomerFormModal';
 
 function lineSubtotal(line: CartLine): number {
@@ -75,7 +75,7 @@ interface FromQuotationState {
 export default function PosPage() {
   const { user } = useAuth();
   const toast = useToast();
-  const { startPrint, printOverlay } = usePrintAnimation();
+  const { startPrint, phase: printPhase } = usePrintAnimation();
   const location = useLocation();
   const navigate = useNavigate();
   const fromQuotationRef = useRef<FromQuotationState | null>(
@@ -1078,9 +1078,12 @@ export default function PosPage() {
           </>
         }
       >
-        {completedSaleId !== null && <ReceiptView saleId={completedSaleId} />}
+        {completedSaleId !== null && (
+          <PrintFeed phase={printPhase}>
+            <ReceiptView saleId={completedSaleId} />
+          </PrintFeed>
+        )}
       </Modal>
-      {printOverlay}
     </div>
   );
 }
