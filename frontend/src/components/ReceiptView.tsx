@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { salesApi, apiErrorMessage } from '../lib/api';
 import { tzs, formatDateTime } from '../lib/format';
 import { Spinner } from './ui';
@@ -66,9 +66,20 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
 // removed from the invoice entirely earlier in this project ("ondoa
 // kabisa") and that stands; only the Quotation (a document the customer
 // countersigns) keeps them.
-export function ReceiptView({ saleId }: { saleId: number }) {
+export function ReceiptView({ saleId, onReady }: { saleId: number; onReady?: () => void }) {
   const [data, setData] = useState<ReceiptData | null>(null);
   const toast = useToast();
+
+  // `onReady` fires once each time a receipt finishes loading (used by the
+  // Sales History printer icon to start the print animation the moment the
+  // receipt is there). Layout effect + ref: it runs before the first paint of
+  // the loaded receipt (so the print feed can clip it without a one-frame
+  // flash) and a new callback identity never re-fires it.
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
+  useLayoutEffect(() => {
+    if (data) onReadyRef.current?.();
+  }, [data]);
 
   useEffect(() => {
     let active = true;

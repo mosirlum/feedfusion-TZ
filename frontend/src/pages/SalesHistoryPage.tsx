@@ -142,6 +142,9 @@ export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
   const { startPrint, phase: printPhase } = usePrintAnimation();
+  // Printer icon in a row = open the receipt AND start printing as soon as it
+  // has loaded (CLAUDE.md #83). The Eye icon only views.
+  const [autoPrintId, setAutoPrintId] = useState<number | null>(null);
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -335,7 +338,7 @@ export default function SalesHistoryPage() {
         <button type="button" onClick={() => setViewSaleId(s.id)} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="View receipt" aria-label={`View receipt ${s.invoice_number}`}>
           <Eye size={16} />
         </button>
-        <button type="button" onClick={() => setViewSaleId(s.id)} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="Print receipt" aria-label={`Print receipt ${s.invoice_number}`}>
+        <button type="button" onClick={() => { setAutoPrintId(s.id); setViewSaleId(s.id); }} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="Print receipt" aria-label={`Print receipt ${s.invoice_number}`}>
           <Printer size={16} />
         </button>
         {s.status === 'COMPLETED' && (
@@ -671,7 +674,10 @@ export default function SalesHistoryPage() {
 
       <Modal
         open={viewSaleId !== null}
-        onClose={() => setViewSaleId(null)}
+        onClose={() => {
+          setViewSaleId(null);
+          setAutoPrintId(null);
+        }}
         title="Receipt"
         size="lg"
         footer={
@@ -686,7 +692,15 @@ export default function SalesHistoryPage() {
       >
         {viewSaleId !== null && (
           <PrintFeed phase={printPhase}>
-            <ReceiptView saleId={viewSaleId} />
+            <ReceiptView
+              saleId={viewSaleId}
+              onReady={() => {
+                if (autoPrintId === viewSaleId) {
+                  setAutoPrintId(null);
+                  handlePrint(viewSaleId);
+                }
+              }}
+            />
           </PrintFeed>
         )}
       </Modal>
