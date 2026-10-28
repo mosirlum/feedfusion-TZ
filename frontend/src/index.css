@@ -228,27 +228,35 @@ h1, h2, h3, h4 {
   animation: fade-in 0.18s ease-out;
 }
 
-/* Print animation (2026-10-22, CLAUDE.md #78) — see components/PrintAnimation.tsx.
-   The paper starts hidden behind the printer body and feeds down out of the
-   slot; the LED blinks while "printing"; the tick pops in when done. */
-@keyframes print-paper-feed {
-  from { transform: translateY(0); }
-  to { transform: translateY(70px); }
+/* Print animation v3 (2026-10-27, CLAUDE.md #84) — see components/PrintAnimation.tsx.
+   The paper slides down out of the printer slot in a few small pushes (like a
+   receipt printer) inside an overflow-hidden wrapper; the done dot pops in.
+   The whole overlay is removed before window.print() runs. */
+@keyframes print-paper-out {
+  0%   { transform: translateY(-100%); }
+  14%  { transform: translateY(-86%); }
+  24%  { transform: translateY(-84%); }
+  48%  { transform: translateY(-52%); }
+  58%  { transform: translateY(-50%); }
+  82%  { transform: translateY(-12%); }
+  100% { transform: translateY(0); }
 }
-@keyframes print-led {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+@keyframes print-stamp {
+  0%   { transform: scale(2.6) rotate(-14deg); opacity: 0; }
+  55%  { transform: scale(0.9) rotate(-12deg); opacity: 1; }
+  75%  { transform: scale(1.06) rotate(-12deg); }
+  100% { transform: scale(1) rotate(-12deg); opacity: 1; }
 }
 @keyframes print-pop {
   0% { transform: scale(0); }
-  70% { transform: scale(1.18); }
+  70% { transform: scale(1.3); }
   100% { transform: scale(1); }
 }
-.print-anim-paper { animation: print-paper-feed 1.05s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
-.print-anim-led { animation: print-led 0.5s ease-in-out infinite; }
+.print-paper-out { animation: print-paper-out 2.4s linear forwards; }
+.print-stamp { animation: print-stamp 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
 .print-anim-pop { animation: print-pop 0.32s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
-  .print-anim-paper { animation: none; transform: translateY(70px); }
-  .print-anim-led { animation: none; }
+  .print-paper-out { animation: none; }
+  .print-stamp { animation: none; transform: rotate(-12deg); }
   .print-anim-pop { animation: none; }
 }

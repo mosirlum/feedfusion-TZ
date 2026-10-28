@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -48,7 +48,8 @@ import {
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { ReceiptView } from '../components/ReceiptView';
-import { usePrintAnimation } from '../components/PrintAnimation';
+import { PrintOverlay, usePrintAnimation } from '../components/PrintAnimation';
+import type { ReceiptData } from '../components/ReceiptView';
 import { EditSaleModal } from '../components/sales/EditSaleModal';
 
 const PAGE_SIZE = 10;
@@ -141,7 +142,12 @@ function TrendHint({ pct }: { pct: number | null }) {
 export default function SalesHistoryPage() {
   const { isOwner } = useAuth();
   const toast = useToast();
-  const { startPrint, printOverlay } = usePrintAnimation();
+  const { startPrint, confirmPrint, cancelPrint, phase: printPhase, data: printData } = usePrintAnimation();
+  // The real receipt currently open in the modal; feeds the animation's paper.
+  const receiptInfoRef = useRef<ReceiptData | null>(null);
+  // Printer icon in a row = open the receipt AND start printing as soon as it
+  // has loaded (CLAUDE.md #83). The Eye icon only views.
+  const [autoPrintId, setAutoPrintId] = useState<number | null>(null);
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -220,7 +226,7 @@ export default function SalesHistoryPage() {
       .catch(() => {
         // Printing itself must never be blocked by this.
       });
-    startPrint();
+    startPrint(receiptInfoRef.current);
   }
 
   async function confirmPayment() {
@@ -335,7 +341,7 @@ export default function SalesHistoryPage() {
         <button type="button" onClick={() => setViewSaleId(s.id)} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="View receipt" aria-label={`View receipt ${s.invoice_number}`}>
           <Eye size={16} />
         </button>
-        <button type="button" onClick={() => setViewSaleId(s.id)} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="Print receipt" aria-label={`Print receipt ${s.invoice_number}`}>
+        <button type="button" onClick={() => { setAutoPrintId(s.id); setViewSaleId(s.id); }} className={clsx(iconBtn, 'hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30')} title="Print receipt" aria-label={`Print receipt ${s.invoice_number}`}>
           <Printer size={16} />
         </button>
         {s.status === 'COMPLETED' && (
@@ -671,7 +677,10 @@ export default function SalesHistoryPage() {
 
       <Modal
         open={viewSaleId !== null}
-        onClose={() => setViewSaleId(null)}
+        onClose={() => {
+          setViewSaleId(null);
+          setAutoPrintId(null);
+        }}
         title="Receipt"
         size="lg"
         footer={
@@ -684,9 +693,22 @@ export default function SalesHistoryPage() {
           </Button>
         }
       >
-        {viewSaleId !== null && <ReceiptView saleId={viewSaleId} />}
+        {viewSaleId !== null && (
+          <>
+            <ReceiptView
+              saleId={viewSaleId}
+              onReady={(d) => {
+                receiptInfoRef.current = d;
+                if (autoPrintId === viewSaleId) {
+                  setAutoPrintId(null);
+                  handlePrint(viewSaleId);
+                }
+              }}
+            />
+          </>
+        )}
       </Modal>
-      {printOverlay}
+      <PrintOverlay phase={printPhase} data={printData} onPrint={confirmPrint} onCancel={cancelPrint} />
 
       <EditSaleModal saleId={editSaleId} onClose={() => setEditSaleId(null)} onSaved={load} />
 
