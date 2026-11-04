@@ -112,7 +112,8 @@ function MonthlyChart({ months }: { months: GrowthOverviewMonth[] }) {
         width={barW}
         height={Math.max(h, v === 0 ? 0 : 1)}
         rx={3}
-        className={clsx(cls, partial && 'opacity-40')}
+        className={clsx('ff-grow-y', cls, partial && 'opacity-40')}
+        style={{ ['--d' as string]: `${200 + Math.round((x / Math.max(1, width)) * 700)}ms` }}
         stroke={partial ? 'currentColor' : undefined}
         strokeDasharray={partial ? '4 3' : undefined}
         strokeWidth={partial ? 1.25 : 0}

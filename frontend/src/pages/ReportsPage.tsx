@@ -528,7 +528,7 @@ function DailyChart({
           const barW = Math.min(24, Math.max(3, stepX * 0.5));
           const v = d[valueKey];
           return (
-            <path key={d.date} d={barPath(xFor(i) - barW / 2, yFor(v), barW, yFor(0), 3)} fill={color}>
+            <path key={d.date} className="ff-grow-y" style={{ ['--d' as string]: `${250 + i * 70}ms` }} d={barPath(xFor(i) - barW / 2, yFor(v), barW, yFor(0), 3)} fill={color}>
               <title>{`${formatDate(d.date)}: ${formatValue(v)}`}</title>
             </path>
           );
@@ -539,11 +539,13 @@ function DailyChart({
               ~10% opacity) — grounds the line against the baseline instead
               of leaving it floating over blank white space. */}
           <polygon
+            className="ff-fade" style={{ ['--d' as string]: `${900}ms` }}
             points={`${xFor(0)},${yFor(0)} ${series.map((d, i) => `${xFor(i)},${yFor(d[valueKey])}`).join(' ')} ${xFor(n - 1)},${yFor(0)}`}
             fill={color}
             opacity={0.1}
           />
           <polyline
+            className="ff-draw" pathLength={1} style={{ ['--d' as string]: `${300}ms` }}
             points={series.map((d, i) => `${xFor(i)},${yFor(d[valueKey])}`).join(' ')}
             fill="none"
             stroke={color}
@@ -552,7 +554,7 @@ function DailyChart({
             strokeLinecap="round"
           />
           {series.map((d, i) => (
-            <circle key={d.date} cx={xFor(i)} cy={yFor(d[valueKey])} r={3.5} fill={color} stroke="#fff" strokeWidth={1.5}>
+            <circle key={d.date} className="ff-dot" style={{ ['--d' as string]: `${400 + i * (1200 / Math.max(1, n))}ms` }} cx={xFor(i)} cy={yFor(d[valueKey])} r={3.5} fill={color} stroke="#fff" strokeWidth={1.5}>
               <title>{`${formatDate(d.date)}: ${formatValue(d[valueKey])}`}</title>
             </circle>
           ))}

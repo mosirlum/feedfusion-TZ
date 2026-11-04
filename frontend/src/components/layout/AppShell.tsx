@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, ChevronDown, UserCircle, Sun, Monitor, Moon } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
@@ -17,6 +17,7 @@ export function AppShell() {
   const { user, logout, isOwner } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -189,7 +190,9 @@ export function AppShell() {
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8 max-w-[1600px]">
-          <Outlet />
+          <div key={pathname} className="ff-page">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

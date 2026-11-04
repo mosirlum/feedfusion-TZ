@@ -243,12 +243,13 @@ function TrendChart({
             <rect className="hit fill-transparent" x={cx(i) - step / 2} y={pad.top} width={step} height={innerH + 4} rx={6} strokeWidth={1.5} stroke="transparent" />
             {isSel && <rect x={cx(i) - step / 2 + 2} y={pad.top} width={step - 4} height={innerH} rx={6} className="fill-green-500/10" />}
             <rect
+              style={{ ['--d' as string]: `${200 + i * 60}ms` }}
               x={x}
               y={top}
               width={barW}
               height={Math.max(base - top, 0)}
               rx={4}
-              className={p.isPartial ? 'fill-green-500/15 stroke-green-600' : isSel ? 'fill-green-600' : 'fill-green-500'}
+              className={clsx('ff-grow-y', p.isPartial ? 'fill-green-500/15 stroke-green-600' : isSel ? 'fill-green-600' : 'fill-green-500')}
               strokeDasharray={p.isPartial ? '4 3' : undefined}
               strokeWidth={p.isPartial ? 1.5 : 0}
             />
@@ -260,9 +261,9 @@ function TrendChart({
           <line x1={pad.left} x2={width - pad.right} y1={y(baselineFullWeek!)} y2={y(baselineFullWeek!)} stroke="#2a78d6" strokeWidth={1.25} strokeDasharray="5 4" opacity={0.7} />
         </g>
       )}
-      <polyline points={linePts} fill="none" stroke="#eb6834" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" pointerEvents="none" />
+      <polyline className="ff-draw" pathLength={1} style={{ ['--d' as string]: `${700}ms` }} points={linePts} fill="none" stroke="#eb6834" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" pointerEvents="none" />
       {points.map((p, i) => (
-        <circle key={`d-${p.period}`} cx={cx(i)} cy={y(p.grossProfit)} r={i === selected ? 4.5 : 3} className="fill-white dark:fill-[#121a16]" stroke="#eb6834" strokeWidth={2} pointerEvents="none" />
+        <circle key={`d-${p.period}`} style={{ ['--d' as string]: `${900 + i * 60}ms` }} cx={cx(i)} cy={y(p.grossProfit)} r={i === selected ? 4.5 : 3} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#eb6834" strokeWidth={2} pointerEvents="none" />
       ))}
       {points.map((p, i) =>
         i % labelEvery === 0 || i === n - 1 ? (

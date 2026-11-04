@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ReactNode, useEffect, useState } from 'react';
+import { CSSProperties, ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -30,6 +30,7 @@ import { DashboardToday } from '../types';
 import { tzs, formatDate } from '../lib/format';
 import { useElementWidth } from '../lib/useElementWidth';
 import { useAuth } from '../context/AuthContext';
+import { useCountUp } from '../lib/useCountUp';
 import {
   Button,
   Card,
@@ -211,11 +212,12 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         {/* Sales hero */}
-        <section aria-label="Today at a glance" className="relative overflow-hidden flex flex-col rounded-card bg-brand-gradient p-5 text-white shadow-panel sm:p-6 xl:col-span-8">
+        <section aria-label="Today at a glance" className="relative overflow-hidden flex flex-col rounded-card bg-brand-gradient p-5 text-white shadow-panel sm:p-6 xl:col-span-8 ff-rise" style={dly(80)}>
           <div className="grid gap-5 sm:grid-cols-[1fr_minmax(0,1fr)] sm:items-start">
             <div>
               <p className="text-sm text-green-100/80">Sales today</p>
-              <p className="mt-1 font-display text-3xl font-extrabold tabular-nums sm:text-[2.6rem] sm:leading-none">{tzs(data.totalSales)}</p>
+              <p className="mt-1 font-display text-3xl font-extrabold tabular-nums sm:text-[2.6rem] sm:leading-none"><CountTzs value={data.totalSales} />
+              </p>
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-green-100/80">
                 <span>
                   {data.transactionCount} sale{data.transactionCount === 1 ? '' : 's'}
@@ -232,14 +234,14 @@ export default function DashboardPage() {
             </div>
           </div>
           <dl className="mt-auto grid grid-cols-3 gap-3 border-t border-white/10 pt-4">
-            <HeroStat label="Gross profit" value={tzs(data.grossProfit)} pct={data.deltas.grossProfit} />
-            <HeroStat label="Expenses" value={tzs(data.expenses)} pct={data.deltas.expenses} invert />
-            <HeroStat label="Estimated net" value={tzs(data.estimatedNet)} pct={data.deltas.estimatedNet} negative={data.estimatedNet < 0} />
+            <HeroStat label="Gross profit" value={<CountTzs value={data.grossProfit} />} pct={data.deltas.grossProfit} />
+            <HeroStat label="Expenses" value={<CountTzs value={data.expenses} />} pct={data.deltas.expenses} invert />
+            <HeroStat label="Estimated net" value={<CountTzs value={data.estimatedNet} />} pct={data.deltas.estimatedNet} negative={data.estimatedNet < 0} />
           </dl>
         </section>
 
         {/* Needs attention */}
-        <Card className="flex flex-col p-5 xl:col-span-4">
+        <Card className="ff-rise flex flex-col p-5 xl:col-span-4" style={dly(200)}>
           <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Needs your attention</h3>
           <div className="mt-3 flex flex-1 flex-col gap-2.5">
             {overdue > 0 && (
@@ -280,7 +282,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Big chart */}
-        <Card className="p-5 xl:col-span-8">
+        <Card className="ff-rise p-5 xl:col-span-8" style={dly(340)}>
           <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <BarChart3 size={16} className="text-green-600 dark:text-green-400" />
@@ -302,7 +304,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Profit & loss */}
-        <Card className="flex flex-col xl:col-span-4">
+        <Card className="ff-rise flex flex-col xl:col-span-4" style={dly(460)}>
           <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
             <div className="flex items-center gap-3">
               <IconChip tone="green" size={34} icon={<Wallet size={16} />} />
@@ -345,7 +347,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Net profit</p>
                 <p className={clsx('mt-1 font-display text-3xl font-extrabold tabular-nums', plFigures.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300')}>
-                  {tzs(plFigures.netProfit)}
+                  <CountTzs value={plFigures.netProfit} />
                 </p>
               </div>
               <dl className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-[#0e1512]">
@@ -370,7 +372,7 @@ export default function DashboardPage() {
         {/* Left column: money owed + recent purchases (balances the right column) */}
         <div className="flex min-w-0 flex-col gap-4 xl:col-span-7">
         {/* Money owed */}
-        <Card>
+        <Card className="ff-rise" style={dly(580)}>
           <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <IconChip tone="amber" size={34} icon={<HandCoins size={16} />} />
@@ -388,7 +390,7 @@ export default function DashboardPage() {
           ) : (
             <>
               <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-5 pt-4">
-                <p className="font-display text-2xl font-extrabold tabular-nums text-amber-600 dark:text-amber-300">{tzs(data.outstandingDebt.totalOutstanding)}</p>
+                <p className="font-display text-2xl font-extrabold tabular-nums text-amber-600 dark:text-amber-300"><CountTzs value={data.outstandingDebt.totalOutstanding} /></p>
                 <p className="text-sm text-slate-500 dark:text-[#97a49b]">
                   across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
                 </p>
@@ -441,7 +443,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent purchases */}
-        <Card>
+        <Card className="ff-rise" style={dly(700)}>
           <CardHeader
             title="Recent purchases"
             action={
@@ -482,7 +484,7 @@ export default function DashboardPage() {
 
         {/* Best sellers + stock health */}
         <div className="flex flex-col gap-4 xl:col-span-5">
-          <Card className="p-5">
+          <Card className="ff-rise p-5" style={dly(640)}>
             <div className="mb-3 flex items-center gap-2">
               <Tag size={16} className="text-green-600 dark:text-green-400" />
               <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Best sellers today</h3>
@@ -491,7 +493,7 @@ export default function DashboardPage() {
               <p className="py-3 text-sm text-slate-500 dark:text-[#97a49b]">No sales recorded yet today.</p>
             ) : (
               <ul className="flex flex-col gap-3">
-                {topProductSlices.map((t) => (
+                {topProductSlices.map((t, idx) => (
                   <li key={t.name}>
                     <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate font-semibold text-slate-700 dark:text-[#d2dbd5]">{t.name}</span>
@@ -500,7 +502,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]">
-                      <div className="h-full rounded-full" style={{ width: `${Math.max(3, (t.value / maxTop) * 100)}%`, background: t.color }} />
+                      <div className="ff-grow-x h-full rounded-full" style={{ ...dly(1000 + idx * 160), width: `${Math.max(3, (t.value / maxTop) * 100)}%`, background: t.color }} />
                     </div>
                   </li>
                 ))}
@@ -516,7 +518,7 @@ export default function DashboardPage() {
             )}
           </Card>
 
-          <Card className="p-5">
+          <Card className="ff-rise p-5" style={dly(900)}>
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Boxes size={16} className="text-green-600 dark:text-green-400" />
@@ -530,7 +532,7 @@ export default function DashboardPage() {
               {stockSlices
                 .filter((sl) => sl.value > 0)
                 .map((sl) => (
-                  <div key={sl.name} style={{ width: `${sl.pct}%`, background: sl.color }} />
+                  <div key={sl.name} className="ff-grow-x" style={{ ...dly(1000), width: `${sl.pct}%`, background: sl.color }} />
                 ))}
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -676,15 +678,15 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
           </text>
         ))}
 
-        <path d={areaPath(purchaseValues)} fill="url(#dashGradBlue)" stroke="none" />
-        <path d={linePath(purchaseValues)} fill="none" stroke="#2a78d6" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
-        <path d={areaPath(salesValues)} fill="url(#dashGradGreen)" stroke="none" />
-        <path d={linePath(salesValues)} fill="none" stroke="#1f9e5d" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+        <path className="ff-fade" style={dly(1100)} d={areaPath(purchaseValues)} fill="url(#dashGradBlue)" stroke="none" />
+        <path className="ff-draw" pathLength={1} style={dly(500)} d={linePath(purchaseValues)} fill="none" stroke="#2a78d6" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+        <path className="ff-fade" style={dly(900)} d={areaPath(salesValues)} fill="url(#dashGradGreen)" stroke="none" />
+        <path className="ff-draw" pathLength={1} style={dly(400)} d={linePath(salesValues)} fill="none" stroke="#1f9e5d" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
 
         {trend.map((t, i) => (
           <g key={t.date}>
-            <circle cx={x(i)} cy={y(t.sales)} r={3.2} className="fill-white dark:fill-[#121a16]" stroke="#1f9e5d" strokeWidth={1.8} />
-            <circle cx={x(i)} cy={y(t.purchases)} r={3.2} className="fill-white dark:fill-[#121a16]" stroke="#2a78d6" strokeWidth={1.8} />
+            <circle cx={x(i)} cy={y(t.sales)} r={3.2} style={dly(500 + i * 190)} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#1f9e5d" strokeWidth={1.8} />
+            <circle cx={x(i)} cy={y(t.purchases)} r={3.2} style={dly(600 + i * 190)} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#2a78d6" strokeWidth={1.8} />
           </g>
         ))}
 
@@ -748,7 +750,7 @@ function HeroDelta({ pct }: { pct: number | null }) {
   );
 }
 
-function HeroStat({ label, value, pct, negative, invert }: { label: string; value: string; pct: number | null; negative?: boolean; invert?: boolean }) {
+function HeroStat({ label, value, pct, negative, invert }: { label: string; value: ReactNode; pct: number | null; negative?: boolean; invert?: boolean }) {
   // `invert`: for expenses, going up is the unwelcome direction.
   const good = pct === null ? null : invert ? pct <= 0 : pct >= 0;
   return (
@@ -764,6 +766,14 @@ function HeroStat({ label, value, pct, negative, invert }: { label: string; valu
   );
 }
 
+/** Animation-delay helper for the shared motion classes in index.css. */
+const dly = (ms: number): CSSProperties => ({ ['--d' as string]: `${ms}ms` });
+
+/** TZS amount that counts up from 0 when it first appears. */
+function CountTzs({ value }: { value: number }) {
+  return <>{tzs(useCountUp(value))}</>;
+}
+
 function HeroSparkline({ trend }: { trend: DashboardToday['trend'] }) {
   const vals = trend.map((t) => t.sales);
   const max = Math.max(1, ...vals);
@@ -773,7 +783,7 @@ function HeroSparkline({ trend }: { trend: DashboardToday['trend'] }) {
   const last = pts[pts.length - 1] ?? [100, 92];
   return (
     <div className="relative h-[76px] w-full" role="img" aria-label={`Sales over the last 7 days, today ${tzs(vals[vals.length - 1] ?? 0)}`}>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="ff-reveal absolute inset-0 h-full w-full overflow-visible" style={dly(500)}>
         <defs>
           <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#86efac" stopOpacity="0.35" />
@@ -784,8 +794,8 @@ function HeroSparkline({ trend }: { trend: DashboardToday['trend'] }) {
         <path d={line} fill="none" stroke="#bbf7d0" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <span
-        className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-200 ring-4 ring-green-300/25"
-        style={{ left: `${last[0]}%`, top: `${last[1]}%` }}
+        className="ff-dot ff-pulse absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-200 ring-4 ring-green-300/25"
+        style={{ left: `${last[0]}%`, top: `${last[1]}%`, ...dly(2100) }}
         aria-hidden="true"
       />
     </div>

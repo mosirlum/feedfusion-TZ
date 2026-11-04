@@ -260,3 +260,57 @@ h1, h2, h3, h4 {
   .print-stamp { animation: none; transform: rotate(-12deg); }
   .print-anim-pop { animation: none; }
 }
+
+/* ---- Motion system (2026-10-28, CLAUDE.md #90) -------------------------
+   One shared set of entrance animations so every page and chart "arrives"
+   instead of just appearing. All are disabled under reduced-motion. */
+@keyframes ff-rise {
+  from { opacity: 0; transform: translateY(22px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ff-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ff-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes ff-grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ff-grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes ff-pop {
+  0% { opacity: 0; transform: scale(0); }
+  70% { opacity: 1; transform: scale(1.35); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ff-reveal { from { clip-path: inset(-10% 100% -10% 0); } to { clip-path: inset(-10% -10% -10% 0); } }
+@keyframes ff-pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(134, 239, 172, 0.55); } 100% { box-shadow: 0 0 0 14px rgba(134, 239, 172, 0); } }
+
+.ff-rise { animation: ff-rise 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 0ms); }
+.ff-fade { animation: ff-fade 0.9s ease both; animation-delay: var(--d, 0ms); }
+.ff-draw { stroke-dasharray: 1; animation: ff-draw 1.7s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: var(--d, 300ms); }
+.ff-grow-x { transform-origin: left center; animation: ff-grow-x 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 400ms); }
+.ff-grow-y { transform-box: fill-box; transform-origin: bottom; animation: ff-grow-y 1s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 300ms); }
+.ff-dot { transform-box: fill-box; transform-origin: center; animation: ff-pop 0.5s ease-out both; animation-delay: var(--d, 1200ms); }
+.ff-reveal { animation: ff-reveal 1.7s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: var(--d, 300ms); }
+.ff-pulse { animation: ff-pulse-ring 1.8s ease-out infinite; }
+
+/* Every page fades/rises in when you navigate to it. */
+.ff-page { animation: ff-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Table rows cascade in (first 12 rows). */
+main tbody tr { animation: ff-fade 0.55s ease both; }
+main tbody tr:nth-child(1) { animation-delay: 0.05s; }
+main tbody tr:nth-child(2) { animation-delay: 0.1s; }
+main tbody tr:nth-child(3) { animation-delay: 0.15s; }
+main tbody tr:nth-child(4) { animation-delay: 0.2s; }
+main tbody tr:nth-child(5) { animation-delay: 0.25s; }
+main tbody tr:nth-child(6) { animation-delay: 0.3s; }
+main tbody tr:nth-child(7) { animation-delay: 0.35s; }
+main tbody tr:nth-child(8) { animation-delay: 0.4s; }
+main tbody tr:nth-child(9) { animation-delay: 0.45s; }
+main tbody tr:nth-child(10) { animation-delay: 0.5s; }
+main tbody tr:nth-child(n + 11) { animation-delay: 0.55s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-rise, .ff-fade, .ff-draw, .ff-grow-x, .ff-grow-y, .ff-dot, .ff-reveal, .ff-page, .ff-pulse,
+  main tbody tr { animation: none !important; }
+  .ff-draw { stroke-dasharray: none; }
+}
+@media print {
+  .ff-rise, .ff-fade, .ff-draw, .ff-grow-x, .ff-grow-y, .ff-dot, .ff-reveal, .ff-page, main tbody tr { animation: none !important; }
+}
