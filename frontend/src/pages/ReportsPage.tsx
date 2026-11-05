@@ -150,7 +150,7 @@ export default function ReportsPage() {
       // can't show a blob PDF in a tab at all. The saved PDF opens/prints from
       // the browser's download bar in one tap.
       saveBlob(blob, `Feed-Fusion-Report-${from}-to-${to}.pdf`);
-      toast.success('Report downloaded — open it from your downloads to read or print.');
+      toast.success('Report ready.');
     } catch (err) {
       toast.error(await apiErrorMessageFromBlob(err, 'Could not generate the report.'));
     } finally {
