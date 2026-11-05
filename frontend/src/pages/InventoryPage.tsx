@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { inventoryApi, productsApi, categoriesApi, apiErrorMessage } from '../lib/api';
 import { InventoryRow, StockMovement, Category } from '../types';
+import { saveBlob } from '../lib/saveBlob';
 import { tzs, formatDateTime, initials, pageWindow } from '../lib/format';
 import { Badge, Button, Card, EmptyState, FullPageSpinner, Input, Modal, Select, Table, Td, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
@@ -164,15 +165,7 @@ export default function InventoryPage() {
       r.status.replace('_', ' '),
     ]);
     const csv = [header, ...csvRows].map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `inventory-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    saveBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), `inventory-${new Date().toISOString().slice(0, 10)}.csv`);
   }
 
   if (loading) return <FullPageSpinner />;

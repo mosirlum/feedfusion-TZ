@@ -27,6 +27,7 @@ import {
 import { reportsApi, apiErrorMessage, apiErrorMessageFromBlob } from '../lib/api';
 import { tzs, formatDate, isoDaysAgo, todayIso, initials, currentWeekRange, currentYearRange, monthRange, MONTH_NAMES, compactNumber } from '../lib/format';
 import { downloadCsv } from '../lib/exportCsv';
+import { saveBlob } from '../lib/saveBlob';
 import {
   Badge,
   Button,
@@ -143,12 +144,13 @@ export default function ReportsPage() {
     try {
       const res = await reportsApi.narrativePdf(from, to);
       const blob = new Blob([res.data], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      // Revoked well after the new tab has had time to load the blob: URL
-      // into its PDF viewer — revoking immediately risks a race where the
-      // new tab hasn't finished fetching it yet and shows a blank page.
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      // 2026-11-05 (CLAUDE.md #92): a real file download instead of
+      // window.open(). window.open() after an await is not a user gesture, so
+      // Chrome blocks it as a pop-up (nothing happens), and mobile Chrome
+      // can't show a blob PDF in a tab at all. The saved PDF opens/prints from
+      // the browser's download bar in one tap.
+      saveBlob(blob, `Feed-Fusion-Report-${from}-to-${to}.pdf`);
+      toast.success('Report downloaded — open it from your downloads to read or print.');
     } catch (err) {
       toast.error(await apiErrorMessageFromBlob(err, 'Could not generate the report.'));
     } finally {
@@ -733,14 +735,7 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
     try {
       const res = await reportsApi.salesExcel(from, to);
       const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Sales-Report-${from}-to-${to}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      saveBlob(blob, `Sales-Report-${from}-to-${to}.xlsx`);
     } catch (err) {
       toast.error(await apiErrorMessageFromBlob(err, 'Could not build the Excel report.'));
     }

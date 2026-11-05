@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { suppliersApi, apiErrorMessage } from '../lib/api';
 import { Supplier, Purchase, SupplierStats } from '../types';
+import { saveBlob } from '../lib/saveBlob';
 import { tzs, formatDate, initials } from '../lib/format';
 import { Badge, Button, Card, CHART_COLORS, DonutChart, EmptyState, FormField, FullPageSpinner, IconChip, Input, Modal, Select, Table, Td, Textarea, Th, THead, Tr, SummaryHero, HeroButton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
@@ -143,15 +144,7 @@ export default function SuppliersPage() {
     const csv = [header, ...rows]
       .map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `suppliers-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    saveBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }), `suppliers-${new Date().toISOString().slice(0, 10)}.csv`);
   }
 
   // ---------------------------------------------------------------------------
