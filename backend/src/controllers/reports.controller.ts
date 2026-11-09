@@ -3,6 +3,7 @@ import * as reportsService from '../services/reports.service';
 import * as narrativeReportService from '../services/narrativeReport.service';
 import * as pdfReportService from '../services/pdfReport.service';
 import * as salesExcelReportService from '../services/salesExcelReport.service';
+import * as profitDoctorService from '../services/profitDoctor.service';
 
 function q(req: Request, key: string): string | undefined {
   const v = req.query[key];
@@ -62,6 +63,14 @@ export async function usersReportHandler(req: Request, res: Response, next: Next
 export async function salesOverviewHandler(req: Request, res: Response, next: NextFunction) {
   try {
     res.status(200).json(await reportsService.getSalesOverview(q(req, 'from'), q(req, 'to'), req.user!.id));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function profitDoctorHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.status(200).json(await profitDoctorService.getProfitDoctor(q(req, 'from'), q(req, 'to')));
   } catch (err) {
     next(err);
   }

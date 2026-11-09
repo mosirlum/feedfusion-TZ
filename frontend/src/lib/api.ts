@@ -21,6 +21,7 @@ import type {
   ExpenseType,
   PurchaseCostsReport,
   SalesOverviewReport,
+  ProfitDoctorReport,
   InventoryRow,
   PaymentMethod,
   PriceProposal,
@@ -489,6 +490,7 @@ export const reportsApi = {
   // Reports "Sales" tab redesign (2026-09-12, CLAUDE.md #41).
   salesOverview: (from: string, to: string) =>
     http.get<SalesOverviewReport>('/reports/sales-overview', { params: { from, to } }),
+  profitDoctor: (from: string, to: string) => http.get<ProfitDoctorReport>('/reports/profit-doctor', { params: { from, to } }),
   sales: (from: string, to: string) => http.get('/reports/sales', { params: { from, to } }),
   products: (from: string, to: string) => http.get<ProductSalesRow[]>('/reports/products', { params: { from, to } }),
   stock: () => http.get<InventoryRow[]>('/reports/stock'),

@@ -930,3 +930,56 @@ export interface GrowthMonthlyOverview {
   completeMonthsTotal: { netProfit: number; profitMonths: number; lossMonths: number };
   missingMonthlyExpenses: { month: string; categories: string[] } | null;
 }
+
+// Profit Doctor (CLAUDE.md #95) — mirrors backend profitDoctor.service.ts.
+export interface ProfitDoctorFinding {
+  id: string;
+  severity: 'critical' | 'warning' | 'info' | 'good';
+  title: string;
+  what: string;
+  why: string;
+  actions: string[];
+  impactTzs: number | null;
+  evidence: Array<{ label: string; value: string }>;
+}
+
+export interface ProfitDoctorProduct {
+  productId: number;
+  name: string;
+  unit: string;
+  qty: number;
+  revenue: number;
+  sharePct: number;
+  profit: number;
+  marginPct: number;
+  avgPrice: number;
+  avgCost: number;
+  costNow: number;
+  suggestedPrice: number;
+  gain: number;
+  costRisePct: number;
+  listPrice: number | null;
+  marginAtListPricePct: number | null;
+}
+
+export interface ProfitDoctorReport {
+  period: { from: string; to: string };
+  targetMarginPct: number;
+  summary: {
+    revenue: number;
+    cogs: number;
+    gross: number;
+    grossMarginPct: number;
+    discount: number;
+    expenses: number;
+    net: number;
+    netMarginPct: number;
+    expensesPctOfGross: number | null;
+    per100: { products: number; expenses: number; profit: number };
+    oneMarginPointTzs: number;
+  };
+  findings: ProfitDoctorFinding[];
+  potentialTzs: number;
+  products: ProfitDoctorProduct[];
+  assumption: string;
+}

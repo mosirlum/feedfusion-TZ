@@ -10,6 +10,7 @@ import {
   usersReportHandler,
   purchaseCostsReportHandler,
   salesOverviewHandler,
+  profitDoctorHandler,
   narrativeReportHandler,
   salesExcelReportHandler,
 } from '../controllers/reports.controller';
@@ -17,6 +18,8 @@ import {
 const router = Router();
 
 router.get('/sales-overview', authenticate, requireRole('owner'), salesOverviewHandler);
+// Profit Doctor (CLAUDE.md #95) — owner-only written diagnosis of low profit.
+router.get('/profit-doctor', authenticate, requireRole('owner'), profitDoctorHandler);
 // Narrative Business Report (2026-09-13, CLAUDE.md #64) — streams a PDF,
 // every other route here returns JSON. Placed right after sales-overview
 // since it's built from the same aggregator.
