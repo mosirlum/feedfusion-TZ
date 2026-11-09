@@ -28,6 +28,7 @@ import { reportsApi, apiErrorMessage, apiErrorMessageFromBlob } from '../lib/api
 import { tzs, formatDate, isoDaysAgo, todayIso, initials, currentWeekRange, currentYearRange, monthRange, MONTH_NAMES, compactNumber } from '../lib/format';
 import { downloadCsv } from '../lib/exportCsv';
 import { saveBlob } from '../lib/saveBlob';
+import { ProfitHealthCard } from '../components/ProfitHealthCard';
 import {
   Badge,
   Button,
@@ -745,6 +746,7 @@ function SalesOverviewTab({ from, to }: { from: string; to: string }) {
     <div>
       <ReportToolbar onDownload={downloadSalesExcel} showPrint={false} downloadLabel="Download Excel" />
       <PrintLetterhead title="Sales" from={from} to={to} />
+      <div className="mb-4"><ProfitHealthCard data={data} periodLabel={`${formatDate(from)} – ${formatDate(to)}`} /></div>
       {/* Headline numbers first (money in → profit out), then the supporting
           counts, so nothing is squeezed into a 7-across row any more. */}
       <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

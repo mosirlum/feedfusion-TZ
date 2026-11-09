@@ -186,3 +186,39 @@ export async function missingMonthlyCategories(prevFrom: string, prevTo: string,
   );
   return rows.map((r: { category: string }) => r.category);
 }
+
+// Expenses grouped by category for [from, to] (2026-11-09, CLAUDE.md #94) — the
+// owner asked "why is my profit small when sales are big?", which needs to
+// show WHICH expenses are biggest. Uses the exact same rules as
+// sumExpensesForRange (MONTHLY prorated across its month, everything else full
+// on its own date) so the category amounts always add up to the Net Profit
+// figure's "Expenses". Sorted largest first; zero rows dropped.
+export async function expensesByCategoryForRange(from: string, to: string): Promise<Array<{ category: string; amount: number }>> {
+  const [lump, monthly] = await Promise.all([
+    pool.query(
+      `SELECT category, COALESCE(SUM(amount), 0) AS total FROM expenses
+       WHERE expense_type != 'MONTHLY' AND expense_date BETWEEN $1 AND $2
+       GROUP BY category`,
+      [from, to]
+    ),
+    pool.query(
+      `SELECT category, amount, expense_date FROM expenses
+       WHERE expense_type = 'MONTHLY'
+         AND expense_date >= ($1::date - INTERVAL '31 days')
+         AND expense_date <= ($2::date + INTERVAL '31 days')`,
+      [from, to]
+    ),
+  ]);
+  const totals = new Map<string, number>();
+  for (const r of lump.rows as Array<{ category: string; total: string }>) {
+    totals.set(r.category, (totals.get(r.category) ?? 0) + Number(r.total));
+  }
+  for (const r of monthly.rows as Array<{ category: string; amount: string; expense_date: string | Date }>) {
+    const part = proratedMonthlyAmount(toDateOnlyIso(r.expense_date), Number(r.amount), from, to);
+    totals.set(r.category, (totals.get(r.category) ?? 0) + part);
+  }
+  return [...totals.entries()]
+    .map(([category, amount]) => ({ category, amount: Math.round(amount) }))
+    .filter((r) => r.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+}

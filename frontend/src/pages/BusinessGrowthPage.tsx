@@ -15,8 +15,9 @@ import {
   BarChart3,
   Boxes,
 } from 'lucide-react';
-import { businessGrowthApi, apiErrorMessage } from '../lib/api';
-import { BusinessGrowthAnalysis, BusinessGrowthDetails, GrowthIssue, GrowthIssueCategory, GrowthIssueSeverity } from '../types';
+import { businessGrowthApi, reportsApi, apiErrorMessage } from '../lib/api';
+import { ProfitHealthCard } from '../components/ProfitHealthCard';
+import { SalesOverviewReport, BusinessGrowthAnalysis, BusinessGrowthDetails, GrowthIssue, GrowthIssueCategory, GrowthIssueSeverity } from '../types';
 import { tzs, formatDate } from '../lib/format';
 import { Badge, Button, Card, EmptyState, IconChip, PageHeader, Skeleton } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
@@ -53,6 +54,22 @@ export default function BusinessGrowthPage() {
   const [detailsLoading, setDetailsLoading] = useState(true);
   const [detailsFailed, setDetailsFailed] = useState(false);
   const toast = useToast();
+  // "Why is my profit small?" for the month so far (CLAUDE.md #94).
+  const [monthOverview, setMonthOverview] = useState<SalesOverviewReport | null>(null);
+  useEffect(() => {
+    const now = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    const from = `${now.getFullYear()}-${p(now.getMonth() + 1)}-01`;
+    const to = `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
+    let active = true;
+    reportsApi
+      .salesOverview(from, to)
+      .then((r) => active && setMonthOverview(r.data))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const loadDetails = useCallback(() => {
     setDetailsLoading(true);
@@ -114,6 +131,8 @@ export default function BusinessGrowthPage() {
       <WeekStatusHero week={week} />
 
       <AttentionTiles details={details} week={week} />
+
+      {monthOverview && <ProfitHealthCard data={monthOverview} periodLabel="This month so far" />}
 
       <section aria-labelledby="issues-title">
         <h2 id="issues-title" className="mb-3 font-display font-bold text-slate-800 dark:text-[#eef3ef]">

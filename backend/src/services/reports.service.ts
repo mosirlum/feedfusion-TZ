@@ -78,6 +78,7 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
     prevProfitAggregate,
     expenses,
     prevExpenses,
+    expensesByCategory,
   ] = await Promise.all([
       reportsRepo.salesTotals(from, to),
       reportsRepo.salesTotals(prevFrom, prevTo),
@@ -102,6 +103,7 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
       // "Expenses".
       expensesRepo.sumExpensesForRange(from, to),
       expensesRepo.sumExpensesForRange(prevFrom, prevTo),
+      expensesRepo.expensesByCategoryForRange(from, to),
     ]);
 
   // Fill gaps so a quiet day shows as zero, not a missing point that would
@@ -163,6 +165,19 @@ export async function getSalesOverview(fromRaw?: string, toRaw?: string, request
     revenueByCategory,
     revenueByStaff,
     topProducts: topProductsAll.slice(0, 5),
+    // "Why is profit small?" (CLAUDE.md #94): where the expenses went, and the
+    // products that earn the least per TZS sold (revenue > 0 only).
+    expensesByCategory,
+    lowMarginProducts: (topProductsAll as Array<{ product_name: string; revenue: string; gross_profit: string }>)
+      .filter((p) => Number(p.revenue) > 0)
+      .map((p) => ({
+        product_name: p.product_name,
+        revenue: Number(p.revenue),
+        gross_profit: Number(p.gross_profit),
+        margin_pct: (Number(p.gross_profit) / Number(p.revenue)) * 100,
+      }))
+      .sort((a, b) => a.margin_pct - b.margin_pct)
+      .slice(0, 3),
     totalQuantitySold,
     lowStockCount: lowStock.length,
   };

@@ -540,6 +540,8 @@ export interface SalesOverviewReport {
   revenueByCategory: RevenueByCategoryRow[];
   revenueByStaff: RevenueByStaffRow[];
   topProducts: ProductSalesRow[];
+  expensesByCategory: Array<{ category: string; amount: number }>;
+  lowMarginProducts: Array<{ product_name: string; revenue: number; gross_profit: number; margin_pct: number }>;
   totalQuantitySold: number;
   lowStockCount: number;
 }
