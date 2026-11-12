@@ -90,20 +90,33 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
     <Card className="p-5">
       {header}
 
-      <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-[#b6c2ba]">
-        You sold <b>{tzs(s.revenue)}</b>. Out of every <b>TZS 100</b> sold, <b>TZS {Math.round(s.per100.products)}</b> paid for the products, <b>TZS {Math.round(s.per100.expenses)}</b> went to expenses, and{' '}
-        <b className={s.net >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300'}>{s.net >= 0 ? `TZS ${Math.round(s.per100.profit)} is your profit (${tzs(s.net)})` : `you lost ${Math.abs(s.per100.profit) < 1 ? 'less than TZS 1' : `TZS ${Math.round(Math.abs(s.per100.profit))}`} (${tzs(Math.abs(s.net))})`}</b>.
-      </p>
-      <div className="mt-3 flex h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]" role="img" aria-label="Where the sales money went">
-        <div className="ff-grow-x h-full bg-slate-400 dark:bg-slate-500" style={{ ...dly(300), width: seg(s.per100.products) }} />
-        <div className="ff-grow-x h-full bg-amber-400" style={{ ...dly(500), width: seg(s.per100.expenses) }} />
-        {s.net > 0 && <div className="ff-grow-x h-full bg-green-500" style={{ ...dly(700), width: seg(s.per100.profit) }} />}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-[#97a49b]">
-        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-slate-400" />Products {tzs(s.cogs)}</span>
-        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-amber-400" />Expenses {tzs(s.expenses)}</span>
-        <span><span className={clsx('mr-1 inline-block h-2 w-2 rounded-full', s.net >= 0 ? 'bg-green-500' : 'bg-danger-500')} />{s.net >= 0 ? 'Profit' : 'Loss'} {tzs(Math.abs(s.net))}</span>
-        <span>Gross margin {pct(s.grossMarginPct)} (target {data.targetMarginPct}%)</span>
+      <div className="mt-3 rounded-xl border border-slate-200 p-3 dark:border-[#26322b]">
+        <div className="flex items-baseline justify-between gap-3 text-sm">
+          <span className="font-semibold text-slate-700 dark:text-[#e3ebe5]">Money you received from sales</span>
+          <span className="font-display font-extrabold tabular-nums text-slate-900 dark:text-white">{tzs(s.revenue)}</span>
+        </div>
+        <div className="mt-2 flex h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]" role="img" aria-label="Where the sales money went">
+          <div className="ff-grow-x h-full bg-slate-400 dark:bg-slate-500" style={{ ...dly(300), width: seg(s.per100.products) }} />
+          <div className="ff-grow-x h-full bg-amber-400" style={{ ...dly(500), width: seg(s.per100.expenses) }} />
+          {s.net > 0 && <div className="ff-grow-x h-full bg-green-500" style={{ ...dly(700), width: seg(s.per100.profit) }} />}
+        </div>
+        <dl className="mt-3 flex flex-col gap-2 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]"><span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-slate-400" />Spent buying the products you sold</dt>
+            <dd className="text-right tabular-nums"><b>{tzs(s.cogs)}</b> <span className="text-xs text-slate-500 dark:text-[#97a49b]">({pct(s.per100.products)} of sales)</span></dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]"><span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-amber-400" />Business expenses (rent, wages, transport…)</dt>
+            <dd className="text-right tabular-nums"><b>{tzs(s.expenses)}</b> <span className="text-xs text-slate-500 dark:text-[#97a49b]">({pct(s.per100.expenses)} of sales)</span></dd>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-2 dark:border-[#26322b]">
+            <dt className="flex items-center gap-2 font-semibold text-slate-700 dark:text-[#e3ebe5]"><span className={clsx('inline-block h-2.5 w-2.5 shrink-0 rounded-full', s.net >= 0 ? 'bg-green-500' : 'bg-danger-500')} />{s.net >= 0 ? 'What is left for you (profit)' : 'What you lost'}</dt>
+            <dd className={clsx('text-right font-bold tabular-nums', s.net >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300')}>{tzs(Math.abs(s.net))} <span className="text-xs font-normal">({pct(Math.abs(s.per100.profit))} of sales)</span></dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-xs text-slate-500 dark:text-[#97a49b]">
+          Example: if a customer pays you TZS 100, about TZS {Math.round(s.per100.products)} goes back to buy the product, TZS {Math.round(s.per100.expenses)} pays expenses and {s.net >= 0 ? <>you keep about TZS {Math.round(s.per100.profit)}</> : <>you lose {Math.abs(s.per100.profit) < 1 ? 'less than TZS 1' : `about TZS ${Math.round(Math.abs(s.per100.profit))}`}</>}. Gross margin {pct(s.grossMarginPct)}, target {data.targetMarginPct}%.
+        </p>
       </div>
 
       {data.potentialTzs > 0 && (
