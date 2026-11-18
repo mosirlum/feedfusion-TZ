@@ -480,9 +480,9 @@ export default function LoginPage() {
             once no edge is flush). The panel still fills the rest of the
             column, so it doesn't shrink back into round 13's small,
             adrift card — it's just inset instead of edge-to-edge. */}
-        <div className="relative flex min-h-screen w-full items-stretch p-3 sm:p-5 lg:p-6">
+        <div className="ff-login-outer relative flex min-h-screen w-full items-stretch p-3 sm:p-5 lg:p-6">
         <div
-          className="relative flex w-full flex-col justify-center rounded-[2rem] bg-white/40 p-8 backdrop-blur-xl dark:bg-[#101914]/45 sm:p-10"
+          className="ff-login-panel relative flex w-full flex-col justify-center rounded-[2rem] bg-white/40 p-8 backdrop-blur-xl dark:bg-[#101914]/45 sm:p-10"
           style={{
             boxShadow:
               '0 25px 50px -12px rgba(10,40,25,0.45), 0 8px 20px -6px rgba(10,40,25,0.2), inset 0 0 0 1px rgba(255,255,255,0.8), inset 0 1px 0 rgba(255,255,255,0.9)',
@@ -490,12 +490,13 @@ export default function LoginPage() {
         >
         <div className="mx-auto w-full max-w-sm">
           {/* Feed scene: reacts to the form (typing = faster pecking, signing in = the
-              scoop works fast, wrong password = the birds shake). Hidden on short
-              screens so the card never needs scrolling. */}
+              scoop works fast, wrong password = the birds shake). It shrinks with the
+              available screen height (see .ff-scene-box in index.css) so the card
+              never needs scrolling, and disappears only on very short screens. */}
           <FeedScene
             mood={submitting ? 'pour' : email || password ? 'active' : 'idle'}
             errorTick={errorTick}
-            className="mx-auto mb-3 h-auto w-full max-w-[250px] [@media(max-height:700px)]:hidden"
+            className="ff-scene-box mx-auto mb-3"
           />
           <div className="flex flex-col items-center text-center">
             <img src="/logo.png" alt="Feed Fusion Tanzania" className="h-14 w-14 rounded-lg bg-white/95 p-1.5 object-contain shadow-lg" />

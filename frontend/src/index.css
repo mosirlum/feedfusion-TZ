@@ -370,3 +370,13 @@ main tbody tr:nth-child(n + 11) { animation-delay: 0.55s; }
   .ff-pellet { display: none; }
   .ff-heap { transform: scaleY(0.85); }
 }
+
+/* Login scene sizing: shrink with the screen height instead of disappearing, and
+   tighten the card's vertical padding on short screens, so the login card never
+   needs scrolling (measured: card needs ~615px without the scene, ~745px with it). */
+.ff-scene-box { height: clamp(0px, calc(100dvh - 575px), 114px); width: auto; aspect-ratio: 320 / 120; }
+@media (max-height: 800px) {
+  .ff-login-outer { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+  .ff-login-panel { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+}
+@media (max-height: 640px) { .ff-scene-box { display: none; } }
