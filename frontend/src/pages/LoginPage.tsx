@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button, Input, Label } from '../components/ui';
+import FeedScene from '../components/login/FeedScene';
 
 // Login page redesign, round 4 (2026-09-13, CLAUDE.md #68) — the owner did
 // a side-by-side visual diff between the live page and the reference and
@@ -307,6 +308,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showForgotHint, setShowForgotHint] = useState(false);
+  const [errorTick, setErrorTick] = useState(0);
 
   if (isAuthenticated) {
     const dest = location.state?.from?.pathname ?? (isOwner ? '/dashboard' : '/pos');
@@ -322,6 +324,7 @@ export default function LoginPage() {
       navigate(location.state?.from?.pathname ?? '/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not log in.');
+      setErrorTick((n) => n + 1);
     } finally {
       setSubmitting(false);
     }
@@ -486,6 +489,14 @@ export default function LoginPage() {
           }}
         >
         <div className="mx-auto w-full max-w-sm">
+          {/* Feed scene: reacts to the form (typing = faster pecking, signing in = the
+              scoop works fast, wrong password = the birds shake). Hidden on short
+              screens so the card never needs scrolling. */}
+          <FeedScene
+            mood={submitting ? 'pour' : email || password ? 'active' : 'idle'}
+            errorTick={errorTick}
+            className="mx-auto mb-3 h-auto w-full max-w-[250px] [@media(max-height:700px)]:hidden"
+          />
           <div className="flex flex-col items-center text-center">
             <img src="/logo.png" alt="Feed Fusion Tanzania" className="h-14 w-14 rounded-lg bg-white/95 p-1.5 object-contain shadow-lg" />
             <p className="mt-2 text-xl font-extrabold leading-none text-slate-800 dark:text-[#eef3ef]">Feed Fusion</p>
