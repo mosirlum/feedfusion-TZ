@@ -10,25 +10,12 @@ import { CONFIG } from './loginConfig';
 // Swapping the picture: replace frontend/public/login-scene.jpg with another
 // 1672x941 image. The hen/chick/corn/sun/lamp positions below are measured
 // on THIS picture, so a different picture needs those numbers re-measured.
+// The hens and chicks are deliberately NOT animated: they stay part of the photo.
 const SRC = '/login-scene.jpg';
 const IMG_W = 1672;
 const IMG_H = 941;
 
 type Part = { x: number; y: number; w: number; h: number };
-type Bird = Part & { kind: 'hen' | 'chick'; dir: 1 | -1 };
-
-// Pixel boxes (in the 1672x941 picture) around each hen and chick. dir: 1 = faces right, -1 = faces left.
-const BIRDS: Bird[] = [
-  { kind: 'hen', x: 665, y: 505, w: 215, h: 235, dir: 1 },
-  { kind: 'hen', x: 830, y: 530, w: 205, h: 215, dir: 1 },
-  { kind: 'hen', x: 1030, y: 530, w: 215, h: 215, dir: -1 },
-  { kind: 'hen', x: 1180, y: 580, w: 230, h: 195, dir: -1 },
-  { kind: 'hen', x: 1265, y: 612, w: 270, h: 300, dir: -1 },
-  { kind: 'chick', x: 672, y: 652, w: 85, h: 92, dir: 1 },
-  { kind: 'chick', x: 788, y: 692, w: 84, h: 80, dir: 1 },
-  { kind: 'chick', x: 1108, y: 670, w: 75, h: 78, dir: -1 },
-  { kind: 'chick', x: 1050, y: 745, w: 68, h: 85, dir: 1 },
-];
 const CORN: Part = { x: 790, y: 306, w: 882, h: 114 };
 
 // A box that shows exactly the same pixels as the photo underneath, so it can be moved without a seam.
@@ -171,21 +158,6 @@ export default function LoginScene({ pRef }: { pRef: MutableRefObject<number> })
       <div className="fl-stage">
         <img className="fl-photo" src={SRC} alt="" fetchPriority="high" decoding="async" draggable={false} />
         <div className="fl-sway" style={slice(CORN)} />
-        {BIRDS.map((b, i) => (
-          <div
-            key={i}
-            className={`fl-bird ${b.kind}`}
-            style={
-              {
-                ...slice(b),
-                ['--a' as string]: `${b.dir * 3.4}deg`,
-                ['--ox' as string]: b.dir === 1 ? '12%' : '88%',
-                ['--t' as string]: `${(b.kind === 'hen' ? 2.3 : 1.7) + (i % 4) * 0.45}s`,
-                ['--dl' as string]: `${-((i * 0.83) % 3)}s`,
-              } as CSSProperties
-            }
-          />
-        ))}
         <div className="fl-clouds">
           <i style={{ left: '6%', top: '3%', width: '26%', height: '10%' }} />
           <i style={{ left: '34%', top: '1%', width: '22%', height: '8%' }} />

@@ -26,27 +26,7 @@
 .fl-tint, .fl-stage > * { pointer-events: none; }
 .fl-tint { position: absolute; inset: 0; }
 
-.fl-bird, .fl-sway { position: absolute; background-repeat: no-repeat; }
-.fl-bird {
-  -webkit-mask-image: radial-gradient(ellipse closest-side, #000 62%, transparent 100%);
-  mask-image: radial-gradient(ellipse closest-side, #000 62%, transparent 100%);
-  transform-origin: var(--ox, 50%) 55%;
-  animation: fl-peck var(--t, 2.6s) ease-in-out infinite; animation-delay: var(--dl, 0s);
-}
-.fl-bird.chick { transform-origin: 50% 100%; animation-name: fl-hop; }
-@keyframes fl-peck {
-  0%, 36%, 100% { transform: rotate(0) translateY(0); }
-  44% { transform: rotate(var(--a)) translateY(2px); }
-  52% { transform: rotate(calc(var(--a) * 0.2)); }
-  60% { transform: rotate(var(--a)) translateY(2px); }
-  70% { transform: rotate(0); }
-}
-@keyframes fl-hop {
-  0%, 66%, 100% { transform: translateY(0); }
-  74% { transform: translateY(-4px) rotate(-1.5deg); }
-  82% { transform: translateY(0); }
-  90% { transform: translateY(-2px) rotate(1.2deg); }
-}
+.fl-sway { position: absolute; background-repeat: no-repeat; }
 .fl-sway {
   transform-origin: 50% 100%;
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 24%, #000 76%, transparent);
@@ -241,7 +221,7 @@
 
 /* reduced motion: no moving scene, simple fades only */
 @media (prefers-reduced-motion: reduce) {
-  .fl-bird, .fl-sway, .fl-clouds i, .fl-rays, .fl-lamp, .fl-moonref, .fl-card.shake { animation: none !important; }
+  .fl-sway, .fl-clouds i, .fl-rays, .fl-lamp, .fl-moonref, .fl-card.shake { animation: none !important; }
   .fl-card.fl-enter .fl-st { animation: fl-fade 0.3s ease both; animation-delay: 0s; }
   .fl-card { filter: none; transform: none; }
   .fl-welcome { animation: fl-fade 0.3s ease both; }
