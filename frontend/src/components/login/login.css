@@ -136,14 +136,14 @@
 
 /* ---------- card ---------- */
 .fl-cardwrap {
-  position: absolute; inset: 0; display: flex; justify-content: flex-end; align-items: stretch;
-  padding: calc(var(--k) * 44) calc(var(--k) * 39) calc(var(--k) * 44) 0; pointer-events: none; z-index: 2;
+  position: absolute; inset: 0; display: flex; justify-content: flex-end; align-items: center;
+  padding: calc(var(--k) * 44) calc(var(--k) * 46) calc(var(--k) * 44) 0; pointer-events: none; z-index: 2;
 }
 @media (max-width: 899px) { .fl-cardwrap { justify-content: center; align-items: center; padding: 64px 16px 70px; } }
 .fl-card {
   --co: clamp(0, calc((0.7 - var(--p)) * 4), 1);
-  width: calc(var(--k) * 520); max-width: 100%; max-height: 100%; overflow: auto;
-  font-size: max(11.5px, calc(var(--k) * 16));
+  width: calc(var(--k) * 455); max-width: 100%; max-height: 100%; overflow: auto;
+  font-size: max(10.5px, calc(var(--k) * 14.2));
   display: flex; flex-direction: column; justify-content: center; text-align: center;
   padding: 2.05em 2.5em 1.45em;
   background: rgba(255, 255, 255, 0.78);
@@ -157,7 +157,7 @@
   scrollbar-width: none;
 }
 .fl-card::-webkit-scrollbar { display: none; }
-@media (max-width: 899px) { .fl-card { width: min(100%, 440px); font-size: 15px; padding: 1.5em 1.5em 1.1em; } .fl-logo { width: 15.5em; } .fl-form { margin-top: 1em; gap: 0.85em; } .fl-tag { margin-top: 1em; } }
+@media (max-width: 899px) { .fl-card { width: min(100%, 440px); font-size: clamp(10.5px, calc((100dvh - 140px) / 43.5), 15px); padding: 1.5em 1.5em 1.1em; } .fl-logo { width: 15.5em; } .fl-form { margin-top: 1em; gap: 0.85em; } .fl-tag { margin-top: 1em; } }
 .fl-card[data-hidden='true'] { visibility: hidden; pointer-events: none; }
 .fl-card.shake { animation: fl-shake 0.45s ease; }
 @keyframes fl-shake {
