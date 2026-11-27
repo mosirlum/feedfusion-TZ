@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   History,
@@ -163,6 +163,22 @@ export default function SalesHistoryPage() {
   const [page, setPage] = useState(1);
 
   const [viewSaleId, setViewSaleId] = useState<number | null>(null);
+  // Opened from the Feedy assistant (CLAUDE.md #104): /sales-history?open=ID[&print=1]
+  // opens that invoice (and starts printing); ?from=&to= sets the period.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const f = searchParams.get('from');
+    const t = searchParams.get('to');
+    const open = Number(searchParams.get('open'));
+    if (!f && !t && !open) return;
+    if (f && /^\d{4}-\d{2}-\d{2}$/.test(f)) setFrom(f);
+    if (t && /^\d{4}-\d{2}-\d{2}$/.test(t)) setTo(t);
+    if (open) {
+      setViewSaleId(open);
+      if (searchParams.get('print') === '1') setAutoPrintId(open);
+    }
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [editSaleId, setEditSaleId] = useState<number | null>(null);
   const [voidSale, setVoidSale] = useState<Sale | null>(null);
   const [voidReason, setVoidReason] = useState('');

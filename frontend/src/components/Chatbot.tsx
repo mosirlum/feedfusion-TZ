@@ -6,10 +6,15 @@ import RobotAvatar, { type RobotMood } from './RobotAvatar';
 import { useAuth } from '../context/AuthContext';
 import { businessGrowthApi, reportsApi } from '../lib/api';
 import { tzs } from '../lib/format';
+import { detectIntent, runIntent, type ChatAction, type Intent } from '../lib/assistantActions';
+import { ReportPreviewModal, makeReportPreview, type ReportPreviewData } from './ReportPreview';
 import type { GrowthOverviewMonth, ProfitDoctorReport } from '../types';
 
 /**
- * Msaidizi — the free, rule-based help chatbot (2026-11-27, CLAUDE.md #99).
+ * Feedy (was "Msaidizi") — the free, rule-based help chatbot (2026-11-27, CLAUDE.md #99).
+ * #104: it also DOES things — sales summaries, yesterday's invoices, "generate
+ * last month's report" — by reading what is typed or spoken (lib/assistantActions.ts).
+ * It starts fresh every time it is opened, and answers out loud when asked by voice.
  * The client's own choice over a paid AI chatbot: a fixed bank of common
  * questions and answers, in English and Kiswahili, with simple keyword
  * matching on free-typed questions. No network call, no per-use cost.
@@ -41,12 +46,18 @@ interface FaqEntry {
   page?: { href: string; label: string };
   /** Answered live from real numbers instead of a fixed text (see askAnalysis). */
   analysis?: 'loss' | 'compare';
+  /** A ready-made request ("Sales this week"): run through the action reader, not an FAQ answer. */
+  command?: boolean;
 }
 
 // Pages a sales user cannot open: no "Open" button for them.
 const OWNER_ONLY_PAGES = ['/reports', '/business-growth', '/audit-log', '/users', '/settings', '/stock-adjustments', '/approvals'];
 
+const NEVER = /a^/;
 const FAQ: FaqEntry[] = [
+  { id: 'act-week', q: { en: 'Sales this week', sw: 'Mauzo ya wiki hii' }, match: NEVER, command: true },
+  { id: 'act-invoices', q: { en: "Yesterday's invoices", sw: 'Ankara za jana' }, match: NEVER, command: true },
+  { id: 'act-report', q: { en: "Last month's report", sw: 'Ripoti ya mwezi uliopita' }, match: NEVER, command: true },
   // Analyst questions: answered live from real numbers (monthlyOverview +
   // profitDoctor), owner only (BR-24: cost/profit is not shown to sales staff).
   {
@@ -192,7 +203,7 @@ const topicForPath = (path: string) => {
   const hit = PAGE_TOPIC.find(([p]) => path === p || path.startsWith(p + '/'));
   return hit ? byId(hit[1]) : undefined;
 };
-const DEFAULT_CHIPS = ['compare', 'sell', 'expense', 'count'];
+const DEFAULT_CHIPS = ['act-week', 'act-invoices', 'compare', 'sell'];
 
 const UNKNOWN: L = {
   en: 'I don’t have an answer for that yet.',
@@ -205,6 +216,7 @@ interface ChatMsg {
   text: string;
   steps?: string[];
   page?: { href: string; label: string };
+  actions?: ChatAction[];
   chips?: string[]; // FAQ ids
   offerRequest?: string; // the original question, if this was an "unknown" reply
   requested?: boolean;
@@ -232,6 +244,8 @@ export default function Chatbot() {
   const { isOwner, user } = useAuth();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const [preview, setPreview] = useState<ReportPreviewData | null>(null);
+  const session = useRef(0); // bumps when the chat closes so late answers from the last chat are dropped
   const [lang, setLang] = useState<Lang>('en');
   const [draft, setDraft] = useState('');
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
@@ -325,24 +339,41 @@ export default function Chatbot() {
 
   const firstName = (user?.name ?? '').trim().split(/\s+/)[0];
 
-  // The first time it opens: say hello and offer what people ask most (and help for the page they are on).
+  // Every time it is closed the chat is wiped, so the next open starts fresh.
+  useEffect(() => {
+    if (open) return;
+    session.current++;
+    setMsgs([]);
+    setDraft('');
+    setThinking(false);
+    setSpeaking(false);
+    try {
+      window.speechSynthesis?.cancel();
+      rec.current?.stop();
+    } catch {
+      /* nothing playing */
+    }
+  }, [open]);
+
+  // Opens with a hello and what people ask most (and help for the page they are on). and offer what people ask most (and help for the page they are on).
   useEffect(() => {
     if (!open || msgs.length) return;
     const here = topicForPath(pathname);
-    const ids = [...(here ? [here.id] : []), ...DEFAULT_CHIPS.filter((id) => id !== here?.id)].slice(0, 5);
+    const base = ['act-week', 'act-invoices', isOwner ? 'act-report' : 'sell', 'compare', 'expense', 'count'].filter((id) => isOwner || id !== 'compare');
+    const ids = [...(here ? [here.id] : []), ...base.filter((id) => id !== here?.id)].slice(0, 6);
     setMsgs([
       {
         id: next.current++,
         from: 'bot',
         text:
           lang === 'en'
-            ? `Hi${firstName ? ' ' + firstName : ''}! I'm Msaidizi, your helper. Tap a question or type your own — I can also look at your numbers.`
-            : `Habari${firstName ? ' ' + firstName : ''}! Mimi ni Msaidizi. Gusa swali au andika lako — naweza pia kuangalia takwimu zako.`,
+            ? `Hi${firstName ? ' ' + firstName : ''}! I'm Feedy, your Feed Fusion helper. Ask me how to do anything in the system, or ask me to do it for you: “sales last week”, “yesterday's invoices”, “generate last month's report”. Type it, or tap the mic and speak.`
+            : `Habari${firstName ? ' ' + firstName : ''}! Mimi ni Feedy, msaidizi wako wa Feed Fusion. Niulize jinsi ya kufanya chochote kwenye mfumo, au niombe nikufanyie: “mauzo ya wiki iliyopita”, “ankara za jana”, “tengeneza ripoti ya mwezi uliopita”. Andika, au gusa maikrofoni uongee.`,
         chips: ids,
       },
     ]);
     flash('wink', 3000);
-  }, [open, msgs.length, lang, firstName, pathname, flash]);
+  }, [open, msgs.length, lang, firstName, pathname, flash, isOwner]);
 
   // While closed: now and then wave, wink and say "Need a hand?" so people notice it is there.
   useEffect(() => {
@@ -376,13 +407,20 @@ export default function Chatbot() {
   }, []);
 
   const pageFor = (e: FaqEntry) => (e.page && (isOwner || !OWNER_ONLY_PAGES.includes(e.page.href)) ? e.page : undefined);
-  const chipsFor = (excludeId?: string) => DEFAULT_CHIPS.filter((id) => id !== excludeId).slice(0, 4);
+  const chipsFor = (excludeId?: string) => DEFAULT_CHIPS.filter((id) => id !== excludeId && (isOwner || id !== 'compare')).slice(0, 4);
 
-  function ask(entry: FaqEntry | null, freeText?: string) {
+  function ask(entry: FaqEntry | null, freeText?: string, viaVoice = false) {
     const question = entry ? entry.q[lang] : freeText ?? '';
     if (!question.trim() || thinking) return;
     setMsgs((prev) => [...prev, { id: next.current++, from: 'me', text: question }]);
     setDraft('');
+    if (entry?.command) {
+      const intent = detectIntent(question);
+      if (intent) {
+        void runCommand(intent, viaVoice);
+        return;
+      }
+    }
     if (entry?.analysis) {
       void askAnalysis(entry.analysis);
       return;
@@ -391,7 +429,7 @@ export default function Chatbot() {
     setMood('think');
     later(() => {
       if (entry) {
-        say({ text: entry.a![lang], steps: entry.steps?.[lang], page: pageFor(entry), chips: chipsFor(entry.id) }, autoRead);
+        say({ text: entry.a![lang], steps: entry.steps?.[lang], page: pageFor(entry), chips: chipsFor(entry.id) }, autoRead || viaVoice);
         flash('happy', 4500);
       } else {
         say(
@@ -404,7 +442,7 @@ export default function Chatbot() {
             offerRequest: question,
             chips: chipsFor(),
           },
-          autoRead
+          autoRead || viaVoice
         );
         flash('sad', 6000);
       }
@@ -450,6 +488,55 @@ export default function Chatbot() {
     setThinking(false);
   }
 
+  // "Do it for me": sales summaries, invoices, report, low stock, open a page.
+  async function runCommand(intent: Intent, viaVoice: boolean) {
+    const sid = session.current;
+    setThinking(true);
+    setMood('think');
+    const res = await runIntent(intent, lang, isOwner);
+    if (sid !== session.current) return; // the chat was closed meanwhile
+    say({ text: res.text, actions: res.actions, chips: chipsFor() }, autoRead || viaVoice);
+    setThinking(false);
+    flash(res.mood ?? 'happy', 4500);
+    if (res.report) void makeReport(res.report.from, res.report.to, viaVoice);
+  }
+
+  // Builds the narrative PDF and shows it in the same preview dialog as Reports → Generate Report.
+  async function makeReport(from: string, to: string, viaVoice = false) {
+    const sid = session.current;
+    setThinking(true);
+    setMood('think');
+    try {
+      const res = await reportsApi.narrativePdf(from, to);
+      if (sid !== session.current) return;
+      setPreview(makeReportPreview(new Blob([res.data], { type: 'application/pdf' }), from, to));
+      say(
+        {
+          text: lang === 'en' ? 'Your report is ready. Check it, then tap Print or Download.' : 'Ripoti yako iko tayari. Iangalie, kisha gusa Chapa au Pakua.',
+          chips: chipsFor(),
+        },
+        autoRead || viaVoice
+      );
+      flash('happy', 4000);
+    } catch {
+      if (sid !== session.current) return;
+      say({ text: lang === 'en' ? 'Could not generate the report right now. Please try again.' : 'Imeshindwa kutengeneza ripoti sasa. Jaribu tena.', chips: chipsFor() }, false);
+      flash('sad', 4000);
+    }
+    setThinking(false);
+  }
+
+  function submitText(text: string, viaVoice = false) {
+    const intent = detectIntent(text);
+    if (intent && !thinking) {
+      setMsgs((prev) => [...prev, { id: next.current++, from: 'me', text }]);
+      setDraft('');
+      void runCommand(intent, viaVoice);
+      return;
+    }
+    ask(matchFree(text), text, viaVoice);
+  }
+
   function matchFree(text: string): FaqEntry | null {
     return FAQ.find((f) => f.match.test(text)) ?? null;
   }
@@ -457,7 +544,7 @@ export default function Chatbot() {
     e.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    ask(matchFree(text), text);
+    submitText(text);
   }
 
   function startListening() {
@@ -469,7 +556,7 @@ export default function Chatbot() {
       r.interimResults = false;
       r.onresult = (e) => {
         const text = e.results[0]?.[0]?.transcript?.trim();
-        if (text) ask(matchFree(text), text);
+        if (text) submitText(text, true);
       };
       r.onend = () => setListening(false);
       r.onerror = () => setListening(false);
@@ -484,7 +571,7 @@ export default function Chatbot() {
   function sendToDeveloper(msgId: number, question: string) {
     // Logged only (see file header) — no feature-requests table exists yet.
     // eslint-disable-next-line no-console
-    console.info('[Msaidizi] feature request:', question);
+    console.info('[Feedy] feature request:', question);
     setMsgs((prev) => [
       ...prev.map((m) => (m.id === msgId ? { ...m, requested: true } : m)),
       { id: next.current++, from: 'bot', text: lang === 'en' ? 'Sent. Thank you!' : 'Imetumwa. Asante!' },
@@ -572,6 +659,7 @@ export default function Chatbot() {
           {lang === 'en' ? 'Need a hand?' : 'Naweza kusaidia?'}
         </button>
       )}
+      {!preview && (
       <button
         type="button"
         onPointerDown={onDown}
@@ -591,11 +679,14 @@ export default function Chatbot() {
       >
         <RobotAvatar size={64} waving={!open} mood={open ? 'happy' : faceMood} />
       </button>
+      )}
 
-      {open && (
+      <ReportPreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {open && !preview && (
         <div
           role="dialog"
-          aria-label="Msaidizi"
+          aria-label="Feedy"
           style={{ right: panelRight, bottom: panelBottom, width: panelW, height: panelH }}
           className="fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#11211a]"
         >
@@ -604,9 +695,9 @@ export default function Chatbot() {
               <RobotAvatar size={36} talking={speaking} mood={faceMood} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-display text-sm font-bold text-slate-800 dark:text-[#e9f1eb]">Msaidizi</p>
+              <p className="font-display text-base font-bold text-green-700 dark:text-lime-300">Feedy</p>
               <p className="truncate text-xs text-slate-500 dark:text-[#8fa596]">
-                {thinking ? (lang === 'en' ? 'thinking…' : 'nafikiri…') : lang === 'en' ? 'Ask how to do anything' : 'Uliza jinsi ya kufanya chochote'}
+                {thinking ? (lang === 'en' ? 'thinking…' : 'nafikiri…') : lang === 'en' ? 'Your Feed Fusion helper' : 'Msaidizi wako wa Feed Fusion'}
               </p>
             </div>
             {speechOk && (
@@ -669,6 +760,32 @@ export default function Chatbot() {
                     >
                       {lang === 'en' ? 'Open' : 'Fungua'} {m.page.label} <ArrowRight size={13} />
                     </Link>
+                  )}
+                  {m.actions && m.actions.length > 0 && (
+                    <div className="mt-2 flex flex-col gap-1.5">
+                      {m.actions.map((a, j) =>
+                        a.href ? (
+                          <Link
+                            key={j}
+                            to={a.href}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-left text-xs font-semibold text-white dark:bg-lime-400 dark:text-[#0b1712]"
+                          >
+                            <span>{a.label}</span> <ArrowRight size={13} className="flex-none" />
+                          </Link>
+                        ) : (
+                          <button
+                            key={j}
+                            type="button"
+                            disabled={thinking}
+                            onClick={() => a.report && void makeReport(a.report.from, a.report.to)}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-left text-xs font-semibold text-white disabled:opacity-60 dark:bg-lime-400 dark:text-[#0b1712]"
+                          >
+                            <span>{a.label}</span> <ArrowRight size={13} className="flex-none" />
+                          </button>
+                        )
+                      )}
+                    </div>
                   )}
                   {m.offerRequest && !m.requested && (
                     <button
