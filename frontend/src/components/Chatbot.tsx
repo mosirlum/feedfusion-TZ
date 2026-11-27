@@ -1,6 +1,7 @@
-import { FormEvent, useState } from 'react';
-import { MessageCircle, Send, X } from 'lucide-react';
+import { FormEvent, useEffect, useState } from 'react';
+import { Send, X } from 'lucide-react';
 import clsx from 'clsx';
+import RobotAvatar from './RobotAvatar';
 
 /**
  * Msaidizi — the free, rule-based help chatbot (2026-11-27, CLAUDE.md #99).
@@ -108,6 +109,16 @@ export default function Chatbot() {
   const [lang, setLang] = useState<Lang>('en');
   const [draft, setDraft] = useState('');
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
+  // Robot "talks" (mouth pulses) for a moment right after it replies — a
+  // small emotional touch the client asked for, on top of its always-on
+  // float/blink/occasional-wink.
+  const [talking, setTalking] = useState(false);
+  useEffect(() => {
+    if (msgs.length === 0 || msgs[msgs.length - 1]?.from !== 'bot') return;
+    setTalking(true);
+    const t = window.setTimeout(() => setTalking(false), 1400);
+    return () => window.clearTimeout(t);
+  }, [msgs]);
 
   function ask(entry: FaqEntry | null, freeText?: string) {
     const question = entry ? entry.q[lang] : freeText ?? '';
@@ -159,16 +170,16 @@ export default function Chatbot() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Close help chat' : 'Open help chat'}
-        className="fixed bottom-5 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-2xl transition hover:bg-green-700 active:scale-95 dark:bg-lime-400 dark:text-[#0b1712] dark:hover:bg-lime-300 sm:bottom-6 sm:left-6"
+        className="fixed bottom-5 left-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-green-600 shadow-2xl transition hover:bg-green-700 hover:scale-105 active:scale-95 dark:bg-lime-400 dark:hover:bg-lime-300 sm:bottom-6 sm:left-6"
       >
-        {open ? <X size={22} /> : <MessageCircle size={22} />}
+        {open ? <X size={22} className="text-white dark:text-[#0b1712]" /> : <RobotAvatar size={44} waving />}
       </button>
 
       {open && (
         <div className="fixed bottom-24 left-5 z-50 flex h-[min(560px,70vh)] w-[min(380px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#11211a] sm:left-6">
           <header className="flex items-center gap-3 border-b border-slate-100 px-4 py-3 dark:border-white/10">
-            <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-lime-400/15 dark:text-lime-300">
-              <MessageCircle size={18} />
+            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-green-50 dark:bg-lime-400/15">
+              <RobotAvatar size={30} talking={talking} />
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-sm font-bold text-slate-800 dark:text-[#e9f1eb]">Msaidizi</p>

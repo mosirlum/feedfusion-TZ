@@ -1,0 +1,96 @@
+/* Msaidizi's robot mascot (2026-11-27) — idle float + blink always on;
+   `waving` loops a friendly wave to invite a tap; `talking` pulses the mouth
+   while the bot "speaks" an answer. Transform/opacity only, so it's cheap. */
+
+.ff-robot {
+  display: inline-block;
+  animation: ff-robot-float 3.2s ease-in-out infinite;
+}
+
+.ff-robot-head,
+.ff-robot-body {
+  fill: #f3f6f2;
+  stroke: #c3cdc5;
+  stroke-width: 1.4;
+}
+.ff-robot-face {
+  fill: #11211a;
+}
+.ff-robot-eye {
+  fill: #c6f36f;
+  filter: drop-shadow(0 0 2.5px rgba(198, 243, 111, 0.85));
+}
+.ff-robot-mouth {
+  stroke: #c6f36f;
+}
+.ff-robot-stroke {
+  color: #c3cdc5;
+}
+.ff-robot-tip {
+  fill: #c6f36f;
+  animation: ff-robot-tip-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ff-robot-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes ff-robot-tip-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* Blink: both eyes together, most of the time open. */
+.ff-robot-eyes {
+  animation: ff-robot-blink 4.4s ease-in-out infinite;
+}
+/* The right eye gets its OWN, independent cycle — since it rarely lands on
+   "closed" at the same moment as the left eye's blink, this reads as an
+   occasional wink rather than a synchronized blink. */
+.ff-robot-eyes.ff-robot-eye-right {
+  animation: ff-robot-wink 5.8s ease-in-out infinite;
+  animation-delay: 1.1s;
+}
+
+@keyframes ff-robot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.12); }
+}
+@keyframes ff-robot-wink {
+  0%, 88%, 100% { transform: scaleY(1); }
+  92% { transform: scaleY(0.1); }
+  96% { transform: scaleY(1); }
+}
+
+/* Gentle, looping wave — mostly still, with a short wave every cycle. */
+.ff-robot-arm-wave {
+  animation: ff-robot-wave 6s ease-in-out infinite;
+}
+@keyframes ff-robot-wave {
+  0%, 100% { transform: rotate(0deg); }
+  3% { transform: rotate(-22deg); }
+  6% { transform: rotate(16deg); }
+  9% { transform: rotate(-14deg); }
+  12% { transform: rotate(6deg); }
+  15% { transform: rotate(0deg); }
+}
+
+.ff-robot-talking .ff-robot-mouthwrap {
+  animation: ff-robot-talk 0.42s ease-in-out infinite;
+}
+@keyframes ff-robot-talk {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-robot,
+  .ff-robot-tip,
+  .ff-robot-eyes,
+  .ff-robot-eyes.ff-robot-eye-right,
+  .ff-robot-arm-wave,
+  .ff-robot-talking .ff-robot-mouthwrap {
+    animation: none !important;
+  }
+}
