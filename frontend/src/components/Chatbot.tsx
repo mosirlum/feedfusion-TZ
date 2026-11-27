@@ -2,6 +2,10 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import clsx from 'clsx';
 import RobotAvatar from './RobotAvatar';
+import { useAuth } from '../context/AuthContext';
+import { businessGrowthApi, reportsApi } from '../lib/api';
+import { tzs } from '../lib/format';
+import type { GrowthOverviewMonth, ProfitDoctorReport } from '../types';
 
 /**
  * Msaidizi — the free, rule-based help chatbot (2026-11-27, CLAUDE.md #99).
@@ -20,9 +24,11 @@ type Lang = 'en' | 'sw';
 
 interface FaqEntry {
   q: Record<Lang, string>;
-  a: Record<Lang, string>;
+  a?: Record<Lang, string>;
   steps?: Record<Lang, string[]>;
   match: RegExp;
+  /** Answered live from real numbers instead of a fixed text (see askAnalysis). */
+  analysis?: boolean;
 }
 
 const FAQ: FaqEntry[] = [
@@ -89,6 +95,15 @@ const FAQ: FaqEntry[] = [
     a: { en: 'Open Sales History, find the sale, and use the void action on that row (owner only). Stock is given back automatically and it stays on record — completed sales are never deleted.', sw: 'Fungua Sales History, tafuta mauzo, bonyeza void kwenye row hiyo (mwenye duka pekee). Stoo inarudishwa yenyewe, na mauzo hubaki kwenye rekodi — mauzo yaliyokamilika hayafutwi kabisa.' },
     match: /void|batilish|cancel sale/i,
   },
+  // "Analyst" mode (2026-11-27, CLAUDE.md #99 follow-up): answered live from
+  // real numbers (businessGrowthApi.monthlyOverview + reportsApi.profitDoctor),
+  // not a fixed sentence — see askAnalysis() below. Owner-only (BR-24: cost
+  // and profit figures aren't shown to sales staff anywhere else either).
+  {
+    q: { en: 'Why am I making a loss this month?', sw: 'Kwa nini nina hasara mwezi huu?' },
+    match: /\bloss\b|hasara|kwa nini.*(faida|hasara)|why.*(loss|profit)|analysis|uchambuzi|je.*biashara inakwendaje/i,
+    analysis: true,
+  },
 ];
 
 const UNKNOWN = {
@@ -105,6 +120,7 @@ interface ChatMsg {
 }
 
 export default function Chatbot() {
+  const { isOwner } = useAuth();
   const [open, setOpen] = useState(false);
   const [lang, setLang] = useState<Lang>('en');
   const [draft, setDraft] = useState('');
@@ -122,10 +138,15 @@ export default function Chatbot() {
 
   function ask(entry: FaqEntry | null, freeText?: string) {
     const question = entry ? entry.q[lang] : freeText ?? '';
+    if (entry?.analysis) {
+      askAnalysis(question);
+      setDraft('');
+      return;
+    }
     const me: ChatMsg = { from: 'me', text: question };
     let bot: ChatMsg;
     if (entry) {
-      bot = { from: 'bot', text: entry.a[lang], steps: entry.steps?.[lang] };
+      bot = { from: 'bot', text: entry.a![lang], steps: entry.steps?.[lang] };
     } else {
       bot = {
         from: 'bot',
@@ -139,6 +160,55 @@ export default function Chatbot() {
     }
     setMsgs((prev) => [...prev, me, bot]);
     setDraft('');
+  }
+
+  // "Analyst" answer (2026-11-27) — reads the SAME live endpoints the
+  // Business Growth and Reports pages already use (never a separate,
+  // driftable copy of the numbers), picks the month's worst finding, and
+  // speaks the answer the same way WelcomeBack.tsx does.
+  async function askAnalysis(question: string) {
+    const me: ChatMsg = { from: 'me', text: question };
+    const checking: ChatMsg = { from: 'bot', text: lang === 'en' ? 'Let me check the numbers…' : 'Nakagua takwimu…' };
+    setMsgs((prev) => [...prev, me, checking]);
+    const replaceLast = (text: string) =>
+      setMsgs((prev) => {
+        const next = prev.slice();
+        next[next.length - 1] = { from: 'bot', text };
+        return next;
+      });
+
+    if (!isOwner) {
+      replaceLast(
+        lang === 'en'
+          ? 'This kind of analysis is only available to the shop owner.'
+          : 'Uchambuzi wa aina hii unapatikana kwa mwenye duka pekee.'
+      );
+      return;
+    }
+    try {
+      const overviewRes = await businessGrowthApi.monthlyOverview();
+      const months = overviewRes.data.months;
+      const current = months[months.length - 1];
+      const doctorRes = await reportsApi.profitDoctor(current.from, current.to);
+      const text = buildAnalysisAnswer(current, doctorRes.data, lang);
+      replaceLast(text);
+      speak(text);
+    } catch {
+      replaceLast(lang === 'en' ? 'Could not load the analysis right now.' : 'Imeshindwa kupata uchambuzi sasa.');
+    }
+  }
+
+  function speak(text: string) {
+    try {
+      const synth = window.speechSynthesis;
+      if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.98;
+      synth.speak(u);
+    } catch {
+      /* no speech support on this device — the text reply still shows */
+    }
   }
 
   function matchFree(text: string): FaqEntry | null {
@@ -267,6 +337,54 @@ export default function Chatbot() {
       )}
     </>
   );
+}
+
+const MONTH_NAMES: Record<Lang, string[]> = {
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  sw: ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni', 'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba'],
+};
+
+function formatMonthLabel(yyyyMm: string, lang: Lang): string {
+  const [y, m] = yyyyMm.split('-').map(Number);
+  const name = MONTH_NAMES[lang][(m ?? 1) - 1] ?? yyyyMm;
+  return `${name} ${y}`;
+}
+
+function verdictText(verdict: GrowthOverviewMonth['verdict'], lang: Lang): string {
+  const map: Record<GrowthOverviewMonth['verdict'], Record<Lang, string>> = {
+    profit: { en: 'profit', sw: 'faida' },
+    loss: { en: 'loss', sw: 'hasara' },
+    breakeven: { en: 'break-even result (no real profit or loss)', sw: 'hali ya mlingano (hakuna faida wala hasara)' },
+    no_data: { en: 'no activity yet', sw: 'bado hakuna mauzo' },
+  };
+  return map[verdict][lang];
+}
+
+function buildAnalysisAnswer(month: GrowthOverviewMonth, doctor: ProfitDoctorReport, lang: Lang): string {
+  const monthLabel = formatMonthLabel(month.month, lang);
+  const net = month.metrics.netProfit;
+  const margin = month.marginPct;
+  const verdictWord = verdictText(month.verdict, lang);
+  const marginText =
+    margin !== null
+      ? lang === 'en'
+        ? ` (${margin.toFixed(1)}% margin)`
+        : ` (asilimia ${margin.toFixed(1)} ya mauzo)`
+      : '';
+  const headline =
+    lang === 'en'
+      ? `${monthLabel} is showing a ${verdictWord} of ${tzs(Math.abs(net))}${marginText}.`
+      : `${monthLabel} inaonyesha ${verdictWord} ya ${tzs(Math.abs(net))}${marginText}.`;
+
+  const worst =
+    doctor.findings.find((f) => f.severity === 'critical') ??
+    doctor.findings.find((f) => f.severity === 'warning') ??
+    doctor.findings[0];
+  if (!worst) return headline;
+
+  const reason = lang === 'en' ? ` Biggest issue: ${worst.what} ${worst.why}` : ` Tatizo kubwa: ${worst.what} ${worst.why}`;
+  const action = worst.actions[0] ? (lang === 'en' ? ` What to do: ${worst.actions[0]}` : ` Ufanye nini: ${worst.actions[0]}`) : '';
+  return (headline + reason + action).trim();
 }
 
 function Bubble({ from, children }: { from: 'bot' | 'me'; children: React.ReactNode }) {
