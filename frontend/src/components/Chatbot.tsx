@@ -491,6 +491,69 @@ export default function Chatbot() {
     ]);
   }
 
+  // Draggable: the helper can be moved anywhere so it never covers the work area. Position is remembered on this device.
+  const POS_KEY = 'ff_bot_pos';
+  const [pos, setPos] = useState<{ right: number; bottom: number }>(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(POS_KEY) ?? 'null');
+      if (v && typeof v.right === 'number' && typeof v.bottom === 'number') return v;
+    } catch {
+      /* no saved spot */
+    }
+    return { right: 20, bottom: 20 };
+  });
+  const drag = useRef<{ sx: number; sy: number; r: number; b: number; moved: boolean } | null>(null);
+  const clampPos = (r: number, b: number) => ({
+    right: Math.max(8, Math.min(window.innerWidth - 76, r)),
+    bottom: Math.max(8, Math.min(window.innerHeight - 76, b)),
+  });
+  const onDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    drag.current = { sx: e.clientX, sy: e.clientY, r: pos.right, b: pos.bottom, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.sx;
+    const dy = e.clientY - d.sy;
+    if (!d.moved && Math.hypot(dx, dy) < 6) return;
+    d.moved = true;
+    setBubble(false);
+    setPos(clampPos(d.r - dx, d.b - dy));
+  };
+  const onUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const d = drag.current;
+    drag.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
+    if (!d) return;
+    if (d.moved) {
+      try {
+        localStorage.setItem(POS_KEY, JSON.stringify(pos));
+      } catch {
+        /* private mode */
+      }
+    } else {
+      setOpen((v) => !v);
+      setBubble(false);
+    }
+  };
+  // keep it on screen if the window shrinks
+  useEffect(() => {
+    const fit = () => setPos((p) => clampPos(p.right, p.bottom));
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const panelW = Math.min(380, vw - 32);
+  const panelH = Math.min(560, vh * 0.7);
+  const panelRight = Math.max(8, Math.min(vw - panelW - 8, pos.right));
+  const panelBottom = Math.max(8, Math.min(vh - panelH - 8, pos.bottom + 76));
+
   const faceMood: RobotMood = thinking ? 'think' : mood;
   const lastBotId = [...msgs].reverse().find((m) => m.from === 'bot')?.id;
 
@@ -503,33 +566,42 @@ export default function Chatbot() {
             setBubble(false);
             setOpen(true);
           }}
-          className="fixed bottom-[5.6rem] left-5 z-50 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-lg dark:border-white/10 dark:bg-[#11211a] dark:text-[#e9f1eb] sm:left-6"
+          style={{ right: pos.right + 76, bottom: pos.bottom + 16 }}
+          className="fixed z-50 rounded-2xl rounded-br-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-lg dark:border-white/10 dark:bg-[#11211a] dark:text-[#e9f1eb]"
         >
           {lang === 'en' ? 'Need a hand?' : 'Naweza kusaidia?'}
         </button>
       )}
       <button
         type="button"
-        onClick={() => {
-          setOpen((v) => !v);
-          setBubble(false);
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={() => (drag.current = null)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
         }}
-        aria-label={open ? 'Close help chat' : 'Open help chat'}
+        style={{ right: pos.right, bottom: pos.bottom, touchAction: 'none' }}
+        aria-label={open ? 'Close help chat (drag to move)' : 'Open help chat (drag to move)'}
         aria-expanded={open}
-        className="fixed bottom-5 left-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-green-600 shadow-2xl transition hover:bg-green-700 hover:scale-105 active:scale-95 dark:bg-lime-400 dark:hover:bg-lime-300 sm:bottom-6 sm:left-6"
+        className="fixed z-[51] flex h-[68px] w-[68px] cursor-grab items-center justify-center rounded-full drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] active:cursor-grabbing"
       >
-        {open ? <X size={22} className="text-white dark:text-[#0b1712]" /> : <RobotAvatar size={44} waving mood={faceMood} />}
+        <RobotAvatar size={64} waving={!open} mood={open ? 'happy' : faceMood} />
       </button>
 
       {open && (
         <div
           role="dialog"
           aria-label="Msaidizi"
-          className="fixed bottom-24 left-5 z-50 flex h-[min(560px,70vh)] w-[min(380px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#11211a] sm:left-6"
+          style={{ right: panelRight, bottom: panelBottom, width: panelW, height: panelH }}
+          className="fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#11211a]"
         >
           <header className="flex items-center gap-2 border-b border-slate-100 px-3 py-3 dark:border-white/10">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-green-50 dark:bg-lime-400/15">
-              <RobotAvatar size={30} talking={speaking} mood={faceMood} />
+            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-green-50 dark:bg-lime-400/15">
+              <RobotAvatar size={36} talking={speaking} mood={faceMood} />
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-sm font-bold text-slate-800 dark:text-[#e9f1eb]">Msaidizi</p>
@@ -567,6 +639,14 @@ export default function Chatbot() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-[#8fa596] dark:hover:bg-white/[0.06]"
+            >
+              <X size={18} />
+            </button>
           </header>
 
           <div ref={box} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
