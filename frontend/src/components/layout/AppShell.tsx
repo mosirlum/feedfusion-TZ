@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { navSections } from './navConfig';
 import { UserAvatar } from '../ui';
+import WelcomeBack from '../WelcomeBack';
+import Chatbot from '../Chatbot';
 
 // App shell — "Look A · Usiku" (2026-11-26, CLAUDE.md #98).
 //
@@ -204,6 +206,9 @@ export function AppShell() {
           </div>
         </main>
       </div>
+
+      <WelcomeBack />
+      <Chatbot />
     </div>
   );
 }

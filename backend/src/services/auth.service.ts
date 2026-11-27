@@ -1,5 +1,5 @@
 import { HttpError } from '../middleware/errorHandler';
-import { findUserByEmail, findUserById, updateOwnPassword } from '../db/usersRepo';
+import { findUserByEmail, findUserById, getAndStampLastLogin, updateOwnPassword } from '../db/usersRepo';
 import { comparePassword, hashPassword } from '../utils/password';
 import { writeAuditLog } from '../db/auditRepo';
 import {
@@ -17,6 +17,9 @@ export interface LoginResult {
   accessToken: string;
   refreshToken: string;
   user: PublicUser;
+  /** When this user last signed in before now, or null on their first-ever
+   *  login — drives the "welcome back" voice greeting (CLAUDE.md #99). */
+  previousLoginAt: string | null;
 }
 
 export async function login(email: string, password: string): Promise<LoginResult> {
@@ -34,11 +37,14 @@ export async function login(email: string, password: string): Promise<LoginResul
     throw new HttpError(403, 'ACCOUNT_INACTIVE');
   }
 
+  const previousLoginAt = await getAndStampLastLogin(user.id);
+
   const payload = { sub: user.id, role: user.role };
   return {
     accessToken: signAccessToken(payload),
     refreshToken: signRefreshToken(payload),
     user: toPublicUser(user),
+    previousLoginAt,
   };
 }
 

@@ -488,6 +488,51 @@ export async function getLatestUnitCost(productId: number, client: PoolClient): 
 // anywhere in the docs: the oldest unpaid balance is usually the one most
 // worth chasing first, but "largest balance first" is an equally
 // defensible reading. Flagging this rather than silently picking one.
+/**
+ * "Welcome back" summary (2026-11-27, CLAUDE.md #99) — what happened since a
+ * timestamp (not a calendar date, since "since you last logged in" can be
+ * mid-day), scoped by role the same way getSalesAggregate is: an owner sees
+ * every sale, anyone else only their own. grossProfit/newCreditAmount are
+ * cost-derived (BR-24), so the service layer only reads them for an owner.
+ */
+export async function getSalesSince(
+  since: string,
+  ownerView: boolean,
+  requesterId: number
+): Promise<{
+  salesCount: number;
+  salesTotal: number;
+  grossProfit: number;
+  newCreditCount: number;
+  newCreditAmount: number;
+}> {
+  const conditions = [`sa.created_at >= $1`, `sa.status = 'COMPLETED'`];
+  const values: unknown[] = [since];
+  if (!ownerView) {
+    values.push(requesterId);
+    conditions.push(`sa.served_by = $${values.length}`);
+  }
+  const where = conditions.join(' AND ');
+  const { rows } = await pool.query(
+    `SELECT
+       (SELECT COALESCE(SUM(sa.total), 0) FROM sales sa WHERE ${where}) AS sales_total,
+       (SELECT COUNT(*)::int FROM sales sa WHERE ${where}) AS sales_count,
+       (SELECT COALESCE(SUM(si.line_total - si.unit_cost_snapshot * si.quantity), 0)
+          FROM sale_items si JOIN sales sa ON sa.id = si.sale_id WHERE ${where}) AS gross_profit,
+       (SELECT COUNT(*)::int FROM sales sa WHERE ${where} AND sa.payment_status = 'PARTIAL') AS new_credit_count,
+       (SELECT COALESCE(SUM(sa.total), 0) FROM sales sa WHERE ${where} AND sa.payment_status = 'PARTIAL') AS new_credit_total`,
+    values
+  );
+  const r = rows[0];
+  return {
+    salesCount: Number(r.sales_count),
+    salesTotal: Number(r.sales_total),
+    grossProfit: Number(r.gross_profit),
+    newCreditCount: Number(r.new_credit_count),
+    newCreditAmount: Number(r.new_credit_total),
+  };
+}
+
 export async function getOutstandingBalances(): Promise<{
   totalOutstanding: number;
   debtorCount: number;

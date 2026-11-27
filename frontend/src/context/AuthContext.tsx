@@ -39,6 +39,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await authApi.login(email, password);
       setSession(res.data.accessToken, res.data.refreshToken, res.data.user, remember);
       setUser(res.data.user);
+      // One-shot flag for the "welcome back" voice greeting (2026-11-27,
+      // CLAUDE.md #99) — sessionStorage so it survives the post-login
+      // redirect but fires only once per real sign-in, never on a page
+      // refresh. WelcomeBack.tsx reads and clears it on mount.
+      try {
+        sessionStorage.setItem(
+          'ff_welcome_pending',
+          JSON.stringify({ previousLoginAt: res.data.previousLoginAt })
+        );
+      } catch {
+        /* private mode: no greeting, not worth failing the login over */
+      }
     } catch (err) {
       throw new Error(apiErrorMessage(err, 'Could not log in. Please try again.'));
     } finally {

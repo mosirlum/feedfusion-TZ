@@ -11,6 +11,22 @@ export async function findUserById(id: number): Promise<UserRecord | null> {
   return rows[0] ?? null;
 }
 
+/**
+ * "Welcome back" summary (2026-11-27, CLAUDE.md #99) — reads the PREVIOUS
+ * last_login_at (so the summary knows what window to cover) and then stamps
+ * a fresh one for next time, in that order. Returns null on a user's very
+ * first-ever login (nothing to summarize yet).
+ */
+export async function getAndStampLastLogin(userId: number): Promise<string | null> {
+  const { rows } = await pool.query<{ last_login_at: string | null }>(
+    'SELECT last_login_at FROM users WHERE id = $1',
+    [userId]
+  );
+  const previous = rows[0]?.last_login_at ?? null;
+  await pool.query('UPDATE users SET last_login_at = now() WHERE id = $1', [userId]);
+  return previous;
+}
+
 export async function listUsers(): Promise<UserRecord[]> {
   const { rows } = await pool.query<UserRecord>('SELECT * FROM users ORDER BY created_at ASC');
   return rows;

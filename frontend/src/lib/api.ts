@@ -234,7 +234,10 @@ function humanizeErrorCode(code: string): string {
 // ---------------------------------------------------------------------------
 export const authApi = {
   login: (email: string, password: string) =>
-    http.post<{ accessToken: string; refreshToken: string; user: PublicUser }>('/auth/login', { email, password }),
+    http.post<{ accessToken: string; refreshToken: string; user: PublicUser; previousLoginAt: string | null }>(
+      '/auth/login',
+      { email, password }
+    ),
   // Self-service password change (2026-09-12, CLAUDE.md #47) — used both for
   // the forced first-login/post-reset change and a voluntary change from My
   // Profile. Requires the current password even right after a forced
@@ -484,6 +487,19 @@ export const dashboardApi = {
       '/dashboard/profit-and-loss',
       { params: { from, to } }
     ),
+  // "Welcome back" summary (2026-11-27, CLAUDE.md #99) — `since` is the
+  // previousLoginAt the login response returned; null means nothing to ask for.
+  welcomeBack: (since: string) =>
+    http.get<{
+      sinceIso: string;
+      salesCount: number;
+      salesTotal: number;
+      grossProfit: number | null;
+      newCreditCount: number;
+      newCreditAmount: number;
+      lowStockCount: number | null;
+      pendingApprovalsCount: number | null;
+    } | null>('/dashboard/welcome-back', { params: { since } }),
 };
 
 export const reportsApi = {
