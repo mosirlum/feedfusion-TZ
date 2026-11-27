@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import {
   BarChart3,
@@ -39,6 +39,7 @@ import {
   FullPageSpinner,
   IconChip,
   Input,
+  Modal,
   PageHeader,
   SegmentedControl,
   Select,
@@ -115,7 +116,49 @@ export default function ReportsPage() {
   const [pickerMonth, setPickerMonth] = useState(new Date().getMonth());
   const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
   const [generatingReport, setGeneratingReport] = useState(false);
+  // Generated PDF waiting in the preview dialog (2026-11-27, CLAUDE.md #103).
+  const [preview, setPreview] = useState<{ blob: Blob; url: string; filename: string } | null>(null);
+  const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const toast = useToast();
+  // Phones/tablets can't render a PDF inside an iframe, so there the preview
+  // dialog offers Open / Download / Print buttons instead of an embedded view.
+  const isTouch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+
+  useEffect(() => {
+    // Free the blob URL when the dialog closes or the page unmounts.
+    return () => {
+      if (preview) URL.revokeObjectURL(preview.url);
+    };
+  }, [preview]);
+
+  function closePreview() {
+    setPreview(null);
+  }
+
+  function downloadPreview() {
+    if (preview) saveBlob(preview.blob, preview.filename);
+  }
+
+  function printPreview() {
+    if (!preview) return;
+    // Desktop: print the embedded PDF directly. If the browser blocks that
+    // (or this is a touch device), open the PDF in its own tab, where the
+    // browser's viewer has its own Print button. This runs inside the tap, so
+    // it isn't treated as a pop-up.
+    if (!isTouch) {
+      try {
+        const win = previewFrameRef.current?.contentWindow;
+        if (win) {
+          win.focus();
+          win.print();
+          return;
+        }
+      } catch {
+        /* fall through to opening a tab */
+      }
+    }
+    window.open(preview.url, '_blank', 'noopener');
+  }
 
   const needsRange = tab !== 'Stock' && tab !== 'Low Stock';
 
@@ -145,13 +188,11 @@ export default function ReportsPage() {
     try {
       const res = await reportsApi.narrativePdf(from, to);
       const blob = new Blob([res.data], { type: 'application/pdf' });
-      // 2026-11-05 (CLAUDE.md #92): a real file download instead of
-      // window.open(). window.open() after an await is not a user gesture, so
-      // Chrome blocks it as a pop-up (nothing happens), and mobile Chrome
-      // can't show a blob PDF in a tab at all. The saved PDF opens/prints from
-      // the browser's download bar in one tap.
-      saveBlob(blob, `Feed-Fusion-Report-${from}-to-${to}.pdf`);
-      toast.success('Report ready.');
+      // 2026-11-27 (CLAUDE.md #103): show the PDF first, then let the owner
+      // choose Download or Print ("niione kwanza PDF, ndo nichague download
+      // au print"). Replaces the auto-download from #92; saveBlob is now only
+      // called from the Download button, which is a real tap.
+      setPreview({ blob, url: URL.createObjectURL(blob), filename: `Feed-Fusion-Report-${from}-to-${to}.pdf` });
     } catch (err) {
       toast.error(await apiErrorMessageFromBlob(err, 'Could not generate the report.'));
     } finally {
@@ -273,6 +314,45 @@ export default function ReportsPage() {
           </Button>
         </Card>
       )}
+
+
+      <Modal
+        open={!!preview}
+        onClose={closePreview}
+        title="Report preview"
+        size="xl"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={closePreview}>
+              Close
+            </Button>
+            <Button type="button" variant="secondary" icon={<Printer size={14} />} onClick={printPreview}>
+              Print
+            </Button>
+            <Button type="button" icon={<Download size={14} />} onClick={downloadPreview}>
+              Download
+            </Button>
+          </>
+        }
+      >
+        {preview && !isTouch && (
+          <iframe
+            ref={previewFrameRef}
+            src={preview.url}
+            title="Generated report"
+            className="h-[70vh] w-full rounded-lg border border-slate-200 bg-white dark:border-white/10"
+          />
+        )}
+        {preview && isTouch && (
+          <div className="space-y-3 py-4 text-center text-sm text-slate-600 dark:text-[#b6c2ba]">
+            <FileText size={40} className="mx-auto text-green-600 dark:text-lime-300" />
+            <p>Your report is ready. Open it to read it, or choose Download or Print below.</p>
+            <Button type="button" variant="secondary" onClick={() => window.open(preview.url, '_blank', 'noopener')}>
+              Open report
+            </Button>
+          </div>
+        )}
+      </Modal>
 
       <div role="tablist" aria-label="Report type" className="no-print mb-5 flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-[rgba(255,255,255,0.12)] dark:border-[rgba(255,255,255,0.1)]">
         {TABS.map(({ key, icon: Icon }) => (
