@@ -104,7 +104,7 @@ export default function SettingsPage() {
 
   if (loading || !settings) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#77857c]">
+      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#8fa596]">
         <SettingsIcon size={18} className="mr-2 animate-pulse" /> Loading settings…
       </div>
     );
@@ -123,7 +123,7 @@ export default function SettingsPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-2.5">
             <IconChip tone="blue" size={30} icon={<Building2 size={14} />} />
-            <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Business Information</h3>
+            <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Business Information</h3>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField label="Business Name">
@@ -151,8 +151,8 @@ export default function SettingsPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-2.5">
             <IconChip tone="blue" size={30} icon={<FileText size={14} />} />
-            <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Invoice Terms</h3>
-            <span className="text-xs text-slate-400 dark:text-[#77857c]">Standard note printed on every invoice/quotation, unless a specific sale has its own.</span>
+            <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Invoice Terms</h3>
+            <span className="text-xs text-slate-400 dark:text-[#8fa596]">Standard note printed on every invoice/quotation, unless a specific sale has its own.</span>
           </div>
           <FormField label="Terms / Notes" hint='e.g. "Payment is due in advance. If you have any question concerning this invoice, please do not hesitate to contact us."'>
             <Textarea rows={3} value={invoiceTerms} onChange={(e) => setInvoiceTerms(e.target.value)} />
@@ -162,8 +162,8 @@ export default function SettingsPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-2.5">
             <IconChip tone="green" size={30} icon={<Landmark size={14} />} />
-            <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Bank Details</h3>
-            <span className="text-xs text-slate-400 dark:text-[#77857c]">Printed on quotations under "Bank Details" — namba za malipo.</span>
+            <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Bank Details</h3>
+            <span className="text-xs text-slate-400 dark:text-[#8fa596]">Printed on quotations under "Bank Details" — namba za malipo.</span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField label="Account Name">
@@ -187,8 +187,8 @@ export default function SettingsPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-2.5">
             <IconChip tone="green" size={30} icon={<Smartphone size={14} />} />
-            <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Mobile Money</h3>
-            <span className="text-xs text-slate-400 dark:text-[#77857c]">Shown on a receipt/invoice when a balance is still owed.</span>
+            <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Mobile Money</h3>
+            <span className="text-xs text-slate-400 dark:text-[#8fa596]">Shown on a receipt/invoice when a balance is still owed.</span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField label="Number 1">
@@ -209,7 +209,7 @@ export default function SettingsPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center gap-2.5">
             <IconChip tone="amber" size={30} icon={<Percent size={14} />} />
-            <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Sales Defaults</h3>
+            <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Sales Defaults</h3>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <FormField label="Max Discount % (sales role limit)">

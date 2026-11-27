@@ -77,7 +77,7 @@ export default function QuotationsPage() {
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -134,15 +134,15 @@ export default function QuotationsPage() {
                   </Td>
                   <Td className="text-slate-700 dark:text-[#d2dbd5]">
                     {quo.customer_name}
-                    <span className="block text-xs text-slate-400 dark:text-[#77857c] md:hidden">{formatDate(quo.quotation_date)}</span>
+                    <span className="block text-xs text-slate-400 dark:text-[#8fa596] md:hidden">{formatDate(quo.quotation_date)}</span>
                   </Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{formatDate(quo.quotation_date)}</Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{quo.valid_until ? formatDate(quo.valid_until) : '—'}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] md:table-cell">{formatDate(quo.quotation_date)}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] md:table-cell">{quo.valid_until ? formatDate(quo.valid_until) : '—'}</Td>
                   <Td className="text-right font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(quo.total)}</Td>
                   <Td>
                     <Badge tone={STATUS_TONE[quo.status]}>{quo.status}</Badge>
                   </Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] lg:table-cell">{quo.created_by_name ?? '—'}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] lg:table-cell">{quo.created_by_name ?? '—'}</Td>
                 </Tr>
               ))}
             </tbody>

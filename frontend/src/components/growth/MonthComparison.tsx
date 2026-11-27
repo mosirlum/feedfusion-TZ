@@ -55,8 +55,8 @@ function show(value: number | null, format: Format): string {
 }
 
 function Delta({ pct, higherIsWorse }: { pct: number | null; higherIsWorse?: boolean }) {
-  if (pct === null) return <span className="text-xs text-slate-400 dark:text-[#77857c]">no comparison</span>;
-  if (pct === 0) return <span className="text-xs font-semibold text-slate-500 dark:text-[#97a49b]">no change</span>;
+  if (pct === null) return <span className="text-xs text-slate-400 dark:text-[#8fa596]">no comparison</span>;
+  if (pct === 0) return <span className="text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">no change</span>;
   const up = pct > 0;
   const good = higherIsWorse ? !up : up;
   return (
@@ -146,21 +146,21 @@ export function MonthComparisonSection() {
                 key={m.key}
                 className="flex min-w-0 flex-col rounded-lg bg-slate-50 px-3 py-3 dark:bg-[rgba(255,255,255,0.04)] sm:px-3.5"
               >
-                <p className="text-xs text-slate-500 dark:text-[#97a49b]">{m.label}</p>
+                <p className="text-xs text-slate-500 dark:text-[#a9bcae]">{m.label}</p>
                 <p className="mt-1 whitespace-nowrap font-display text-[15px] font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5] max-[380px]:text-sm sm:text-lg">
                   {show(cur.metrics[m.key], m.format)}
                 </p>
                 <div className="mt-1.5">
                   <Delta pct={data.changes[m.key]} higherIsWorse={m.higherIsWorse} />
                 </div>
-                <p className="mt-2 whitespace-nowrap text-xs text-slate-500 tabular-nums dark:text-[#97a49b]">
+                <p className="mt-2 whitespace-nowrap text-xs text-slate-500 tabular-nums dark:text-[#a9bcae]">
                   {monthName(prev.month).slice(0, 3)}: {show(prev.metrics[m.key], m.format)}
                 </p>
               </div>
             ))}
           </div>
           {!prev.isFullMonth && (
-            <p className="mt-4 text-xs text-slate-500 dark:text-[#97a49b]">
+            <p className="mt-4 text-xs text-slate-500 dark:text-[#a9bcae]">
               All of {monthName(data.previousFull.month)}: revenue {tzs(data.previousFull.metrics.revenue)} · net profit {tzs(data.previousFull.metrics.netProfit)} ·{' '}
               {data.previousFull.metrics.salesCount.toLocaleString('en-TZ')} sales. {monthName(cur.month)} is still running (day {cur.daysElapsed} of {cur.daysInMonth}), so it is
               compared with the same days, not the whole month.

@@ -420,14 +420,14 @@ export default function ApprovalCenterPage() {
                 key={t.key}
                 onClick={() => setTypeFilter(t.key)}
                 className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  typeFilter === t.key ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                  typeFilter === t.key ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                 }`}
               >
                 {t.label}
                 {t.count > 0 && (
                   <span
                     className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
-                      typeFilter === t.key ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-600 dark:text-[#b6c2ba]'
+                      typeFilter === t.key ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'bg-slate-200 text-slate-600 dark:text-[#b6c2ba]'
                     }`}
                   >
                     {t.count}
@@ -439,7 +439,7 @@ export default function ApprovalCenterPage() {
 
           <div className="mb-4 flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[220px]">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -485,8 +485,8 @@ export default function ApprovalCenterPage() {
                           {initials(c.requesterName)}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{c.requesterName}</p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">{c.requesterRole}</p>
+                          <p className="text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">{c.requesterName}</p>
+                          <p className="text-xs text-slate-400 dark:text-[#8fa596]">{c.requesterRole}</p>
                         </div>
                         <Badge tone={meta.tone} className="flex items-center gap-1">
                           <meta.icon size={11} />
@@ -496,20 +496,20 @@ export default function ApprovalCenterPage() {
                           <Badge tone={c.status === 'APPROVED' ? 'green' : 'red'}>{c.status}</Badge>
                         )}
                       </div>
-                      <span className="text-xs text-slate-400 dark:text-[#77857c]">{timeAgo(c.createdAt)}</span>
+                      <span className="text-xs text-slate-400 dark:text-[#8fa596]">{timeAgo(c.createdAt)}</span>
                     </div>
 
                     <div className="mt-3">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">
                         {c.title}
-                        {c.subtitle && <span className="font-normal text-slate-400 dark:text-[#77857c]"> — {c.subtitle}</span>}
+                        {c.subtitle && <span className="font-normal text-slate-400 dark:text-[#8fa596]"> — {c.subtitle}</span>}
                       </p>
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div className="rounded-lg bg-slate-50 px-3 py-2.5">
-                        <p className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-[#77857c]">{c.oldLabel}</p>
-                        <p className="text-sm font-semibold text-slate-500 dark:text-[#97a49b]">{c.oldValue}</p>
+                        <p className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">{c.oldLabel}</p>
+                        <p className="text-sm font-semibold text-slate-500 dark:text-[#a9bcae]">{c.oldValue}</p>
                       </div>
                       <div className="rounded-lg bg-green-50 px-3 py-2.5">
                         <p className="text-[11px] uppercase tracking-wide text-green-700">{c.newLabel}</p>
@@ -533,7 +533,7 @@ export default function ApprovalCenterPage() {
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-3">
-                      <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                      <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                         {c.status === 'PENDING'
                           ? `Requested on ${formatDate(c.createdAt)}`
                           : `${c.status === 'APPROVED' ? 'Approved' : 'Rejected'} by ${c.reviewedByName ?? 'the owner'} on ${formatDate(c.reviewedAt)}`}
@@ -559,7 +559,7 @@ export default function ApprovalCenterPage() {
         <div className="flex flex-col gap-4">
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-[#eef3ef]">
+              <h3 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-[#e9f1eb]">
                 <IconChip tone="slate" size={28} icon={<Clock size={14} />} />
                 Recent Activity
               </h3>
@@ -570,7 +570,7 @@ export default function ApprovalCenterPage() {
               )}
             </div>
             {recentActivity.length === 0 ? (
-              <p className="py-6 text-center text-sm text-slate-400 dark:text-[#77857c]">Nothing resolved yet.</p>
+              <p className="py-6 text-center text-sm text-slate-400 dark:text-[#8fa596]">Nothing resolved yet.</p>
             ) : (
               <ul className="space-y-3">
                 {recentActivity.map((a) => {
@@ -583,8 +583,8 @@ export default function ApprovalCenterPage() {
                         <p className="text-sm text-slate-700 dark:text-[#d2dbd5]">
                           {meta.badgeLabel} {a.action === 'APPROVED' ? 'approved' : 'rejected'}
                         </p>
-                        <p className="truncate text-xs text-slate-500 dark:text-[#97a49b]">{a.label}</p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                        <p className="truncate text-xs text-slate-500 dark:text-[#a9bcae]">{a.label}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                           {timeAgo(a.reviewedAt)}
                           {a.reviewedByName && ` · by ${a.reviewedByName}`}
                         </p>

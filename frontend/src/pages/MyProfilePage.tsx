@@ -162,9 +162,9 @@ export default function MyProfilePage() {
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={avatarProcessing} />
               </label>
             </div>
-            <div className="text-sm text-slate-500 dark:text-[#97a49b]">
+            <div className="text-sm text-slate-500 dark:text-[#a9bcae]">
               <p className="font-medium text-slate-700 dark:text-[#d2dbd5]">{avatarProcessing ? 'Processing photo…' : 'Profile photo'}</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">JPG or PNG. Resized automatically.</p>
+              <p className="text-xs text-slate-400 dark:text-[#8fa596]">JPG or PNG. Resized automatically.</p>
             </div>
           </div>
 
@@ -207,7 +207,7 @@ export default function MyProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowPasswords((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c] hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596] hover:text-slate-600"
                 tabIndex={-1}
               >
                 {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}

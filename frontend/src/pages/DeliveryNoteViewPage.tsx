@@ -133,20 +133,20 @@ export default function DeliveryNoteViewPage() {
       </div>
 
       {note.status !== 'CANCELLED' && (
-        <div className="no-print mb-4 flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 text-[13px] dark:border-[rgba(255,255,255,0.14)] dark:bg-[#121a16] sm:flex-row sm:items-center">
+        <div className="no-print mb-4 flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 text-[13px] dark:border-[rgba(255,255,255,0.14)] dark:bg-[#11211a] sm:flex-row sm:items-center">
           <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-[#d2dbd5]">
             <Link2 size={14} /> Linked invoice:
           </span>
           {note.linked_invoice_number ? (
             <>
-              <span className="font-medium text-slate-800 dark:text-[#eef3ef]">{note.linked_invoice_number}</span>
+              <span className="font-medium text-slate-800 dark:text-[#e9f1eb]">{note.linked_invoice_number}</span>
               <Button size="sm" variant="ghost" loading={busy} onClick={() => linkInvoice(null)}>
                 Remove link
               </Button>
             </>
           ) : (
             <>
-              <span className="text-slate-400 dark:text-[#77857c]">None yet — add the invoice number once the sale is completed.</span>
+              <span className="text-slate-400 dark:text-[#8fa596]">None yet — add the invoice number once the sale is completed.</span>
               <div className="flex gap-2 sm:ml-auto">
                 <Input
                   value={invoiceInput}

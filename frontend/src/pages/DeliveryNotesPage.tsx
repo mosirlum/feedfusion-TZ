@@ -77,7 +77,7 @@ export default function DeliveryNotesPage() {
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -130,14 +130,14 @@ export default function DeliveryNotesPage() {
                   </Td>
                   <Td className="text-slate-700 dark:text-[#d2dbd5]">
                     {n.customer_name}
-                    <span className="block text-xs text-slate-400 dark:text-[#77857c] md:hidden">{formatDate(n.delivery_date)}</span>
+                    <span className="block text-xs text-slate-400 dark:text-[#8fa596] md:hidden">{formatDate(n.delivery_date)}</span>
                     <span className="mt-1 block md:hidden">
                       <Badge tone={STATUS_TONE[n.status]}>{n.status}</Badge>
                     </span>
                   </Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">{formatDate(n.delivery_date)}</Td>
-                  <Td className="hidden text-right text-slate-500 dark:text-[#97a49b] md:table-cell">{n.item_count ?? 0}</Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] lg:table-cell">{n.linked_invoice_number ?? '—'}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] md:table-cell">{formatDate(n.delivery_date)}</Td>
+                  <Td className="hidden text-right text-slate-500 dark:text-[#a9bcae] md:table-cell">{n.item_count ?? 0}</Td>
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] lg:table-cell">{n.linked_invoice_number ?? '—'}</Td>
                   <Td className="hidden md:table-cell">
                     <Badge tone={STATUS_TONE[n.status]}>{n.status}</Badge>
                   </Td>

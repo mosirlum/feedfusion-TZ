@@ -81,7 +81,7 @@ const UNPRINTED_WARNING_DAYS = 7;
 function PrintedIndicator({ sale }: { sale: Sale }) {
   if (sale.printed_at) {
     return (
-      <span className="text-[10.5px] text-slate-400 dark:text-[#77857c]" title={formatDateTime(sale.printed_at)}>
+      <span className="text-[10.5px] text-slate-400 dark:text-[#8fa596]" title={formatDateTime(sale.printed_at)}>
         Printed
       </span>
     );
@@ -92,7 +92,7 @@ function PrintedIndicator({ sale }: { sale: Sale }) {
     <span
       className={clsx(
         'inline-flex items-center gap-1 text-[10.5px] font-medium',
-        overdue ? 'text-danger-600' : 'text-slate-400 dark:text-[#77857c]'
+        overdue ? 'text-danger-600' : 'text-slate-400 dark:text-[#8fa596]'
       )}
       title={overdue ? `Not printed for ${daysSince} days` : 'Not printed yet'}
     >
@@ -114,7 +114,7 @@ const METHOD_META: Record<string, { label: string; icon: typeof Wallet }> = {
 function PaymentMethodBadge({ sale }: { sale: Sale }) {
   const meta = METHOD_META[sale.last_payment_method ?? 'CASH'];
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-[#0e1512] dark:text-[#b6c2ba]">
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-[#0d1a14] dark:text-[#b6c2ba]">
       <meta.icon size={12} /> {meta.label}
       {(sale.payment_method_count ?? 1) > 1 && ` +${(sale.payment_method_count ?? 1) - 1}`}
     </span>
@@ -123,7 +123,7 @@ function PaymentMethodBadge({ sale }: { sale: Sale }) {
 
 function TrendHint({ pct }: { pct: number | null }) {
   if (pct === null) {
-    return <span className="text-slate-400 dark:text-[#77857c]">No sales in the previous period</span>;
+    return <span className="text-slate-400 dark:text-[#8fa596]">No sales in the previous period</span>;
   }
   const up = pct >= 0;
   return (
@@ -331,7 +331,7 @@ export default function SalesHistoryPage() {
   }
 
   const iconBtn =
-    'inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-[#77857c]';
+    'inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-[#8fa596]';
 
   // Row actions are shared by the desktop table and the phone cards, so the
   // two layouts can never drift apart on which actions exist.
@@ -418,8 +418,8 @@ export default function SalesHistoryPage() {
       className={clsx(
         'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400',
         activeQuick === key
-          ? 'bg-green-600 text-white shadow-card'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#0e1512] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]'
+          ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712] shadow-card'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#0d1a14] dark:text-[#b6c2ba] dark:hover:bg-[#172a21]'
       )}
     >
       {label}
@@ -487,7 +487,7 @@ export default function SalesHistoryPage() {
       <Card className="mb-5 flex flex-col gap-4 p-4">
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-[minmax(0,1fr)_11rem_10rem]">
           <div className="relative">
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" aria-hidden="true" />
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" aria-hidden="true" />
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -512,19 +512,19 @@ export default function SalesHistoryPage() {
         </div>
         <div className="flex flex-wrap items-end gap-x-4 gap-y-3 border-t border-slate-100 pt-4 dark:border-[rgba(255,255,255,0.08)]">
           <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Quick date ranges">
-            <Calendar size={15} className="mr-1 text-slate-400 dark:text-[#77857c]" aria-hidden="true" />
+            <Calendar size={15} className="mr-1 text-slate-400 dark:text-[#8fa596]" aria-hidden="true" />
             {rangeChip('today', 'Today')}
             {rangeChip('week', 'Last 7 days')}
             {rangeChip('month', 'This month')}
           </div>
           <div className="flex w-full items-end gap-2 sm:w-auto">
             <div className="min-w-0 flex-1 sm:flex-none">
-              <label htmlFor="sh-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+              <label htmlFor="sh-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">From</label>
               <Input id="sh-from" type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className="sm:w-auto" />
             </div>
             <ArrowRight size={13} className="mb-3 text-slate-300 dark:text-[#4a5650]" aria-hidden="true" />
             <div className="min-w-0 flex-1 sm:flex-none">
-              <label htmlFor="sh-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+              <label htmlFor="sh-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">To</label>
               <Input id="sh-to" type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} className="sm:w-auto" />
             </div>
           </div>
@@ -575,19 +575,19 @@ export default function SalesHistoryPage() {
                   {pageItems.map((s) => (
                     <Tr key={s.id} className={s.status === 'VOIDED' ? 'opacity-70' : undefined}>
                       <Td>
-                        <p className="font-mono text-xs font-semibold text-slate-800 dark:text-[#eef3ef]">{s.invoice_number}</p>
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">{formatDateTime(s.sale_date)}</p>
+                        <p className="font-mono text-xs font-semibold text-slate-800 dark:text-[#e9f1eb]">{s.invoice_number}</p>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">{formatDateTime(s.sale_date)}</p>
                       </Td>
                       <Td>
-                        <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{s.customer_name || 'Walk-in Customer'}</p>
-                        {isOwner && <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">Served by {s.served_by_name}</p>}
+                        <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">{s.customer_name || 'Walk-in Customer'}</p>
+                        {isOwner && <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">Served by {s.served_by_name}</p>}
                       </Td>
                       <Td>
                         <button type="button" onClick={() => setViewSaleId(s.id)} className="rounded text-left text-sm font-medium text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:text-blue-400">
                           {s.item_count ?? 0} item{s.item_count === 1 ? '' : 's'}
                         </button>
                       </Td>
-                      <Td className="text-right font-display font-bold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(s.total)}</Td>
+                      <Td className="text-right font-display font-bold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(s.total)}</Td>
                       <Td>{renderStatus(s)}</Td>
                       <Td>{renderActions(s)}</Td>
                     </Tr>
@@ -602,15 +602,15 @@ export default function SalesHistoryPage() {
                 <li key={s.id} className={clsx('flex flex-col gap-2.5 p-4', s.status === 'VOIDED' && 'opacity-70')}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-mono text-xs font-semibold text-slate-800 dark:text-[#eef3ef]">{s.invoice_number}</p>
-                      <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">{formatDateTime(s.sale_date)}</p>
+                      <p className="font-mono text-xs font-semibold text-slate-800 dark:text-[#e9f1eb]">{s.invoice_number}</p>
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">{formatDateTime(s.sale_date)}</p>
                     </div>
                     <p className="font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{tzs(s.total)}</p>
                   </div>
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <p className="min-w-0 truncate font-medium text-slate-700 dark:text-[#d2dbd5]">
                       {s.customer_name || 'Walk-in Customer'}
-                      {isOwner && <span className="font-normal text-slate-400 dark:text-[#77857c]"> · {s.served_by_name}</span>}
+                      {isOwner && <span className="font-normal text-slate-400 dark:text-[#8fa596]"> · {s.served_by_name}</span>}
                     </p>
                     <button type="button" onClick={() => setViewSaleId(s.id)} className="shrink-0 rounded text-sm font-medium text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:text-blue-400">
                       {s.item_count ?? 0} item{s.item_count === 1 ? '' : 's'}
@@ -628,7 +628,7 @@ export default function SalesHistoryPage() {
 
         {sales.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
-            <p className="text-[12.5px] text-slate-500 dark:text-[#97a49b]">
+            <p className="text-[12.5px] text-slate-500 dark:text-[#a9bcae]">
               Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, sales.length)} of {sales.length} sales
             </p>
             <nav className="flex items-center gap-1" aria-label="Pagination">
@@ -637,7 +637,7 @@ export default function SalesHistoryPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={pageSafe === 1}
                 aria-label="Previous page"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-30 disabled:hover:bg-transparent dark:text-[#97a49b] dark:hover:bg-[#17211c]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-30 disabled:hover:bg-transparent dark:text-[#a9bcae] dark:hover:bg-[#172a21]"
               >
                 <ChevronLeft size={15} />
               </button>
@@ -654,7 +654,7 @@ export default function SalesHistoryPage() {
                     aria-label={`Page ${n}`}
                     aria-current={n === pageSafe ? 'page' : undefined}
                     className={`h-8 min-w-[2rem] rounded-md px-1 text-[12.5px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
-                      n === pageSafe ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:text-[#97a49b] dark:hover:bg-[#17211c]'
+                      n === pageSafe ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-500 hover:bg-slate-100 dark:text-[#a9bcae] dark:hover:bg-[#172a21]'
                     }`}
                   >
                     {n}
@@ -666,7 +666,7 @@ export default function SalesHistoryPage() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={pageSafe === totalPages}
                 aria-label="Next page"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-30 disabled:hover:bg-transparent dark:text-[#97a49b] dark:hover:bg-[#17211c]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:opacity-30 disabled:hover:bg-transparent dark:text-[#a9bcae] dark:hover:bg-[#172a21]"
               >
                 <ChevronRight size={15} />
               </button>
@@ -733,7 +733,7 @@ export default function SalesHistoryPage() {
         {paySale && (
           <div className="space-y-3">
             <p className="text-sm text-slate-600 dark:text-[#b6c2ba]">
-              Balance owed: <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{tzs(paySale.balance_due)}</span>
+              Balance owed: <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{tzs(paySale.balance_due)}</span>
             </p>
             <div>
               <Label>Amount received</Label>

@@ -188,7 +188,7 @@ export default function DashboardPage() {
     <div>
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-[#97a49b]">{formatDate(data.date)}</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-[#a9bcae]">{formatDate(data.date)}</p>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-slate-800 dark:text-[#f4f8f5] sm:text-[1.7rem]">
             {greeting}
             {firstName ? `, ${firstName}` : ''}
@@ -197,13 +197,13 @@ export default function DashboardPage() {
         <div className="flex gap-2">
           <Link
             to="/pos"
-            className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 text-sm font-semibold text-white shadow-card transition-colors hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:flex-none"
+            className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full bg-green-600 px-5 text-sm font-semibold text-white shadow-card transition-colors hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:bg-lime-400 dark:font-bold dark:text-[#0b1712] dark:hover:bg-lime-300 sm:flex-none"
           >
             <ShoppingCart size={16} aria-hidden="true" /> New sale
           </Link>
           <Link
             to="/purchases"
-            className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:border-[rgba(255,255,255,0.14)] dark:bg-transparent dark:text-[#d2dbd5] dark:hover:bg-[#17211c] sm:flex-none"
+            className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:border-[rgba(255,255,255,0.14)] dark:bg-transparent dark:text-[#d2dbd5] dark:hover:bg-[#172a21] sm:flex-none"
           >
             <Truck size={16} aria-hidden="true" /> New purchase
           </Link>
@@ -216,7 +216,7 @@ export default function DashboardPage() {
           <div className="grid gap-5 sm:grid-cols-[1fr_minmax(0,1fr)] sm:items-start">
             <div>
               <p className="text-sm text-green-100/80">Sales today</p>
-              <p className="mt-1 font-display text-3xl font-extrabold tabular-nums sm:text-[2.6rem] sm:leading-none"><CountTzs value={data.totalSales} />
+              <p className="mt-1 font-display text-4xl font-extrabold tracking-tight tabular-nums sm:text-[3.4rem] sm:leading-none"><CountTzs value={data.totalSales} />
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-green-100/80">
                 <span>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
 
         {/* Needs attention */}
         <Card className="ff-rise flex flex-col p-5 xl:col-span-4" style={dly(200)}>
-          <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Needs your attention</h3>
+          <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Needs your attention</h3>
           <div className="mt-3 flex flex-1 flex-col gap-2.5">
             {overdue > 0 && (
               <AttentionRow
@@ -275,7 +275,7 @@ export default function DashboardPage() {
               <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
                 <CheckCircle2 size={30} className="text-green-600 dark:text-green-400" aria-hidden="true" />
                 <p className="font-semibold text-slate-700 dark:text-[#d2dbd5]">All clear</p>
-                <p className="text-sm text-slate-500 dark:text-[#97a49b]">Stock is healthy and nobody owes you money.</p>
+                <p className="text-sm text-slate-500 dark:text-[#a9bcae]">Stock is healthy and nobody owes you money.</p>
               </div>
             )}
           </div>
@@ -286,18 +286,18 @@ export default function DashboardPage() {
           <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <BarChart3 size={16} className="text-green-600 dark:text-green-400" />
-              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Sales vs purchases</h3>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Sales vs purchases</h3>
             </div>
-            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-[#0e1512] dark:text-[#97a49b]">Last 7 days</span>
+            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-[#0d1a14] dark:text-[#a9bcae]">Last 7 days</span>
           </div>
-          <div className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-medium text-slate-500 dark:text-[#97a49b]">
+          <div className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-medium text-slate-500 dark:text-[#a9bcae]">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-sm" style={{ background: '#1f9e5d' }} />
-              Sales <b className="text-slate-800 dark:text-[#eef3ef]">{tzs(weekSales)}</b>
+              <span className="h-2 w-2 rounded-sm bg-[#1f9e5d] dark:bg-lime-400" />
+              Sales <b className="text-slate-800 dark:text-[#e9f1eb]">{tzs(weekSales)}</b>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-sm" style={{ background: '#2a78d6' }} />
-              Purchases <b className="text-slate-800 dark:text-[#eef3ef]">{tzs(weekPurchases)}</b>
+              Purchases <b className="text-slate-800 dark:text-[#e9f1eb]">{tzs(weekPurchases)}</b>
             </span>
           </div>
           <SalesPurchasesChart trend={data.trend} />
@@ -309,8 +309,8 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               <IconChip tone="green" size={34} icon={<Wallet size={16} />} />
               <div className="min-w-0">
-                <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Profit &amp; loss</h3>
-                <p className="truncate text-sm text-slate-500 dark:text-[#97a49b]">{plPeriodLabel}</p>
+                <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Profit &amp; loss</h3>
+                <p className="truncate text-sm text-slate-500 dark:text-[#a9bcae]">{plPeriodLabel}</p>
               </div>
             </div>
             <SegmentedControl
@@ -330,11 +330,11 @@ export default function DashboardPage() {
           {plRange === 'custom' && (
             <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
               <div>
-                <label htmlFor="pl-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">From</label>
+                <label htmlFor="pl-from" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">From</label>
                 <Input id="pl-from" type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} max={customTo} className="w-auto" />
               </div>
               <div>
-                <label htmlFor="pl-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">To</label>
+                <label htmlFor="pl-to" className="mb-1 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">To</label>
                 <Input id="pl-to" type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} min={customFrom} max={todayLocalIso()} className="w-auto" />
               </div>
               <Button size="sm" loading={customLoading} onClick={fetchCustomRange}>
@@ -345,18 +345,18 @@ export default function DashboardPage() {
           {plFigures ? (
             <div className="flex flex-1 flex-col justify-center gap-4 p-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Net profit</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">Net profit</p>
                 <p className={clsx('mt-1 font-display text-3xl font-extrabold tabular-nums', plFigures.netProfit >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300')}>
                   <CountTzs value={plFigures.netProfit} />
                 </p>
               </div>
-              <dl className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-[#0e1512]">
+              <dl className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-[#0d1a14]">
                 <div>
-                  <dt className="text-xs text-slate-500 dark:text-[#97a49b]">Gross profit</dt>
+                  <dt className="text-xs text-slate-500 dark:text-[#a9bcae]">Gross profit</dt>
                   <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-700 dark:text-[#dbe6de]">{tzs(plFigures.grossProfit)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-500 dark:text-[#97a49b]">Expenses</dt>
+                  <dt className="text-xs text-slate-500 dark:text-[#a9bcae]">Expenses</dt>
                   <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-700 dark:text-[#dbe6de]">{tzs(plFigures.expenses)}</dd>
                 </div>
               </dl>
@@ -365,7 +365,7 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <p className="p-5 text-sm text-slate-500 dark:text-[#97a49b]">Pick the dates above and choose “Show profit”.</p>
+            <p className="p-5 text-sm text-slate-500 dark:text-[#a9bcae]">Pick the dates above and choose “Show profit”.</p>
           )}
         </Card>
 
@@ -377,8 +377,8 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               <IconChip tone="amber" size={34} icon={<HandCoins size={16} />} />
               <div>
-                <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Money owed to you</h3>
-                <p className="text-sm text-slate-500 dark:text-[#97a49b]">Credit sales not fully paid yet</p>
+                <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Money owed to you</h3>
+                <p className="text-sm text-slate-500 dark:text-[#a9bcae]">Credit sales not fully paid yet</p>
               </div>
             </div>
             <Link to="/sales-history" className="inline-flex items-center gap-1 text-sm font-semibold text-green-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:text-green-400">
@@ -391,7 +391,7 @@ export default function DashboardPage() {
             <>
               <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-5 pt-4">
                 <p className="font-display text-2xl font-extrabold tabular-nums text-amber-600 dark:text-amber-300"><CountTzs value={data.outstandingDebt.totalOutstanding} /></p>
-                <p className="text-sm text-slate-500 dark:text-[#97a49b]">
+                <p className="text-sm text-slate-500 dark:text-[#a9bcae]">
                   across {data.outstandingDebt.debtorCount} unpaid sale{data.outstandingDebt.debtorCount === 1 ? '' : 's'}
                 </p>
                 {/* Overdue (2026-09-25, migration 021) — the in-app alert the
@@ -404,24 +404,24 @@ export default function DashboardPage() {
               </div>
               <ul className="mt-2 divide-y divide-slate-100 dark:divide-[rgba(255,255,255,0.08)]">
                 {visibleDebtors.map((d) => (
-                  <li key={d.id} className="flex flex-col gap-1 px-5 py-3 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                  <li key={d.id} className="flex flex-col gap-1 px-5 py-3 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0d1a14]/40 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-800 dark:text-[#eef3ef]">
+                      <p className="truncate font-semibold text-slate-800 dark:text-[#e9f1eb]">
                         {d.customer_name || 'Walk-in'}
-                        {d.customer_phone && <span className="ml-2 text-sm font-normal text-slate-400 dark:text-[#77857c]">{d.customer_phone}</span>}
+                        {d.customer_phone && <span className="ml-2 text-sm font-normal text-slate-400 dark:text-[#8fa596]">{d.customer_phone}</span>}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+                      <p className="text-xs text-slate-500 dark:text-[#a9bcae]">
                         {d.invoice_number} · sold {formatDate(d.sale_date)} · total {tzs(d.total)}
                       </p>
                     </div>
                     <div className="flex items-baseline justify-between gap-4 sm:flex-col sm:items-end sm:justify-center sm:gap-0">
                       <p className="font-bold tabular-nums text-amber-600 dark:text-amber-300">{tzs(d.balance_due)}</p>
                       {d.due_date ? (
-                        <p className={clsx('text-xs tabular-nums', d.is_overdue ? 'font-bold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]')}>
+                        <p className={clsx('text-xs tabular-nums', d.is_overdue ? 'font-bold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#a9bcae]')}>
                           {d.is_overdue ? 'Overdue since' : 'Due'} {formatDate(d.due_date)}
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">no due date</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">no due date</p>
                       )}
                     </div>
                   </li>
@@ -470,8 +470,8 @@ export default function DashboardPage() {
                     would be decoration, not data. */}
                 {data.recentPurchases.map((p) => (
                   <Tr key={p.id}>
-                    <Td className="whitespace-nowrap text-slate-500 dark:text-[#97a49b]">{formatDate(p.purchase_date)}</Td>
-                    <Td className="font-semibold text-slate-800 dark:text-[#eef3ef]">{p.supplier_name}</Td>
+                    <Td className="whitespace-nowrap text-slate-500 dark:text-[#a9bcae]">{formatDate(p.purchase_date)}</Td>
+                    <Td className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{p.supplier_name}</Td>
                     <Td className="hidden text-right sm:table-cell">{p.item_count}</Td>
                     <Td className="text-right font-medium">{tzs(p.total_cost)}</Td>
                   </Tr>
@@ -487,21 +487,21 @@ export default function DashboardPage() {
           <Card className="ff-rise p-5" style={dly(640)}>
             <div className="mb-3 flex items-center gap-2">
               <Tag size={16} className="text-green-600 dark:text-green-400" />
-              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Best sellers today</h3>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Best sellers today</h3>
             </div>
             {topProductSlices.length === 0 ? (
-              <p className="py-3 text-sm text-slate-500 dark:text-[#97a49b]">No sales recorded yet today.</p>
+              <p className="py-3 text-sm text-slate-500 dark:text-[#a9bcae]">No sales recorded yet today.</p>
             ) : (
               <ul className="flex flex-col gap-3">
                 {topProductSlices.map((t, idx) => (
                   <li key={t.name}>
                     <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate font-semibold text-slate-700 dark:text-[#d2dbd5]">{t.name}</span>
-                      <span className="shrink-0 tabular-nums text-slate-500 dark:text-[#97a49b]">
-                        {tzs(t.value)} <b className="ml-1 text-slate-800 dark:text-[#eef3ef]">{t.pct.toFixed(0)}%</b>
+                      <span className="shrink-0 tabular-nums text-slate-500 dark:text-[#a9bcae]">
+                        {tzs(t.value)} <b className="ml-1 text-slate-800 dark:text-[#e9f1eb]">{t.pct.toFixed(0)}%</b>
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]">
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0d1a14]">
                       <div className="ff-grow-x h-full rounded-full" style={{ ...dly(1000 + idx * 160), width: `${Math.max(3, (t.value / maxTop) * 100)}%`, background: t.color }} />
                     </div>
                   </li>
@@ -522,7 +522,7 @@ export default function DashboardPage() {
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Boxes size={16} className="text-green-600 dark:text-green-400" />
-                <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Stock health</h3>
+                <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Stock health</h3>
               </div>
               <Link to="/inventory" className="inline-flex items-center text-sm font-semibold text-green-700 hover:underline dark:text-green-400">
                 Inventory <ChevronRight size={14} aria-hidden="true" />
@@ -538,8 +538,8 @@ export default function DashboardPage() {
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               {stockSlices.map((sl) => (
                 <div key={sl.name}>
-                  <p className="font-display text-xl font-extrabold tabular-nums text-slate-800 dark:text-[#eef3ef]">{sl.value}</p>
-                  <p className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-[#97a49b]">
+                  <p className="font-display text-xl font-extrabold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{sl.value}</p>
+                  <p className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-[#a9bcae]">
                     <span className="h-2 w-2 rounded-full" style={{ background: sl.color }} />
                     {sl.name}
                   </p>
@@ -548,12 +548,12 @@ export default function DashboardPage() {
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-[rgba(255,255,255,0.08)]">
               <div>
-                <dt className="text-xs text-slate-500 dark:text-[#97a49b]">Stock value (at cost)</dt>
-                <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(data.currentStockValue)}</dd>
+                <dt className="text-xs text-slate-500 dark:text-[#a9bcae]">Stock value (at cost)</dt>
+                <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(data.currentStockValue)}</dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-500 dark:text-[#97a49b]">Purchases today</dt>
-                <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(data.totalPurchasesToday)}</dd>
+                <dt className="text-xs text-slate-500 dark:text-[#a9bcae]">Purchases today</dt>
+                <dd className="mt-0.5 font-display font-bold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(data.totalPurchasesToday)}</dd>
               </div>
             </dl>
           </Card>
@@ -650,8 +650,8 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block max-w-full" style={{ overflow: 'visible' }}>
         <defs>
           <linearGradient id="dashGradGreen" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1f9e5d" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#1f9e5d" stopOpacity="0" />
+            <stop offset="0%" className="[stop-color:#1f9e5d] dark:[stop-color:#c6f36f]" stopOpacity="0.28" />
+            <stop offset="100%" className="[stop-color:#1f9e5d] dark:[stop-color:#c6f36f]" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="dashGradBlue" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#2a78d6" stopOpacity="0.2" />
@@ -665,7 +665,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
           return (
             <g key={i}>
               <line x1={padL} x2={W - padR} y1={ly} y2={ly} className="stroke-slate-100 dark:stroke-[rgba(255,255,255,0.08)]" strokeWidth={1} />
-              <text x={padL - 8} y={ly + 4} textAnchor="end" className="fill-slate-400 dark:fill-[#77857c]" fontSize={11}>
+              <text x={padL - 8} y={ly + 4} textAnchor="end" className="fill-slate-400 dark:fill-[#8fa596]" fontSize={11}>
                 {v === 0 ? '0' : fmtK(v)}
               </text>
             </g>
@@ -673,7 +673,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
         })}
 
         {trend.map((t, i) => (
-          <text key={t.date} x={x(i)} y={H - 4} textAnchor="middle" className="fill-slate-400 dark:fill-[#77857c]" fontSize={11}>
+          <text key={t.date} x={x(i)} y={H - 4} textAnchor="middle" className="fill-slate-400 dark:fill-[#8fa596]" fontSize={11}>
             {shortDate(t.date)}
           </text>
         ))}
@@ -681,12 +681,12 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
         <path className="ff-fade" style={dly(1100)} d={areaPath(purchaseValues)} fill="url(#dashGradBlue)" stroke="none" />
         <path className="ff-draw" pathLength={1} style={dly(500)} d={linePath(purchaseValues)} fill="none" stroke="#2a78d6" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
         <path className="ff-fade" style={dly(900)} d={areaPath(salesValues)} fill="url(#dashGradGreen)" stroke="none" />
-        <path className="ff-draw" pathLength={1} style={dly(400)} d={linePath(salesValues)} fill="none" stroke="#1f9e5d" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+        <path className="ff-draw stroke-[#1f9e5d] dark:stroke-lime-400" pathLength={1} style={dly(400)} d={linePath(salesValues)} fill="none" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
 
         {trend.map((t, i) => (
           <g key={t.date}>
-            <circle cx={x(i)} cy={y(t.sales)} r={3.2} style={dly(500 + i * 190)} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#1f9e5d" strokeWidth={1.8} />
-            <circle cx={x(i)} cy={y(t.purchases)} r={3.2} style={dly(600 + i * 190)} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#2a78d6" strokeWidth={1.8} />
+            <circle cx={x(i)} cy={y(t.sales)} r={3.2} style={dly(500 + i * 190)} className="ff-dot fill-white stroke-[#1f9e5d] dark:fill-[#0b1712] dark:stroke-lime-400" strokeWidth={1.8} />
+            <circle cx={x(i)} cy={y(t.purchases)} r={3.2} style={dly(600 + i * 190)} className="ff-dot fill-white dark:fill-[#11211a]" stroke="#2a78d6" strokeWidth={1.8} />
           </g>
         ))}
 
@@ -718,7 +718,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
 
       {hoverRow && (
         <div
-          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-[11.5px] text-white shadow-lg dark:bg-[#0c1310]"
+          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-[11.5px] text-white shadow-lg dark:bg-[#0b1712]"
           style={{
             left: `${(x(hover!) / W) * 100}%`,
             top: `${(y(Math.max(hoverRow.sales, hoverRow.purchases)) / H) * 100}%`,
@@ -727,7 +727,7 @@ function SalesPurchasesChart({ trend }: { trend: DashboardToday['trend'] }) {
         >
           <div className="mb-1 font-bold opacity-80">{formatDate(hoverRow.date)}</div>
           <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#1f9e5d' }} />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#1f9e5d] dark:bg-lime-400" />
             Sales <b className="ml-1">{tzs(hoverRow.sales)}</b>
           </div>
           <div className="flex items-center gap-1.5">
@@ -786,12 +786,12 @@ function HeroSparkline({ trend }: { trend: DashboardToday['trend'] }) {
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="ff-reveal absolute inset-0 h-full w-full overflow-visible" style={dly(500)}>
         <defs>
           <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#86efac" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#86efac" stopOpacity="0" />
+            <stop offset="0%" stopColor="#c6f36f" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#c6f36f" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={`${line} L 100,100 L 0,100 Z`} fill="url(#heroSpark)" />
-        <path d={line} fill="none" stroke="#bbf7d0" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+        <path d={line} fill="none" stroke="#c6f36f" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <span
         className="ff-dot ff-pulse absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-200 ring-4 ring-green-300/25"

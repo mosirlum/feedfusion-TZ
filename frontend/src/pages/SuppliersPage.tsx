@@ -244,7 +244,7 @@ export default function SuppliersPage() {
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -299,16 +299,16 @@ export default function SuppliersPage() {
                         {initials(s.name)}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{s.name}</p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">SUP-{String(s.id).padStart(3, '0')}</p>
+                        <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">{s.name}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">SUP-{String(s.id).padStart(3, '0')}</p>
                       </div>
                     </button>
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{s.phone ?? '—'}</Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">{s.phone ?? '—'}</Td>
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">
                     {s.address ? (
                       <span className="flex items-center gap-1.5">
-                        <MapPin size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" />
+                        <MapPin size={13} className="flex-shrink-0 text-slate-400 dark:text-[#8fa596]" />
                         {s.address}
                       </span>
                     ) : (
@@ -316,16 +316,16 @@ export default function SuppliersPage() {
                     )}
                   </Td>
                   <Td className="text-right font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(s.total_purchases)}</Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{s.last_purchase_date ? formatDate(s.last_purchase_date) : '—'}</Td>
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">{s.last_purchase_date ? formatDate(s.last_purchase_date) : '—'}</Td>
                   <Td>
                     <Badge tone={s.status === 'active' ? 'green' : 'slate'}>{s.status}</Badge>
                   </Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
-                      <button onClick={() => openDetail(s, 'history')} className="text-slate-400 dark:text-[#77857c] hover:text-blue-600" title="Purchase history">
+                      <button onClick={() => openDetail(s, 'history')} className="text-slate-400 dark:text-[#8fa596] hover:text-blue-600" title="Purchase history">
                         <History size={16} />
                       </button>
-                      <button onClick={() => openEdit(s)} className="text-slate-400 dark:text-[#77857c] hover:text-amber-600" title="Edit supplier">
+                      <button onClick={() => openEdit(s)} className="text-slate-400 dark:text-[#8fa596] hover:text-amber-600" title="Edit supplier">
                         <Pencil size={16} />
                       </button>
                     </div>
@@ -342,10 +342,10 @@ export default function SuppliersPage() {
           <Card className="p-5">
             <div className="mb-4 flex items-center gap-2.5">
               <IconChip tone="green" icon={<PieChart size={17} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Purchase Share by Supplier</h3>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Purchase Share by Supplier</h3>
             </div>
             {donutSlices.length === 0 ? (
-              <p className="py-8 text-center text-[13px] text-slate-400 dark:text-[#77857c]">No purchases recorded yet this month.</p>
+              <p className="py-8 text-center text-[13px] text-slate-400 dark:text-[#8fa596]">No purchases recorded yet this month.</p>
             ) : (
               <div className="flex items-center gap-5">
                 <DonutChart slices={donutSlices} centerValue={tzs(totalThisMonth)} centerLabel="This month" />
@@ -368,12 +368,12 @@ export default function SuppliersPage() {
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <IconChip tone="blue" icon={<BarChart3 size={17} />} />
-                <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Top Suppliers by Purchase Value</h3>
+                <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Top Suppliers by Purchase Value</h3>
               </div>
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">All-time</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">All-time</span>
             </div>
             {rankedSuppliers.length === 0 ? (
-              <p className="py-8 text-center text-[13px] text-slate-400 dark:text-[#77857c]">No purchases recorded yet.</p>
+              <p className="py-8 text-center text-[13px] text-slate-400 dark:text-[#8fa596]">No purchases recorded yet.</p>
             ) : (
               <>
                 <div className="space-y-3">
@@ -383,7 +383,7 @@ export default function SuppliersPage() {
                         <span className="truncate text-slate-600 dark:text-[#b6c2ba]">{slice.name}</span>
                         <span className="font-semibold text-slate-700 dark:text-[#d2dbd5]">{tzs(slice.value)}</span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]">
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0d1a14]">
                         <div className="h-full rounded-full" style={{ width: `${slice.pct}%`, backgroundColor: slice.color }} />
                       </div>
                     </div>
@@ -391,14 +391,14 @@ export default function SuppliersPage() {
                 </div>
                 {rankedPageCount > 1 && (
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-[11.5px] text-slate-400 dark:text-[#77857c]">
+                    <span className="text-[11.5px] text-slate-400 dark:text-[#8fa596]">
                       Page {rankedPageSafe + 1} of {rankedPageCount}
                     </span>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setRankedPage((p) => Math.max(0, p - 1))}
                         disabled={rankedPageSafe === 0}
-                        className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                        className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -407,7 +407,7 @@ export default function SuppliersPage() {
                           key={i}
                           onClick={() => setRankedPage(i)}
                           className={`h-6 w-6 rounded-md text-[12px] font-semibold ${
-                            i === rankedPageSafe ? 'bg-green-600 text-white' : 'text-slate-500 dark:text-[#97a49b] hover:bg-slate-100'
+                            i === rankedPageSafe ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-500 dark:text-[#a9bcae] hover:bg-slate-100'
                           }`}
                         >
                           {i + 1}
@@ -416,7 +416,7 @@ export default function SuppliersPage() {
                       <button
                         onClick={() => setRankedPage((p) => Math.min(rankedPageCount - 1, p + 1))}
                         disabled={rankedPageSafe === rankedPageCount - 1}
-                        className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                        className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                       >
                         <ChevronRight size={15} />
                       </button>
@@ -430,10 +430,10 @@ export default function SuppliersPage() {
           <Card className="p-5">
             <div className="mb-4 flex items-center gap-2.5">
               <IconChip tone="amber" icon={<Lightbulb size={17} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Insights</h3>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Insights</h3>
             </div>
             {insights.length === 0 ? (
-              <p className="text-[13px] text-slate-400 dark:text-[#77857c]">Nothing notable yet — insights build up as purchases are recorded.</p>
+              <p className="text-[13px] text-slate-400 dark:text-[#8fa596]">Nothing notable yet — insights build up as purchases are recorded.</p>
             ) : (
               <ul className="space-y-2.5">
                 {insights.map((line, idx) => (
@@ -516,15 +516,15 @@ function SupplierDetailPanel({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
-      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col bg-white dark:bg-[#121a16] shadow-panel animate-fade-in sm:w-[420px]">
+      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col bg-white dark:bg-[#11211a] shadow-panel animate-fade-in sm:w-[420px]">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-green-600 text-sm font-bold text-white">
               {initials(supplier.name)}
             </div>
             <div>
-              <p className="font-bold text-slate-800 dark:text-[#eef3ef]">{supplier.name}</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">
+              <p className="font-bold text-slate-800 dark:text-[#e9f1eb]">{supplier.name}</p>
+              <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                 SUP-{String(supplier.id).padStart(3, '0')} · Supplier{' '}
                 <Badge tone={supplier.status === 'active' ? 'green' : 'slate'} className="ml-1">
                   {supplier.status}
@@ -532,7 +532,7 @@ function SupplierDetailPanel({
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 dark:text-[#77857c] hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-400 dark:text-[#8fa596] hover:text-slate-600">
             <X size={20} />
           </button>
         </div>
@@ -547,7 +547,7 @@ function SupplierDetailPanel({
               key={t.key}
               onClick={() => onTabChange(t.key)}
               className={`border-b-2 px-3 py-2.5 text-[13px] font-semibold transition-colors ${
-                tab === t.key ? 'border-green-600 text-green-700' : 'border-transparent text-slate-400 dark:text-[#77857c] hover:text-slate-600'
+                tab === t.key ? 'border-green-600 text-green-700' : 'border-transparent text-slate-400 dark:text-[#8fa596] hover:text-slate-600'
               }`}
             >
               {t.label}
@@ -559,20 +559,20 @@ function SupplierDetailPanel({
           {tab === 'overview' && (
             <div className="space-y-5">
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Supplier Information</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Supplier Information</p>
                 <div className="space-y-2.5 rounded-xl border border-slate-100 dark:border-[rgba(255,255,255,0.08)] bg-slate-50/50 p-4 text-[13px]">
                   <div className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]">
-                    <Phone size={14} className="text-slate-400 dark:text-[#77857c]" /> {supplier.phone ?? 'No phone on file'}
+                    <Phone size={14} className="text-slate-400 dark:text-[#8fa596]" /> {supplier.phone ?? 'No phone on file'}
                   </div>
                   <div className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]">
-                    <MapPin size={14} className="text-slate-400 dark:text-[#77857c]" /> {supplier.address ?? 'No location on file'}
+                    <MapPin size={14} className="text-slate-400 dark:text-[#8fa596]" /> {supplier.address ?? 'No location on file'}
                   </div>
-                  {supplier.notes && <p className="text-slate-500 dark:text-[#97a49b]">{supplier.notes}</p>}
+                  {supplier.notes && <p className="text-slate-500 dark:text-[#a9bcae]">{supplier.notes}</p>}
                 </div>
               </div>
 
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Quick Actions</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Quick Actions</p>
                 <div className="space-y-1.5">
                   <button
                     onClick={() => onTabChange('history')}
@@ -582,7 +582,7 @@ function SupplierDetailPanel({
                       <IconChip tone="green" size={30} icon={<History size={14} />} />
                       <span>
                         <span className="block text-[13px] font-semibold text-slate-700 dark:text-[#d2dbd5]">View Purchase History</span>
-                        <span className="block text-[11.5px] text-slate-400 dark:text-[#77857c]">See all past purchases and invoices</span>
+                        <span className="block text-[11.5px] text-slate-400 dark:text-[#8fa596]">See all past purchases and invoices</span>
                       </span>
                     </span>
                     <ChevronRight size={16} className="text-slate-300" />
@@ -595,7 +595,7 @@ function SupplierDetailPanel({
                       <IconChip tone="blue" size={30} icon={<BarChart3 size={14} />} />
                       <span>
                         <span className="block text-[13px] font-semibold text-slate-700 dark:text-[#d2dbd5]">View Supplier Analysis</span>
-                        <span className="block text-[11.5px] text-slate-400 dark:text-[#77857c]">Spend, volume, and trend over time</span>
+                        <span className="block text-[11.5px] text-slate-400 dark:text-[#8fa596]">Spend, volume, and trend over time</span>
                       </span>
                     </span>
                     <ChevronRight size={16} className="text-slate-300" />
@@ -608,7 +608,7 @@ function SupplierDetailPanel({
                       <IconChip tone="amber" size={30} icon={<Pencil size={14} />} />
                       <span>
                         <span className="block text-[13px] font-semibold text-slate-700 dark:text-[#d2dbd5]">Edit Supplier</span>
-                        <span className="block text-[11.5px] text-slate-400 dark:text-[#77857c]">Update contact details or status</span>
+                        <span className="block text-[11.5px] text-slate-400 dark:text-[#8fa596]">Update contact details or status</span>
                       </span>
                     </span>
                     <ChevronRight size={16} className="text-slate-300" />
@@ -636,7 +636,7 @@ function SupplierDetailPanel({
                   <tbody>
                     {history.map((p) => (
                       <Tr key={p.id}>
-                        <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">{p.reference_number}</Td>
+                        <Td className="font-medium text-slate-800 dark:text-[#e9f1eb]">{p.reference_number}</Td>
                         <Td>{formatDate(p.purchase_date)}</Td>
                         <Td className="text-right">{tzs(p.total_cost)}</Td>
                       </Tr>
@@ -657,20 +657,20 @@ function SupplierDetailPanel({
                 <div className="space-y-5">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-xl border border-slate-100 dark:border-[rgba(255,255,255,0.08)] p-3.5">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Total Spent</p>
-                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#eef3ef]">{tzs(totalSpent)}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Total Spent</p>
+                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#e9f1eb]">{tzs(totalSpent)}</p>
                     </div>
                     <div className="rounded-xl border border-slate-100 dark:border-[rgba(255,255,255,0.08)] p-3.5">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Purchases</p>
-                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#eef3ef]">{purchaseCount}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Purchases</p>
+                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#e9f1eb]">{purchaseCount}</p>
                     </div>
                     <div className="rounded-xl border border-slate-100 dark:border-[rgba(255,255,255,0.08)] p-3.5">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Avg. Order Value</p>
-                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#eef3ef]">{tzs(avgOrder)}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Avg. Order Value</p>
+                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#e9f1eb]">{tzs(avgOrder)}</p>
                     </div>
                     <div className="rounded-xl border border-slate-100 dark:border-[rgba(255,255,255,0.08)] p-3.5">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Last Purchase</p>
-                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#eef3ef]">{lastPurchase ? formatDate(lastPurchase.purchase_date) : '—'}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Last Purchase</p>
+                      <p className="mt-1 text-lg font-bold text-slate-800 dark:text-[#e9f1eb]">{lastPurchase ? formatDate(lastPurchase.purchase_date) : '—'}</p>
                     </div>
                   </div>
 
@@ -684,15 +684,15 @@ function SupplierDetailPanel({
 
                   {months.length > 0 && (
                     <div>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Spend by Month</p>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Spend by Month</p>
                       <div className="space-y-2">
                         {months.map(([key, value]) => (
                           <div key={key}>
-                            <div className="mb-1 flex items-center justify-between text-[12px] text-slate-500 dark:text-[#97a49b]">
+                            <div className="mb-1 flex items-center justify-between text-[12px] text-slate-500 dark:text-[#a9bcae]">
                               <span>{monthLabel(key)}</span>
                               <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(value)}</span>
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]">
+                            <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0d1a14]">
                               <div
                                 className="h-full rounded-full bg-blue-500"
                                 style={{ width: `${maxMonth > 0 ? (value / maxMonth) * 100 : 0}%` }}

@@ -58,7 +58,7 @@ export function ProposePriceModal({
           <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </FormField>
         {!isOwner && (
-          <p className="text-xs text-slate-400 dark:text-[#77857c]">
+          <p className="text-xs text-slate-400 dark:text-[#8fa596]">
             This will be sent to the owner for approval and won't affect the sale price until approved.
           </p>
         )}

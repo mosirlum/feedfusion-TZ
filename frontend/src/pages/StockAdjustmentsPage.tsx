@@ -195,11 +195,11 @@ export default function StockAdjustmentsPage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
         <Card className="h-fit p-5">
-          <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#eef3ef]">
+          <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#e9f1eb]">
             <IconChip tone="amber" size={28} icon={<SlidersHorizontal size={14} />} />
             New Adjustment
           </h3>
-          <p className="mb-4 text-xs text-slate-400 dark:text-[#77857c]">Applies immediately — there is no separate approval step.</p>
+          <p className="mb-4 text-xs text-slate-400 dark:text-[#8fa596]">Applies immediately — there is no separate approval step.</p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
@@ -223,7 +223,7 @@ export default function StockAdjustmentsPage() {
                   className={`flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                     direction === 'decrease'
                       ? 'border-danger-500 bg-danger-50 text-danger-600'
-                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                   }`}
                 >
                   <Minus size={14} /> Decrease
@@ -234,7 +234,7 @@ export default function StockAdjustmentsPage() {
                   className={`flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                     direction === 'increase'
                       ? 'border-green-600 bg-green-50 text-green-700'
-                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                   }`}
                 >
                   <Plus size={14} /> Increase
@@ -248,7 +248,7 @@ export default function StockAdjustmentsPage() {
                 <button
                   type="button"
                   onClick={() => setQuantity(String(Math.max(0, magnitude - 1)))}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50"
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50"
                   aria-label="Decrease quantity"
                 >
                   <Minus size={14} />
@@ -264,18 +264,18 @@ export default function StockAdjustmentsPage() {
                 <button
                   type="button"
                   onClick={() => setQuantity(String(magnitude + 1))}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50"
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50"
                   aria-label="Increase quantity"
                 >
                   <Plus size={14} />
                 </button>
-                <span className="flex-shrink-0 text-sm text-slate-400 dark:text-[#77857c]">{selectedProduct?.unit ?? 'units'}</span>
+                <span className="flex-shrink-0 text-sm text-slate-400 dark:text-[#8fa596]">{selectedProduct?.unit ?? 'units'}</span>
               </div>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-[#d2dbd5]">Current Stock</label>
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50 px-3.5 py-2.5 text-sm text-slate-500 dark:text-[#97a49b]">
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50 px-3.5 py-2.5 text-sm text-slate-500 dark:text-[#a9bcae]">
                 <Lock size={13} className="flex-shrink-0" />
                 {productId ? `${currentStock} ${selectedProduct?.unit ?? 'units'}` : 'Select a product first'}
               </div>
@@ -301,7 +301,7 @@ export default function StockAdjustmentsPage() {
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-[#d2dbd5]">Reason</label>
-              <p className="mb-1.5 text-xs text-slate-400 dark:text-[#77857c]">
+              <p className="mb-1.5 text-xs text-slate-400 dark:text-[#8fa596]">
                 {direction === 'increase'
                   ? "Adjustments should rarely add stock — use Purchases for normal restocking. Only for a count turning up more than expected, or fixing an earlier mistake."
                   : 'For damage, expiry, loss, or a correction — not a sale (that happens automatically).'}
@@ -313,7 +313,7 @@ export default function StockAdjustmentsPage() {
                     key={r}
                     onClick={() => setReason(r)}
                     className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      reason === r ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                      reason === r ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                     }`}
                   >
                     {r}
@@ -331,13 +331,13 @@ export default function StockAdjustmentsPage() {
                 rows={3}
                 placeholder="Add any extra detail..."
               />
-              <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#77857c]">{notes.length}/500</p>
+              <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#8fa596]">{notes.length}/500</p>
             </div>
 
             <Button type="submit" className="w-full" loading={submitting}>
               Record Adjustment
             </Button>
-            <p className="text-center text-xs text-slate-400 dark:text-[#77857c]">
+            <p className="text-center text-xs text-slate-400 dark:text-[#8fa596]">
               Posts immediately to the stock ledger as an ADJUSTMENT movement — no review step.
             </p>
           </form>
@@ -346,8 +346,8 @@ export default function StockAdjustmentsPage() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-slate-800 dark:text-[#eef3ef]">Adjustment History</h3>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">Every manual correction, most recent first.</p>
+              <h3 className="font-semibold text-slate-800 dark:text-[#e9f1eb]">Adjustment History</h3>
+              <p className="text-xs text-slate-400 dark:text-[#8fa596]">Every manual correction, most recent first.</p>
             </div>
             <div className="flex gap-1.5">
               {(
@@ -365,7 +365,7 @@ export default function StockAdjustmentsPage() {
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     rangeFilter === value
                       ? 'border-green-600 bg-green-50 text-green-700'
-                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                      : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                   }`}
                 >
                   {label}
@@ -392,16 +392,16 @@ export default function StockAdjustmentsPage() {
                         {initials(a.created_by_name ?? '?')}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{a.created_by_name}</p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">{a.created_by_role ? roleLabel(a.created_by_role) : ''}</p>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">{a.created_by_name}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">{a.created_by_role ? roleLabel(a.created_by_role) : ''}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-slate-400 dark:text-[#77857c]">{timeAgo(a.created_at)}</span>
+                    <span className="text-xs text-slate-400 dark:text-[#8fa596]">{timeAgo(a.created_at)}</span>
                   </div>
 
-                  <p className="mt-3 text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">
+                  <p className="mt-3 text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">
                     {a.product_name}
-                    {a.category_name && <span className="font-normal text-slate-400 dark:text-[#77857c]"> — {a.category_name}</span>}
+                    {a.category_name && <span className="font-normal text-slate-400 dark:text-[#8fa596]"> — {a.category_name}</span>}
                   </p>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -413,7 +413,7 @@ export default function StockAdjustmentsPage() {
                       {a.quantity >= 0 ? <Plus size={13} /> : <Minus size={13} />}
                       {Math.abs(a.quantity)} {a.unit}
                     </span>
-                    <span className="rounded-full bg-slate-100 dark:bg-[#0e1512] px-3 py-1 text-xs font-medium text-slate-600 dark:text-[#b6c2ba]">{a.reason}</span>
+                    <span className="rounded-full bg-slate-100 dark:bg-[#0d1a14] px-3 py-1 text-xs font-medium text-slate-600 dark:text-[#b6c2ba]">{a.reason}</span>
                   </div>
 
                   {a.notes && (

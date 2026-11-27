@@ -218,7 +218,7 @@ export default function ProductsPage() {
         <div className="min-w-0">
           <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or category…" className="pl-9" />
             </div>
             <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="sm:w-44">
@@ -238,14 +238,14 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewMode('list')}
                 title="List view"
-                className={`rounded-md p-1.5 ${viewMode === 'list' ? 'bg-green-600 text-white' : 'text-slate-400 dark:text-[#77857c] hover:text-slate-600'}`}
+                className={`rounded-md p-1.5 ${viewMode === 'list' ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-400 dark:text-[#8fa596] hover:text-slate-600'}`}
               >
                 <ListIcon size={16} />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
                 title="Grid view"
-                className={`rounded-md p-1.5 ${viewMode === 'grid' ? 'bg-green-600 text-white' : 'text-slate-400 dark:text-[#77857c] hover:text-slate-600'}`}
+                className={`rounded-md p-1.5 ${viewMode === 'grid' ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-400 dark:text-[#8fa596] hover:text-slate-600'}`}
               >
                 <LayoutGrid size={16} />
               </button>
@@ -281,14 +281,14 @@ export default function ProductsPage() {
                               {initials(p.name)}
                             </div>
                             <div>
-                              <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
-                              <p className="text-xs text-slate-400 dark:text-[#77857c]">PRD-{String(p.id).padStart(3, '0')}
+                              <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">{p.name}</p>
+                              <p className="text-xs text-slate-400 dark:text-[#8fa596]">PRD-{String(p.id).padStart(3, '0')}
                                 <span className="md:hidden">{` · ${p.category_name ?? 'No category'} · ${p.unit}`}</span>
                               </p>
                             </div>
                           </div>
                         </Td>
-                        <Td className="hidden md:table-cell">{p.category_name ? <Badge tone="blue">{p.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
+                        <Td className="hidden md:table-cell">{p.category_name ? <Badge tone="blue">{p.category_name}</Badge> : <span className="text-slate-400 dark:text-[#8fa596]">—</span>}</Td>
                         <Td className="hidden 2xl:table-cell">{p.unit}</Td>
                         <Td className="text-right">{p.active_price ? tzs(p.active_price) : <Badge tone="amber">No price</Badge>}</Td>
                         {isOwner && (
@@ -314,7 +314,7 @@ export default function ProductsPage() {
                                 onClick={() => setEditProduct(p)}
                                 title="Edit product"
                                 aria-label={`Edit ${p.name}`}
-                                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#97a49b]"
+                                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#a9bcae]"
                               >
                                 <Pencil size={13} /> <span className="hidden 2xl:inline">Edit</span>
                               </button>
@@ -357,8 +357,8 @@ export default function ProductsPage() {
                           {initials(p.name)}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-semibold text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">PRD-{String(p.id).padStart(3, '0')}</p>
+                          <p className="truncate font-semibold text-slate-800 dark:text-[#e9f1eb]">{p.name}</p>
+                          <p className="text-xs text-slate-400 dark:text-[#8fa596]">PRD-{String(p.id).padStart(3, '0')}</p>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -366,11 +366,11 @@ export default function ProductsPage() {
                         <Badge tone={p.status === 'active' ? 'green' : 'slate'}>{p.status}</Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 dark:text-[#97a49b]">{p.unit}</span>
-                        <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{p.active_price ? tzs(p.active_price) : <Badge tone="amber">No price</Badge>}</span>
+                        <span className="text-slate-500 dark:text-[#a9bcae]">{p.unit}</span>
+                        <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{p.active_price ? tzs(p.active_price) : <Badge tone="amber">No price</Badge>}</span>
                       </div>
                       {isOwner && stock && (
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                           {stock.current_stock} {stock.unit} in stock
                         </p>
                       )}
@@ -384,7 +384,7 @@ export default function ProductsPage() {
                         {isOwner && (
                           <button
                             onClick={() => setEditProduct(p)}
-                            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#97a49b]"
+                            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:underline dark:text-[#a9bcae]"
                           >
                             <Pencil size={13} /> Edit
                           </button>
@@ -416,18 +416,18 @@ export default function ProductsPage() {
 
             {filtered.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
-                <p className="text-[12.5px] text-slate-400 dark:text-[#77857c]">
+                <p className="text-[12.5px] text-slate-400 dark:text-[#8fa596]">
                   Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filtered.length)} of {filtered.length} products
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="text-[12.5px] text-slate-400 dark:text-[#77857c]">
+                  <span className="text-[12.5px] text-slate-400 dark:text-[#8fa596]">
                     Page {pageSafe} of {totalPages}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setPage((pg) => Math.max(1, pg - 1))}
                       disabled={pageSafe === 1}
-                      className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
                       <ChevronLeft size={15} />
                     </button>
@@ -441,7 +441,7 @@ export default function ProductsPage() {
                           key={n}
                           onClick={() => setPage(n)}
                           className={`h-7 w-7 rounded-md text-[12.5px] font-semibold ${
-                            n === pageSafe ? 'bg-green-600 text-white' : 'text-slate-500 dark:text-[#97a49b] hover:bg-slate-100'
+                            n === pageSafe ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-500 dark:text-[#a9bcae] hover:bg-slate-100'
                           }`}
                         >
                           {n}
@@ -451,7 +451,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => setPage((pg) => Math.min(totalPages, pg + 1))}
                       disabled={pageSafe === totalPages}
-                      className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
                       <ChevronRight size={15} />
                     </button>
@@ -466,7 +466,7 @@ export default function ProductsPage() {
           <div className="flex flex-col gap-4">
             <Card className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Product Categories</h3>
+                <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Product Categories</h3>
                 {categoryFilter !== 'all' && (
                   <button onClick={() => setCategoryFilter('all')} className="text-[11.5px] font-semibold text-blue-600 hover:underline">
                     View all
@@ -474,7 +474,7 @@ export default function ProductsPage() {
                 )}
               </div>
               {categoryCounts.length === 0 ? (
-                <p className="text-[13px] text-slate-400 dark:text-[#77857c]">No categories yet.</p>
+                <p className="text-[13px] text-slate-400 dark:text-[#8fa596]">No categories yet.</p>
               ) : (
                 <div className="space-y-2">
                   {categoryCounts.map(([name, count], i) => (
@@ -485,7 +485,7 @@ export default function ProductsPage() {
                     >
                       <IconChip tone={CHIP_TONES[i % CHIP_TONES.length]} size={30} icon={<Boxes size={14} />} />
                       <span className="min-w-0 flex-1 truncate text-[13px] text-slate-700 dark:text-[#d2dbd5]">{name}</span>
-                      <span className="flex-shrink-0 text-[12.5px] font-semibold text-slate-500 dark:text-[#97a49b]">{count}</span>
+                      <span className="flex-shrink-0 text-[12.5px] font-semibold text-slate-500 dark:text-[#a9bcae]">{count}</span>
                     </button>
                   ))}
                 </div>
@@ -495,17 +495,17 @@ export default function ProductsPage() {
             <Card className="p-5">
               <div className="mb-3 flex items-center gap-2.5">
                 <IconChip tone="red" size={30} icon={<AlertTriangle size={14} />} />
-                <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Stock Alerts</h3>
+                <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Stock Alerts</h3>
               </div>
               {stockAlerts.length === 0 ? (
-                <p className="text-[13px] text-slate-400 dark:text-[#77857c]">Everything is at a healthy stock level.</p>
+                <p className="text-[13px] text-slate-400 dark:text-[#8fa596]">Everything is at a healthy stock level.</p>
               ) : (
                 <div className="space-y-2.5">
                   {stockAlerts.map((r) => (
                     <div key={r.id} className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="truncate text-[13px] font-medium text-slate-700 dark:text-[#d2dbd5]">{r.name}</p>
-                        <p className="text-[11.5px] text-slate-400 dark:text-[#77857c]">
+                        <p className="text-[11.5px] text-slate-400 dark:text-[#8fa596]">
                           {r.current_stock} {r.unit} left
                         </p>
                       </div>
@@ -522,12 +522,12 @@ export default function ProductsPage() {
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <IconChip tone="blue" size={30} icon={<TrendingUp size={14} />} />
-                  <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Top Selling Products</h3>
+                  <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Top Selling Products</h3>
                 </div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">This month</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">This month</span>
               </div>
               {topSellingSorted.length === 0 ? (
-                <p className="text-[13px] text-slate-400 dark:text-[#77857c]">No sales recorded yet this month.</p>
+                <p className="text-[13px] text-slate-400 dark:text-[#8fa596]">No sales recorded yet this month.</p>
               ) : (
                 <div className="space-y-2.5">
                   {topSellingSorted.map((r, i) => (
@@ -540,7 +540,7 @@ export default function ProductsPage() {
                           {Number(r.quantity_sold).toLocaleString()} {r.unit}
                         </span>
                       </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-[#0d1a14]">
                         <div
                           className="h-full rounded-full bg-green-600"
                           style={{ width: `${maxSold > 0 ? (Number(r.quantity_sold) / maxSold) * 100 : 0}%` }}
@@ -610,10 +610,10 @@ export default function ProductsPage() {
             </div>
             <div className="text-sm text-slate-600 dark:text-[#b6c2ba]">
               <p>
-                Delete <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{deleteTarget.name}</span>? This permanently removes
+                Delete <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{deleteTarget.name}</span>? This permanently removes
                 the product and cannot be undone.
               </p>
-              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
+              <p className="mt-2 text-xs text-slate-400 dark:text-[#8fa596]">
                 This only works if the product has no recorded activity yet (no sales, purchases, stock records, etc.). If it does, delete
                 will be blocked — deactivate the product instead.
               </p>

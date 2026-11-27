@@ -17,7 +17,8 @@ export default {
         // which the owner has now explicitly moved on from in favor of this
         // new direction; both families are loaded in index.css.
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Sora since 2026-11-26 ("Look A · Usiku", CLAUDE.md #98).
+        display: ['Sora', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Re-sampled from the approved dashboard redesign artifact
@@ -62,6 +63,23 @@ export default {
           800: '#661c12',
           900: '#4a140d',
         },
+        // "Look A · Usiku" accent (2026-11-26, CLAUDE.md #98): lime for the
+        // one thing that matters on a dark screen (primary action, active
+        // nav item, today's figure). Used through `dark:` only — on the
+        // light theme the green scale above stays the accent.
+        lime: {
+          200: '#e2ffad',
+          300: '#d4f78a',
+          400: '#c6f36f',
+          500: '#a9db4b',
+        },
+        // Look A dark surfaces.
+        ink: {
+          900: '#08110d',
+          800: '#0b1712',
+          700: '#11211a',
+          600: '#172a21',
+        },
         // New chart-only slot (donut/line charts) — kept distinct from the
         // `green`/`blue` UI scales above so recoloring a button never
         // silently recolors a chart series. Values are the dataviz-skill
@@ -74,7 +92,8 @@ export default {
         },
       },
       borderRadius: {
-        card: '1.125rem',
+        // 1.125rem → 1.5rem with Look A (CLAUDE.md #98): softer, bigger panels.
+        card: '1.5rem',
       },
       boxShadow: {
         card: '0 1px 2px 0 rgba(10, 46, 33, 0.05), 0 8px 20px -14px rgba(10, 46, 33, 0.45)',

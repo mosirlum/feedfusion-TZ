@@ -28,7 +28,7 @@ const VERDICT_META: Record<GrowthVerdict, { label: string; icon: JSX.Element; ch
   profit: { label: 'Profit', icon: <CheckCircle2 size={13} />, chip: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
   loss: { label: 'Loss', icon: <TrendingDown size={13} />, chip: 'bg-danger-50 text-danger-600 dark:bg-danger-900/40 dark:text-danger-300' },
   breakeven: { label: 'Break-even', icon: <Minus size={13} />, chip: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  no_data: { label: 'No data', icon: <Minus size={13} />, chip: 'bg-slate-100 text-slate-500 dark:bg-[rgba(255,255,255,0.06)] dark:text-[#97a49b]' },
+  no_data: { label: 'No data', icon: <Minus size={13} />, chip: 'bg-slate-100 text-slate-500 dark:bg-[rgba(255,255,255,0.06)] dark:text-[#a9bcae]' },
 };
 
 function VerdictChip({ verdict, partial }: { verdict: GrowthVerdict; partial?: boolean }) {
@@ -130,7 +130,7 @@ function MonthlyChart({ months }: { months: GrowthOverviewMonth[] }) {
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className="block max-w-full text-slate-500 dark:text-[#97a49b]"
+        className="block max-w-full text-slate-500 dark:text-[#a9bcae]"
         role="img"
         aria-label="Revenue and net profit for each of the last six months"
       >
@@ -193,14 +193,14 @@ function MonthlyChart({ months }: { months: GrowthOverviewMonth[] }) {
             {act.isPartial ? ' (so far)' : ''}
           </p>
           <p className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-[#97a49b]">
+            <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-[#a9bcae]">
               <span className="h-0.5 w-3 rounded bg-green-500" aria-hidden="true" />
               Revenue
             </span>
             <span className="font-bold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{tzs(act.metrics.revenue)}</span>
           </p>
           <p className="mt-0.5 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-[#97a49b]">
+            <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-[#a9bcae]">
               <span className="h-0.5 w-3 rounded bg-[#2a78d6] dark:bg-[#4a90de]" aria-hidden="true" />
               Net profit
             </span>
@@ -239,20 +239,20 @@ function MonthTable({ months }: { months: GrowthOverviewMonth[] }) {
         <caption className="sr-only">Revenue, costs and profit for each of the last six months</caption>
         <thead>
           <tr className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)]">
-            <th scope="col" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-[#121a16] dark:text-[#97a49b]">
+            <th scope="col" className="sticky left-0 z-10 bg-white px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-[#11211a] dark:text-[#a9bcae]">
               Month (TZS)
             </th>
             {months.map((m) => (
               <th key={m.month} scope="col" className="px-3 py-2.5 text-right text-xs font-semibold text-slate-600 dark:text-[#b7c3bb]">
                 {shortMonth(m.month)}
-                {m.isPartial && <span className="block text-[10px] font-normal text-slate-400 dark:text-[#77857c]">so far</span>}
+                {m.isPartial && <span className="block text-[10px] font-normal text-slate-400 dark:text-[#8fa596]">so far</span>}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
           <tr className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)]">
-            <th scope="row" className="sticky left-0 z-10 whitespace-nowrap bg-white px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:bg-[#121a16] dark:text-[#b7c3bb]">
+            <th scope="row" className="sticky left-0 z-10 whitespace-nowrap bg-white px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:bg-[#11211a] dark:text-[#b7c3bb]">
               Result
             </th>
             {months.map((m) => (
@@ -266,8 +266,8 @@ function MonthTable({ months }: { months: GrowthOverviewMonth[] }) {
               <th
                 scope="row"
                 className={clsx(
-                  'sticky left-0 z-10 whitespace-nowrap bg-white px-4 py-2.5 text-left text-xs dark:bg-[#121a16]',
-                  row.strong ? 'font-bold text-slate-800 dark:text-[#eef3ef]' : 'font-medium text-slate-600 dark:text-[#b7c3bb]'
+                  'sticky left-0 z-10 whitespace-nowrap bg-white px-4 py-2.5 text-left text-xs dark:bg-[#11211a]',
+                  row.strong ? 'font-bold text-slate-800 dark:text-[#e9f1eb]' : 'font-medium text-slate-600 dark:text-[#b7c3bb]'
                 )}
               >
                 {row.label}
@@ -353,22 +353,22 @@ export function MonthlyOverviewSection() {
         <div className="p-4 sm:p-5">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-lg bg-slate-50 p-3.5 dark:bg-[rgba(255,255,255,0.04)]">
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">{lastFull ? `Last full month · ${monthName(lastFull.month)}` : 'Last full month'}</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">{lastFull ? `Last full month · ${monthName(lastFull.month)}` : 'Last full month'}</p>
               {lastFull ? (
                 <>
                   <p className="mt-1 font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{signedTzs(lastFull.metrics.netProfit)}</p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <VerdictChip verdict={lastFull.verdict} />
-                    {lastFull.marginPct !== null && <span className="text-xs text-slate-500 dark:text-[#97a49b]">{lastFull.marginPct}% of revenue</span>}
+                    {lastFull.marginPct !== null && <span className="text-xs text-slate-500 dark:text-[#a9bcae]">{lastFull.marginPct}% of revenue</span>}
                   </div>
                 </>
               ) : (
-                <p className="mt-1 text-sm text-slate-500 dark:text-[#97a49b]">No full month of sales yet.</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-[#a9bcae]">No full month of sales yet.</p>
               )}
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3.5 dark:bg-[rgba(255,255,255,0.04)]">
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">{monthName(current.month)} so far</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">{monthName(current.month)} so far</p>
               <p className="mt-1 font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{signedTzs(current.metrics.netProfit)}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
                 <VerdictChip verdict={current.verdict} partial />
@@ -377,7 +377,7 @@ export function MonthlyOverviewSection() {
             </div>
 
             <div className="rounded-lg bg-slate-50 p-3.5 dark:bg-[rgba(255,255,255,0.04)]">
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">Where we are heading</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">Where we are heading</p>
               <p
                 className={clsx(
                   'mt-1 inline-flex items-center gap-1.5 font-display text-lg font-extrabold',
@@ -390,7 +390,7 @@ export function MonthlyOverviewSection() {
                 {trajLabel}
               </p>
               {total.profitMonths + total.lossMonths > 0 && (
-                <p className="mt-1.5 text-xs text-slate-500 dark:text-[#97a49b]">
+                <p className="mt-1.5 text-xs text-slate-500 dark:text-[#a9bcae]">
                   {total.profitMonths} profit {total.profitMonths === 1 ? 'month' : 'months'}, {total.lossMonths} loss · {signedTzs(total.netProfit)} net over full months
                 </p>
               )}
@@ -413,7 +413,7 @@ export function MonthlyOverviewSection() {
 
           <div className="mt-5">
             <MonthlyChart months={months} />
-            <ul className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500 dark:text-[#97a49b]">
+            <ul className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500 dark:text-[#a9bcae]">
               <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-green-500" aria-hidden="true" />Revenue</li>
               <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-[#2a78d6] dark:bg-[#4a90de]" aria-hidden="true" />Net profit (after all costs; below the line is a loss)</li>
               <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm border border-dashed border-slate-500 opacity-60" aria-hidden="true" />* month still running</li>
@@ -424,7 +424,7 @@ export function MonthlyOverviewSection() {
       {hasAnything && (
         <div className="border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)]">
           <MonthTable months={months} />
-          <p className="px-5 pb-4 pt-1 text-xs text-slate-500 dark:text-[#97a49b]">
+          <p className="px-5 pb-4 pt-1 text-xs text-slate-500 dark:text-[#a9bcae]">
             Net profit = gross profit (sales minus what the stock cost) minus expenses. Monthly costs such as salary and rent count in the month they are dated. A month is called break-even when profit is within 1% of revenue.
           </p>
         </div>

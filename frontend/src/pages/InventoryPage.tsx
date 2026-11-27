@@ -201,7 +201,7 @@ export default function InventoryPage() {
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
               className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
-                statusFilter === tab.key ? 'bg-green-600 text-white' : 'bg-slate-100 dark:bg-[#0e1512] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-200'
+                statusFilter === tab.key ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'bg-slate-100 dark:bg-[#0d1a14] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-200'
               }`}
             >
               {tab.label}
@@ -210,7 +210,7 @@ export default function InventoryPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative">
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products…" className="w-56 pl-9" />
           </div>
           <Button type="button" variant="outline" icon={<Download size={15} />} onClick={exportCsv} disabled={sorted.length === 0}>
@@ -267,15 +267,15 @@ export default function InventoryPage() {
             <tbody>
               {pageItems.map((r, i) => (
                 <Tr key={r.id}>
-                  <Td className="hidden text-slate-400 dark:text-[#77857c] md:table-cell">{(pageSafe - 1) * pageSize + i + 1}</Td>
+                  <Td className="hidden text-slate-400 dark:text-[#8fa596] md:table-cell">{(pageSafe - 1) * pageSize + i + 1}</Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
                       <div className="hidden h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-600 text-[11px] font-bold text-white sm:flex">
                         {initials(r.name)}
                       </div>
                       <div className="min-w-0 whitespace-normal">
-                        <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{r.name}</p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                        <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">{r.name}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                           <span className="hidden md:inline">PRD-{String(r.id).padStart(3, '0')}</span>
                           <span className="md:hidden">{`${r.category_name ?? 'No category'} · ${r.active_price ? tzs(r.active_price) : 'No price'}`}</span>
                           </p>
@@ -285,9 +285,9 @@ export default function InventoryPage() {
                       </div>
                     </div>
                   </Td>
-                  <Td className="hidden md:table-cell">{r.category_name ? <Badge tone="blue">{r.category_name}</Badge> : <span className="text-slate-400 dark:text-[#77857c]">—</span>}</Td>
+                  <Td className="hidden md:table-cell">{r.category_name ? <Badge tone="blue">{r.category_name}</Badge> : <span className="text-slate-400 dark:text-[#8fa596]">—</span>}</Td>
                   <Td className="text-right">
-                    <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">
+                    <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">
                       {r.current_stock} {r.unit}
                     </span>
                     <span
@@ -301,7 +301,7 @@ export default function InventoryPage() {
                       />
                     </span>
                   </Td>
-                  <Td className="hidden text-right text-slate-400 dark:text-[#77857c] md:table-cell">
+                  <Td className="hidden text-right text-slate-400 dark:text-[#8fa596] md:table-cell">
                     {r.minimum_stock} {r.unit}
                   </Td>
                   <Td className="hidden text-right md:table-cell">{r.active_price ? tzs(r.active_price) : <Badge tone="amber">No price</Badge>}</Td>
@@ -311,15 +311,15 @@ export default function InventoryPage() {
                   </Td>
                   <Td className="!px-2 md:!px-4">
                     <div className="flex items-center gap-3">
-                      <button onClick={() => openHistory(r)} className="text-slate-400 dark:text-[#77857c] hover:text-blue-600" title="Stock history">
+                      <button onClick={() => openHistory(r)} className="text-slate-400 dark:text-[#8fa596] hover:text-blue-600" title="Stock history">
                         <History size={16} />
                       </button>
-                      <button onClick={() => setPriceRow(r)} className="text-slate-400 dark:text-[#77857c] hover:text-amber-600" title="Set price">
+                      <button onClick={() => setPriceRow(r)} className="text-slate-400 dark:text-[#8fa596] hover:text-amber-600" title="Set price">
                         <Pencil size={16} />
                       </button>
                       <Link
                         to={`/stock-adjustments?product=${r.id}`}
-                        className="text-slate-400 dark:text-[#77857c] hover:text-green-600"
+                        className="text-slate-400 dark:text-[#8fa596] hover:text-green-600"
                         title="Record a stock adjustment"
                       >
                         <SlidersHorizontal size={16} />
@@ -334,18 +334,18 @@ export default function InventoryPage() {
 
         {filtered.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
-            <p className="text-[12.5px] text-slate-400 dark:text-[#77857c]">
+            <p className="text-[12.5px] text-slate-400 dark:text-[#8fa596]">
               Showing {(pageSafe - 1) * pageSize + 1}–{Math.min(pageSafe * pageSize, sorted.length)} of {sorted.length} products
             </p>
             <div className="flex items-center gap-2">
-              <span className="text-[12.5px] text-slate-400 dark:text-[#77857c]">
+              <span className="text-[12.5px] text-slate-400 dark:text-[#8fa596]">
                 Page {pageSafe} of {totalPages}
               </span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={pageSafe === 1}
-                  className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ChevronLeft size={15} />
                 </button>
@@ -359,7 +359,7 @@ export default function InventoryPage() {
                       key={n}
                       onClick={() => setPage(n)}
                       className={`h-7 w-7 rounded-md text-[12.5px] font-semibold ${
-                        n === pageSafe ? 'bg-green-600 text-white' : 'text-slate-500 dark:text-[#97a49b] hover:bg-slate-100'
+                        n === pageSafe ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-500 dark:text-[#a9bcae] hover:bg-slate-100'
                       }`}
                     >
                       {n}
@@ -369,7 +369,7 @@ export default function InventoryPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={pageSafe === totalPages}
-                  className="rounded-md px-2 py-1 text-slate-400 dark:text-[#77857c] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                  className="rounded-md px-2 py-1 text-slate-400 dark:text-[#8fa596] hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <ChevronRight size={15} />
                 </button>
@@ -398,7 +398,7 @@ export default function InventoryPage() {
             <tbody>
               {movements.map((m) => (
                 <Tr key={m.id}>
-                  <Td className="text-xs text-slate-400 dark:text-[#77857c]">{formatDateTime(m.created_at)}</Td>
+                  <Td className="text-xs text-slate-400 dark:text-[#8fa596]">{formatDateTime(m.created_at)}</Td>
                   <Td>
                     <Badge tone={m.quantity >= 0 ? 'green' : 'red'}>{m.movement_type.replace(/_/g, ' ')}</Badge>
                   </Td>
@@ -407,7 +407,7 @@ export default function InventoryPage() {
                     {m.quantity}
                   </Td>
                   <Td className="text-right">{m.balance_after}</Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">{m.created_by_name}</Td>
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">{m.created_by_name}</Td>
                 </Tr>
               ))}
             </tbody>

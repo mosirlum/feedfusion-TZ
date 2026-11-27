@@ -25,17 +25,19 @@ export function Button({
   return (
     <button
       className={clsx(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#121a16]',
+        // Look A (CLAUDE.md #98): rounder buttons, press feedback, and in the
+        // dark look the primary action is lime on near-black.
+        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0b1712]',
         size === 'sm' && 'px-3 py-1.5 text-sm',
         size === 'md' && 'px-4 py-2.5 text-sm',
         size === 'lg' && 'px-5 py-3 text-base',
         variant === 'primary' &&
-          'bg-green-600 text-white shadow-card hover:bg-green-700 active:bg-green-800 focus-visible:ring-green-400',
+          'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712] shadow-card hover:bg-green-700 active:bg-green-800 focus-visible:ring-green-400 dark:bg-lime-400 dark:font-bold dark:text-[#0b1712] dark:shadow-[0_8px_24px_-12px_rgba(198,243,111,0.6)] dark:hover:bg-lime-300 dark:active:bg-lime-500 dark:focus-visible:ring-lime-300',
         variant === 'secondary' &&
-          'bg-blue-600 text-white shadow-card hover:bg-blue-700 active:bg-blue-800 focus-visible:ring-blue-400',
+          'bg-blue-600 text-white shadow-card hover:bg-blue-700 active:bg-blue-800 focus-visible:ring-blue-400 dark:bg-white/[0.1] dark:text-white dark:shadow-none dark:hover:bg-white/[0.16] dark:focus-visible:ring-white/40',
         variant === 'outline' &&
-          'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-300 dark:border-[rgba(255,255,255,0.2)] dark:bg-[#0e1512] dark:text-[#d2dbd5] dark:hover:bg-[#17211c]',
-        variant === 'ghost' && 'text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-300 dark:text-[#b6c2ba] dark:hover:bg-[#0e1512]',
+          'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-300 dark:border-white/[0.16] dark:bg-transparent dark:text-[#e9f1eb] dark:hover:bg-white/[0.07]',
+        variant === 'ghost' && 'text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-300 dark:text-[#b9cbbd] dark:hover:bg-white/[0.07]',
         variant === 'danger' &&
           'bg-danger-500 text-white shadow-card hover:bg-danger-600 focus-visible:ring-red-300',
         className
@@ -56,7 +58,8 @@ export function Card({ className, children, ...rest }: { className?: string; chi
   return (
     <div
       className={clsx(
-        'rounded-card border border-slate-200 bg-white shadow-card dark:border-[rgba(255,255,255,0.08)] dark:bg-[#121a16]',
+        // Dark (Look A): a glass panel over the page glow, no drop shadow.
+        'rounded-card border border-slate-200 bg-white shadow-card dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none',
         className
       )}
       {...rest}
@@ -70,8 +73,8 @@ export function CardHeader({ title, subtitle, action }: { title: ReactNode; subt
   return (
     <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
       <div className="min-w-[10rem] flex-1">
-        <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">{title}</h3>
-        {subtitle && <p className="text-sm text-slate-500 dark:text-[#97a49b] mt-0.5">{subtitle}</p>}
+        <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">{title}</h3>
+        {subtitle && <p className="text-sm text-slate-500 dark:text-[#a9bcae] mt-0.5">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -91,8 +94,8 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    slate: 'bg-slate-100 text-slate-700 dark:bg-[#0e1512] dark:text-[#b6c2ba]',
-    green: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    slate: 'bg-slate-100 text-slate-700 dark:bg-[#0d1a14] dark:text-[#b6c2ba]',
+    green: 'bg-green-100 text-green-800 dark:bg-lime-400/15 dark:text-lime-300',
     blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
     red: 'bg-danger-50 text-danger-600 dark:bg-danger-900/50 dark:text-danger-300',
     amber: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
@@ -118,11 +121,11 @@ export function IconChip({
   size?: number;
 }) {
   const tones: Record<string, string> = {
-    green: 'bg-green-50 text-green-600 dark:bg-green-900/40 dark:text-green-300',
-    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300',
+    green: 'bg-green-50 text-green-600 dark:bg-lime-400/15 dark:text-lime-300',
+    blue: 'bg-blue-50 text-blue-600 dark:bg-white/[0.08] dark:text-[#d2dbd5]',
     amber: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
     red: 'bg-danger-50 text-danger-600 dark:bg-danger-900/40 dark:text-danger-300',
-    slate: 'bg-slate-100 text-slate-500 dark:bg-[#0e1512] dark:text-[#97a49b]',
+    slate: 'bg-slate-100 text-slate-500 dark:bg-[#0d1a14] dark:text-[#a9bcae]',
   };
   return (
     <div
@@ -149,10 +152,10 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={clsx(
-        'w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors',
+        'w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors',
         'focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100',
         'disabled:bg-slate-50 disabled:text-slate-400',
-        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0e1512] dark:text-[#eef3ef] dark:placeholder:text-[#77857c] dark:focus:border-green-500 dark:focus:ring-green-900/40 dark:disabled:bg-[#121a16] dark:disabled:text-[#556059]',
+        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0d1a14] dark:text-[#e9f1eb] dark:placeholder:text-[#8fa596] dark:focus:border-lime-400 dark:focus:ring-lime-400/20 dark:disabled:bg-[#11211a] dark:disabled:text-[#556059]',
         className
       )}
       {...rest}
@@ -164,9 +167,9 @@ export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLText
   return (
     <textarea
       className={clsx(
-        'w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors',
+        'w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors',
         'focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100',
-        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0e1512] dark:text-[#eef3ef] dark:placeholder:text-[#77857c] dark:focus:border-green-500 dark:focus:ring-green-900/40',
+        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0d1a14] dark:text-[#e9f1eb] dark:placeholder:text-[#8fa596] dark:focus:border-lime-400 dark:focus:ring-lime-400/20',
         className
       )}
       {...rest}
@@ -178,9 +181,9 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
   return (
     <select
       className={clsx(
-        'w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 transition-colors',
+        'w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 transition-colors',
         'focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100',
-        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0e1512] dark:text-[#eef3ef] dark:focus:border-green-500 dark:focus:ring-green-900/40',
+        'dark:border-[rgba(255,255,255,0.14)] dark:bg-[#0d1a14] dark:text-[#e9f1eb] dark:focus:border-lime-400 dark:focus:ring-lime-400/20',
         className
       )}
       {...rest}
@@ -195,7 +198,7 @@ export function FormField({ label, children, hint }: { label: string; children: 
     <div>
       <Label>{label}</Label>
       {children}
-      {hint && <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-slate-400 dark:text-[#8fa596]">{hint}</p>}
     </div>
   );
 }
@@ -212,7 +215,7 @@ export function Table({ children }: { children: ReactNode }) {
 }
 export function THead({ children }: { children: ReactNode }) {
   return (
-    <thead className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#77857c] border-b border-slate-200 dark:border-[rgba(255,255,255,0.08)]">
+    <thead className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa596] border-b border-slate-200 dark:border-[rgba(255,255,255,0.08)]">
       {children}
     </thead>
   );
@@ -227,7 +230,7 @@ export function Tr({ children, className, ...rest }: { children: ReactNode; clas
   return (
     <tr
       className={clsx(
-        'border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors dark:border-[rgba(255,255,255,0.08)] dark:hover:bg-[#0e1512]/40',
+        'border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors dark:border-[rgba(255,255,255,0.08)] dark:hover:bg-[#0d1a14]/40',
         className
       )}
       {...rest}
@@ -241,7 +244,7 @@ export function Tr({ children, className, ...rest }: { children: ReactNode; clas
 // Misc
 // ---------------------------------------------------------------------------
 export function Spinner({ className }: { className?: string }) {
-  return <Loader2 className={clsx('animate-spin text-green-600', className)} />;
+  return <Loader2 className={clsx('animate-spin text-green-600 dark:text-lime-400', className)} />;
 }
 
 export function FullPageSpinner() {
@@ -255,9 +258,9 @@ export function FullPageSpinner() {
 export function EmptyState({ icon, title, description, action }: { icon?: ReactNode; title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-14 text-center">
-      {icon && <div className="mb-2 text-slate-300 dark:text-[#97a49b]">{icon}</div>}
+      {icon && <div className="mb-2 text-slate-300 dark:text-[#a9bcae]">{icon}</div>}
       <p className="font-medium text-slate-600 dark:text-[#b6c2ba]">{title}</p>
-      {description && <p className="max-w-sm text-sm text-slate-400 dark:text-[#77857c]">{description}</p>}
+      {description && <p className="max-w-sm text-sm text-slate-400 dark:text-[#8fa596]">{description}</p>}
       {action}
     </div>
   );
@@ -280,7 +283,7 @@ export function PageHeader({
         {icon && <IconChip tone="blue" size={40} icon={icon} />}
         <div>
           <h1 className="font-display text-2xl font-extrabold text-slate-800 dark:text-[#f4f8f5]">{title}</h1>
-          {subtitle && <p className="text-sm text-slate-500 dark:text-[#97a49b] mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-slate-500 dark:text-[#a9bcae] mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action}
@@ -310,7 +313,7 @@ export function HeroButton({ icon, children, className, ...rest }: ButtonHTMLAtt
       type="button"
       {...rest}
       className={clsx(
-        'inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-green-800 shadow-sm transition active:scale-[0.98] hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-green-800 disabled:opacity-60',
+        'inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-green-800 shadow-sm transition active:scale-[0.98] hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-green-800 disabled:opacity-60 dark:bg-lime-400 dark:font-bold dark:text-[#0b1712] dark:hover:bg-lime-300',
         className
       )}
     >
@@ -396,7 +399,7 @@ export function StatCard({
   delta?: { value: string; direction: 'up' | 'down' };
 }) {
   const tones: Record<string, string> = {
-    green: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    green: 'bg-green-50 text-green-700 dark:bg-lime-400/15 dark:text-lime-300',
     blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
     amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
     red: 'bg-danger-50 text-danger-600 dark:bg-danger-900/40 dark:text-danger-300',
@@ -411,7 +414,7 @@ export function StatCard({
             className={clsx(
               'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold',
               delta.direction === 'up'
-                ? 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                ? 'bg-green-50 text-green-700 dark:bg-lime-400/15 dark:text-lime-300'
                 : 'bg-danger-50 text-danger-600 dark:bg-danger-900/40 dark:text-danger-300'
             )}
           >
@@ -419,9 +422,9 @@ export function StatCard({
           </span>
         )}
       </div>
-      <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-[#97a49b] sm:mt-3 sm:text-sm">{label}</p>
-      <p className="mt-0.5 break-words font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5] sm:mt-1 sm:text-2xl">{value}</p>
-      {hint && <p className="mt-1 text-[11px] text-slate-500 dark:text-[#97a49b] sm:text-xs">{hint}</p>}
+      <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-[#a9bcae] sm:mt-3 sm:text-sm">{label}</p>
+      <p className="mt-0.5 break-words font-display text-lg font-bold tracking-tight tabular-nums text-slate-800 dark:text-white sm:mt-1 sm:text-[26px]">{value}</p>
+      {hint && <p className="mt-1 text-[11px] text-slate-500 dark:text-[#a9bcae] sm:text-xs">{hint}</p>}
     </Card>
   );
 }
@@ -549,8 +552,8 @@ export function DonutChart({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         {/* Long figures ("TZS 50,521,750") used to spill over the ring — shrink to fit. */}
-        <p className={`max-w-[84px] break-words font-display font-extrabold leading-tight tabular-nums text-slate-800 dark:text-[#eef3ef] ${centerValue.length <= 8 ? 'text-[13px]' : centerValue.length <= 11 ? 'text-[11.5px]' : 'text-[10px]'}`}>{centerValue}</p>
-        <p className="text-[10px] text-slate-400 dark:text-[#77857c]">{centerLabel}</p>
+        <p className={`max-w-[84px] break-words font-display font-extrabold leading-tight tabular-nums text-slate-800 dark:text-[#e9f1eb] ${centerValue.length <= 8 ? 'text-[13px]' : centerValue.length <= 11 ? 'text-[11.5px]' : 'text-[10px]'}`}>{centerValue}</p>
+        <p className="text-[10px] text-slate-400 dark:text-[#8fa596]">{centerLabel}</p>
       </div>
     </div>
   );
@@ -580,7 +583,7 @@ export function Modal({
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
       <div
         className={clsx(
-          'relative z-10 w-full rounded-card bg-white shadow-panel animate-fade-in max-h-[90vh] flex flex-col dark:bg-[#121a16] dark:border dark:border-[rgba(255,255,255,0.08)]',
+          'relative z-10 w-full rounded-card bg-white shadow-panel animate-fade-in max-h-[90vh] flex flex-col dark:bg-[#11211a] dark:border dark:border-[rgba(255,255,255,0.08)]',
           size === 'sm' && 'max-w-sm',
           size === 'md' && 'max-w-lg',
           size === 'lg' && 'max-w-2xl',
@@ -591,8 +594,8 @@ export function Modal({
         )}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
-          <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">{title}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:text-[#77857c] dark:hover:text-[#eef3ef] text-xl leading-none">
+          <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">{title}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:text-[#8fa596] dark:hover:text-[#e9f1eb] text-xl leading-none">
             &times;
           </button>
         </div>
@@ -629,7 +632,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-[#0e1512]"
+      className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-[#0d1a14]"
     >
       {options.map((o) => (
         <button
@@ -640,8 +643,8 @@ export function SegmentedControl<T extends string>({
           className={clsx(
             'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400',
             value === o.value
-              ? 'bg-white text-green-800 shadow-sm dark:bg-[#1c2a23] dark:text-green-300'
-              : 'text-slate-500 hover:text-slate-700 dark:text-[#97a49b] dark:hover:text-[#d2dbd5]'
+              ? 'bg-white text-green-800 shadow-sm dark:bg-lime-400 dark:text-[#0b1712]'
+              : 'text-slate-500 hover:text-slate-700 dark:text-[#a9bcae] dark:hover:text-[#d2dbd5]'
           )}
         >
           {o.label}

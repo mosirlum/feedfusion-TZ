@@ -1,18 +1,20 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-// Three-way theme picker: Light / System / Dark (2026-09-12, CLAUDE.md #61).
-// "System" here is NOT "follow the OS light/dark preference" (that's the
-// #58 bug we deliberately removed) — the owner defined it as its own third
-// look: identical to Light everywhere except the sidebar, which uses the
-// app's original green→blue diagonal gradient instead of the current
-// mockup's solid forest-green. Dark is the full dark theme from #56-#58.
-// Tailwind is configured with `darkMode: 'class'` (tailwind.config.js), so
-// every `dark:` utility across the app activates purely from the presence
-// of a `dark` class on <html> — that class is only added for 'dark', never
-// for 'system'. The System-only sidebar swap is handled by AppShell.tsx
-// reading `theme` directly (see AppShell.tsx), not by Tailwind's dark: variant.
-type Theme = 'light' | 'dark' | 'system';
-const STORAGE_KEY = 'feedfusion-theme';
+// Theme (2026-11-26, CLAUDE.md #98): the owner/client chose "Look A · Usiku"
+// — a dark green-black look with lime highlights — as the app's main look.
+// It lives in Tailwind's `dark:` layer (darkMode: 'class'), so the default is
+// now 'dark'; 'light' stays available from the profile menu.
+//
+// The storage key moved to 'feedfusion-theme-v2' on purpose: the old
+// ThemeProvider wrote its value to 'feedfusion-theme' on every load, so every
+// existing user already had 'light' stored and would never have seen the new
+// default. The old 'system' option (CLAUDE.md #61, an alternate light-mode
+// sidebar) is retired together with the old sidebar.
+//
+// index.html has a tiny pre-paint script that reads the same key with the
+// same default — keep the two in sync.
+type Theme = 'light' | 'dark';
+const STORAGE_KEY = 'feedfusion-theme-v2';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -22,16 +24,11 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): Theme {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-  // Fixed 2026-09-12 (CLAUDE.md #58) — this used to fall back to the
-  // device/browser's OS preference, so anyone whose phone/laptop was set to
-  // dark mode landed on the dark theme on first visit without ever asking
-  // for it, which read as "the app is stuck in the wrong colors." The owner
-  // was explicit: light should always be the default, white, clean look;
-  // dark (and now "system") are opt-in via the picker, never inherited
-  // from the OS.
-  return 'light';
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'light' ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -39,14 +36,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      /* private mode: the choice just isn't remembered */
+    }
   }, [theme]);
 
-  function setTheme(t: Theme) {
-    setThemeState(t);
-  }
+  // Paper is always white: drop the dark look while the browser prints, so a
+  // Reports tab (whose .print-area carries dark: classes) never prints light
+  // text on white paper. Matters more now that dark is the default.
+  useEffect(() => {
+    const root = document.documentElement;
+    const before = () => root.classList.remove('dark');
+    const after = () => root.classList.toggle('dark', theme === 'dark');
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', after);
+    return () => {
+      window.removeEventListener('beforeprint', before);
+      window.removeEventListener('afterprint', after);
+    };
+  }, [theme]);
 
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, setTheme: setThemeState }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeContextValue {

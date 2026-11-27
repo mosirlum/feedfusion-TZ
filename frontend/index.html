@@ -5,37 +5,26 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1c7d4f" />
+    <meta name="theme-color" content="#0b1712" />
     <title>Feed Fusion Tanzania</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Manrope (display/headings) + Inter (body/UI) — the whole-app visual
-         redesign, 2026-09-12 (CLAUDE.md #56). Replaces Plus Jakarta Sans. -->
+    <!-- Sora (display/headings/big numbers) + Inter (body/UI) — "Look A ·
+         Usiku", chosen by the owner 2026-11-26 (CLAUDE.md #98). Manrope is
+         kept loaded only because the light-only print documents still use it. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Sets the theme class before first paint (no flash). Must match
+         ThemeContext.tsx: key 'feedfusion-theme-v2', default = dark ("Look A",
+         CLAUDE.md #98). If you edit this script, recompute its sha256 for the
+         CSP script-src in vercel.json (CLAUDE.md #77). -->
     <script>
-      // Set the dark/light class before first paint so there's no flash of
-      // the wrong theme while React boots (ThemeContext.tsx owns the choice
-      // afterwards — this just reads the same localStorage key it writes).
-      // Fixed 2026-09-12 (CLAUDE.md #58) — this used to fall back to
-      // window.matchMedia('(prefers-color-scheme: dark)') when nothing was
-      // stored yet, so a visitor whose device/OS was set to dark mode landed
-      // on the dark theme on first visit without ever choosing it. Light is
-      // now the unconditional default; dark only applies once the user has
-      // actually picked it via the picker (ThemeContext.tsx has the same fix
-      // — keep both in sync, this script runs before React does).
-      // Updated 2026-09-12 (CLAUDE.md #61) — theme is now a 3-way choice
-      // (light/system/dark). Only 'dark' adds the `dark` class; 'system' is
-      // its own light-based look (different sidebar only, see AppShell.tsx)
-      // and must NOT get the `dark` class or every dark: utility would fire.
       (function () {
         try {
-          var stored = localStorage.getItem('feedfusion-theme');
-          var dark = stored === 'dark';
-          if (dark) document.documentElement.classList.add('dark');
-        } catch (e) {}
+          if (localStorage.getItem('feedfusion-theme-v2') !== 'light') document.documentElement.classList.add('dark');
+        } catch (e) { document.documentElement.classList.add('dark'); }
       })();
     </script>
   </head>

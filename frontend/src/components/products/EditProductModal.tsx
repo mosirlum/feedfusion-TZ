@@ -86,7 +86,7 @@ export function EditProductModal({
             <Input type="number" min={0} value={minimumStock} onChange={(e) => setMinimumStock(e.target.value)} />
           </FormField>
         </div>
-        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+        <p className="text-xs text-slate-400 dark:text-[#8fa596]">
           Selling price isn't edited here — use a Price Proposal (BR-27) to change it.
         </p>
         <div className="flex justify-end gap-2 pt-2">

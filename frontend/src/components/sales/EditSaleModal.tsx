@@ -244,7 +244,7 @@ export function EditSaleModal({
               <p className="text-sm font-semibold text-slate-700 dark:text-[#d2dbd5]">Sale Items</p>
               <Badge tone="amber">{isOwner ? 'Applies immediately (you\'re the owner)' : "Requires owner's approval"}</Badge>
             </div>
-            <p className="flex items-center gap-1.5 border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-4 py-2 text-xs text-slate-400 dark:text-[#77857c]">
+            <p className="flex items-center gap-1.5 border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-4 py-2 text-xs text-slate-400 dark:text-[#8fa596]">
               <Info size={13} />
               Quantity, price, and discount can be corrected here. To change which product a line is, or add/remove an
               item, void this sale and re-enter it instead.
@@ -252,7 +252,7 @@ export function EditSaleModal({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] text-left text-xs font-medium text-slate-400 dark:text-[#77857c]">
+                  <tr className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] text-left text-xs font-medium text-slate-400 dark:text-[#8fa596]">
                     <th className="px-4 py-2">Product</th>
                     <th className="px-2 py-2 text-right">Qty</th>
                     <th className="px-2 py-2 text-right">Unit Price</th>
@@ -268,7 +268,7 @@ export function EditSaleModal({
                       <tr key={l.saleItemId} className={changed ? 'bg-amber-50/60' : ''}>
                         <td className="px-4 py-2 align-top">
                           <p className="font-medium text-slate-700 dark:text-[#d2dbd5]">{l.productName}</p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">{l.unit}</p>
+                          <p className="text-xs text-slate-400 dark:text-[#8fa596]">{l.unit}</p>
                         </td>
                         <td className="px-2 py-2 align-top">
                           <Input
@@ -350,7 +350,7 @@ export function EditSaleModal({
                   <TriangleAlert size={16} className="text-amber-500" />
                 )
               ) : (
-                <Info size={16} className="text-slate-400 dark:text-[#77857c]" />
+                <Info size={16} className="text-slate-400 dark:text-[#8fa596]" />
               )}
               <span className="text-slate-600 dark:text-[#b6c2ba]">
                 {hasFinancialChange
@@ -361,7 +361,7 @@ export function EditSaleModal({
               </span>
             </div>
             <div className="text-right text-sm">
-              <span className="text-slate-400 dark:text-[#77857c]">Current: {tzs(currentTotal)}</span>
+              <span className="text-slate-400 dark:text-[#8fa596]">Current: {tzs(currentTotal)}</span>
               {totalDelta !== 0 && (
                 <>
                   {' → '}

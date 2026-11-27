@@ -128,7 +128,7 @@ export default function BusinessGrowthPage() {
       <ProfitDoctorCard from={monthRange.from} to={monthRange.to} periodLabel="This month so far" />
 
       <section aria-labelledby="issues-title">
-        <h2 id="issues-title" className="mb-3 font-display font-bold text-slate-800 dark:text-[#eef3ef]">
+        <h2 id="issues-title" className="mb-3 font-display font-bold text-slate-800 dark:text-[#e9f1eb]">
           Issues &amp; advice
         </h2>
         {orderedIssues.length === 0 ? (
@@ -264,11 +264,11 @@ function IssueCard({ issue }: { issue: GrowthIssue }) {
         <IconChip tone={meta.tone} icon={meta.icon} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">{issue.title}</h3>
+            <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">{issue.title}</h3>
             <Badge tone={meta.tone}>{meta.label}</Badge>
           </div>
           <p className="mt-1 text-sm text-slate-600 dark:text-[#b6c2ba]">{issue.detail}</p>
-          <p className="mt-3 flex items-start gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-[#0e1512] dark:text-[#b6c2ba]">
+          <p className="mt-3 flex items-start gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:bg-[#0d1a14] dark:text-[#b6c2ba]">
             <Lightbulb size={14} className="mt-0.5 shrink-0 text-amber-500" aria-hidden="true" />
             <span>{issue.advice}</span>
           </p>

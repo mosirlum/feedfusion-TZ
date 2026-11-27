@@ -45,9 +45,9 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <Stethoscope size={17} className="text-green-600 dark:text-green-400" aria-hidden="true" />
-        <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Profit Doctor: why is my profit small?</h3>
+        <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Profit Doctor: why is my profit small?</h3>
       </div>
-      {periodLabel && <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-[#0e1512] dark:text-[#97a49b]">{periodLabel}</span>}
+      {periodLabel && <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-[#0d1a14] dark:text-[#a9bcae]">{periodLabel}</span>}
     </div>
   );
 
@@ -55,7 +55,7 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
     return (
       <Card className="p-5">
         {header}
-        <p className="mt-2 text-sm text-slate-500 dark:text-[#97a49b]">Could not load the profit analysis. Refresh the page to try again.</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-[#a9bcae]">Could not load the profit analysis. Refresh the page to try again.</p>
       </Card>
     );
   }
@@ -77,7 +77,7 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
     return (
       <Card className="p-5">
         {header}
-        <p className="mt-2 text-sm text-slate-500 dark:text-[#97a49b]">No sales in this period yet, so there is nothing to explain.</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-[#a9bcae]">No sales in this period yet, so there is nothing to explain.</p>
       </Card>
     );
   }
@@ -95,7 +95,7 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
           <span className="font-semibold text-slate-700 dark:text-[#e3ebe5]">Money you received from sales</span>
           <span className="font-display font-extrabold tabular-nums text-slate-900 dark:text-white">{tzs(s.revenue)}</span>
         </div>
-        <div className="mt-2 flex h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[#0e1512]" role="img" aria-label="Where the sales money went">
+        <div className="mt-2 flex h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[#0d1a14]" role="img" aria-label="Where the sales money went">
           <div className="ff-grow-x h-full bg-slate-400 dark:bg-slate-500" style={{ ...dly(300), width: seg(s.per100.products) }} />
           <div className="ff-grow-x h-full bg-amber-400" style={{ ...dly(500), width: seg(s.per100.expenses) }} />
           {s.net > 0 && <div className="ff-grow-x h-full bg-green-500" style={{ ...dly(700), width: seg(s.per100.profit) }} />}
@@ -103,18 +103,18 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
         <dl className="mt-3 flex flex-col gap-2 text-sm">
           <div className="flex items-center justify-between gap-3">
             <dt className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]"><span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-slate-400" />Spent buying the products you sold</dt>
-            <dd className="text-right tabular-nums"><b>{tzs(s.cogs)}</b> <span className="text-xs text-slate-500 dark:text-[#97a49b]">({pct(s.per100.products)} of sales)</span></dd>
+            <dd className="text-right tabular-nums"><b>{tzs(s.cogs)}</b> <span className="text-xs text-slate-500 dark:text-[#a9bcae]">({pct(s.per100.products)} of sales)</span></dd>
           </div>
           <div className="flex items-center justify-between gap-3">
             <dt className="flex items-center gap-2 text-slate-600 dark:text-[#b6c2ba]"><span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-amber-400" />Business expenses (rent, wages, transport…)</dt>
-            <dd className="text-right tabular-nums"><b>{tzs(s.expenses)}</b> <span className="text-xs text-slate-500 dark:text-[#97a49b]">({pct(s.per100.expenses)} of sales)</span></dd>
+            <dd className="text-right tabular-nums"><b>{tzs(s.expenses)}</b> <span className="text-xs text-slate-500 dark:text-[#a9bcae]">({pct(s.per100.expenses)} of sales)</span></dd>
           </div>
           <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-2 dark:border-[#26322b]">
             <dt className="flex items-center gap-2 font-semibold text-slate-700 dark:text-[#e3ebe5]"><span className={clsx('inline-block h-2.5 w-2.5 shrink-0 rounded-full', s.net >= 0 ? 'bg-green-500' : 'bg-danger-500')} />{s.net >= 0 ? 'What is left for you (profit)' : 'What you lost'}</dt>
             <dd className={clsx('text-right font-bold tabular-nums', s.net >= 0 ? 'text-green-700 dark:text-green-300' : 'text-danger-600 dark:text-danger-300')}>{tzs(Math.abs(s.net))} <span className="text-xs font-normal">({pct(Math.abs(s.per100.profit))} of sales)</span></dd>
           </div>
         </dl>
-        <p className="mt-3 text-xs text-slate-500 dark:text-[#97a49b]">
+        <p className="mt-3 text-xs text-slate-500 dark:text-[#a9bcae]">
           Example: if a customer pays you TZS 100, about TZS {Math.round(s.per100.products)} goes back to buy the product, TZS {Math.round(s.per100.expenses)} pays expenses and {s.net >= 0 ? <>you keep about TZS {Math.round(s.per100.profit)}</> : <>you lose {Math.abs(s.per100.profit) < 1 ? 'less than TZS 1' : `about TZS ${Math.round(Math.abs(s.per100.profit))}`}</>}. Gross margin {pct(s.grossMarginPct)}, target {data.targetMarginPct}%.
         </p>
       </div>
@@ -135,7 +135,7 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex min-w-0 items-start gap-2.5">
                   <t.Icon size={18} className="mt-0.5 shrink-0 text-slate-600 dark:text-[#b6c2ba]" aria-hidden="true" />
-                  <h4 className="min-w-0 font-display font-bold text-slate-800 dark:text-[#eef3ef]">{f.title}</h4>
+                  <h4 className="min-w-0 font-display font-bold text-slate-800 dark:text-[#e9f1eb]">{f.title}</h4>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {f.impactTzs !== null && f.impactTzs > 0 && <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-bold tabular-nums text-slate-700 dark:bg-white/10 dark:text-[#d2dbd5]">≈ {tzs(f.impactTzs)}</span>}
@@ -144,16 +144,16 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
               </div>
               <dl className="mt-3 grid gap-3 text-sm md:grid-cols-2">
                 <div>
-                  <dt className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">What is happening</dt>
+                  <dt className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">What is happening</dt>
                   <dd className="mt-1 text-slate-700 dark:text-[#d2dbd5]">{f.what}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Why it matters</dt>
+                  <dt className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">Why it matters</dt>
                   <dd className="mt-1 text-slate-700 dark:text-[#d2dbd5]">{f.why}</dd>
                 </div>
               </dl>
               <div className="mt-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">What to do</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">What to do</p>
                 <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-slate-700 dark:text-[#d2dbd5]">
                   {f.actions.map((a) => (
                     <li key={a}>{a}</li>
@@ -177,12 +177,12 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
 
       {fixRows.length > 0 && (
         <div className="mt-5">
-          <h4 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Prices to correct</h4>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">Suggested price = latest buying cost (with transport) + a {data.targetMarginPct}% margin. Change prices in Products → Price Proposals.</p>
+          <h4 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Prices to correct</h4>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">Suggested price = latest buying cost (with transport) + a {data.targetMarginPct}% margin. Change prices in Products → Price Proposals.</p>
           <div className="mt-2 overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
-                <tr className="text-xs uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">
+                <tr className="text-xs uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">
                   <th className="py-2 pr-3 font-bold">Product</th>
                   <th className="py-2 pr-3 text-right font-bold">Sold at (avg)</th>
                   <th className="py-2 pr-3 text-right font-bold">Cost now</th>
@@ -194,7 +194,7 @@ export function ProfitDoctorCard({ from, to, periodLabel }: { from: string; to: 
               <tbody className="divide-y divide-slate-100 dark:divide-white/10">
                 {fixRows.map((p) => (
                   <tr key={p.productId}>
-                    <td className="py-2 pr-3 font-semibold text-slate-800 dark:text-[#eef3ef]">{p.name}</td>
+                    <td className="py-2 pr-3 font-semibold text-slate-800 dark:text-[#e9f1eb]">{p.name}</td>
                     <td className="py-2 pr-3 text-right tabular-nums">{tzs(p.avgPrice)}</td>
                     <td className="py-2 pr-3 text-right tabular-nums">{tzs(p.costNow)}</td>
                     <td className={clsx('py-2 pr-3 text-right font-bold tabular-nums', p.marginPct < 3 ? 'text-danger-600 dark:text-danger-300' : 'text-amber-600 dark:text-amber-300')}>{pct(p.marginPct)}</td>

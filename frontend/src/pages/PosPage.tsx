@@ -449,7 +449,7 @@ export default function PosPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#77857c]">
+      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#8fa596]">
         <ShoppingCart size={18} className="mr-2 animate-pulse" /> Loading the product catalog…
       </div>
     );
@@ -471,13 +471,13 @@ export default function PosPage() {
               setCustomerQuery('');
               setEditingCustomer(true);
             }}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] px-3.5 py-2 hover:border-green-300"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] px-3.5 py-2 hover:border-green-300"
           >
-            <User size={16} className="text-slate-400 dark:text-[#77857c]" />
+            <User size={16} className="text-slate-400 dark:text-[#8fa596]" />
             <span className="text-left text-sm">
-              <span className="block text-[11px] text-slate-400 dark:text-[#77857c]">Customer</span>
-              <span className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-[#eef3ef]">
-                {customerName || 'Walk-in Customer'} <Pencil size={12} className="text-slate-400 dark:text-[#77857c]" />
+              <span className="block text-[11px] text-slate-400 dark:text-[#8fa596]">Customer</span>
+              <span className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-[#e9f1eb]">
+                {customerName || 'Walk-in Customer'} <Pencil size={12} className="text-slate-400 dark:text-[#8fa596]" />
               </span>
             </span>
           </button>
@@ -517,7 +517,7 @@ export default function PosPage() {
           <div ref={customerBoxRef} className="relative">
             <Label>Search saved customers</Label>
             <div className="relative">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
               <Input
                 className="pl-9"
                 placeholder="Type a name or phone number…"
@@ -530,10 +530,10 @@ export default function PosPage() {
               />
             </div>
             {customerDropdownOpen && (
-              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] shadow-panel">
+              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] shadow-panel">
                 <div className="max-h-40 overflow-y-auto">
                   {customerResults.length === 0 ? (
-                    <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#77857c]">No saved customers match yet.</p>
+                    <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#8fa596]">No saved customers match yet.</p>
                   ) : (
                     customerResults.map((c) => (
                       <button
@@ -543,8 +543,8 @@ export default function PosPage() {
                         className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm hover:bg-slate-50"
                       >
                         <span>
-                          <span className="block font-medium text-slate-800 dark:text-[#eef3ef]">{c.name}</span>
-                          <span className="block text-xs text-slate-400 dark:text-[#77857c]">{c.phone ?? 'No phone'}</span>
+                          <span className="block font-medium text-slate-800 dark:text-[#e9f1eb]">{c.name}</span>
+                          <span className="block text-xs text-slate-400 dark:text-[#8fa596]">{c.phone ?? 'No phone'}</span>
                         </span>
                         {customerIdDraft === c.id && <Check size={15} className="text-green-600" />}
                       </button>
@@ -605,7 +605,7 @@ export default function PosPage() {
           <Card className="p-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" aria-hidden="true" />
+                <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" aria-hidden="true" />
                 <Input
                   ref={searchBoxRef}
                   placeholder="Search products by name or category…"
@@ -639,8 +639,8 @@ export default function PosPage() {
                   aria-pressed={categoryFilter === c.key}
                   className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
                     categoryFilter === c.key
-                      ? 'bg-green-600 text-white shadow-card'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#0e1512] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]'
+                      ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712] shadow-card'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-[#0d1a14] dark:text-[#b6c2ba] dark:hover:bg-[#172a21]'
                   }`}
                 >
                   {c.label}
@@ -650,11 +650,11 @@ export default function PosPage() {
 
             <div className="mt-3 lg:max-h-[calc(100vh-17rem)] lg:overflow-y-auto lg:pr-1">
               {catalog.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#97a49b]">
+                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#a9bcae]">
                   No sellable products yet — add a product and set a price on the Products page first.
                 </p>
               ) : filteredCatalog.length === 0 ? (
-                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#97a49b]">No products match "{query}".</p>
+                <p className="py-10 text-center text-sm text-slate-500 dark:text-[#a9bcae]">No products match "{query}".</p>
               ) : (
                 <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 2xl:grid-cols-3">
                   {filteredCatalog.map((p) => {
@@ -670,7 +670,7 @@ export default function PosPage() {
                           className={`group flex h-full w-full flex-col gap-3 rounded-xl border p-3.5 text-left transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-[0.98] ${
                             qtyInCart
                               ? 'border-green-400 bg-green-50/70 shadow-card dark:border-green-600 dark:bg-green-900/20'
-                              : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-green-300 hover:shadow-card dark:border-[rgba(255,255,255,0.1)] dark:bg-[#121a16] dark:hover:border-green-700'
+                              : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-green-300 hover:shadow-card dark:border-[rgba(255,255,255,0.1)] dark:bg-[#11211a] dark:hover:border-green-700'
                           } ${stock <= 0 ? 'opacity-75' : ''}`}
                         >
                           <div className="flex items-start justify-between gap-2">
@@ -680,20 +680,20 @@ export default function PosPage() {
                             {qtyInCart ? (
                               <Badge tone="green">×{qtyInCart} in sale</Badge>
                             ) : (
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 transition-colors group-hover:bg-green-600 group-hover:text-white dark:bg-[#0e1512] dark:text-[#77857c]" aria-hidden="true">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400 transition-colors group-hover:bg-green-600 group-hover:text-white dark:bg-[#0d1a14] dark:text-[#8fa596]" aria-hidden="true">
                                 <Plus size={14} />
                               </span>
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="break-words text-sm font-semibold leading-snug text-slate-800 dark:text-[#eef3ef]">{p.name}</p>
-                            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">
+                            <p className="break-words text-sm font-semibold leading-snug text-slate-800 dark:text-[#e9f1eb]">{p.name}</p>
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">
                               {p.category_name ?? 'Uncategorized'} · {p.unit}
                             </p>
                           </div>
                           <div className="mt-auto flex items-end justify-between gap-2">
                             <p className="font-display text-base font-extrabold tabular-nums text-green-700 dark:text-green-400">{tzs(p.active_price)}</p>
-                            <span className={`flex items-center gap-1.5 text-xs font-medium tabular-nums ${stock <= 0 ? 'text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]'}`}>
+                            <span className={`flex items-center gap-1.5 text-xs font-medium tabular-nums ${stock <= 0 ? 'text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#a9bcae]'}`}>
                               <span
                                 className={`h-2 w-2 rounded-full ${tone === 'green' ? 'bg-green-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-danger-500'}`}
                                 aria-hidden="true"
@@ -717,11 +717,11 @@ export default function PosPage() {
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 dark:border-[rgba(255,255,255,0.08)]">
               <div className="flex items-center gap-2.5">
                 <IconChip tone="blue" size={30} icon={<ShoppingCart size={14} />} />
-                <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Sale items</h3>
+                <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Sale items</h3>
                 <Badge tone="blue">{cart.length}</Badge>
               </div>
               {cart.length > 0 && (
-                <button type="button" onClick={resetSale} className="flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-slate-500 hover:text-danger-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 dark:text-[#97a49b]">
+                <button type="button" onClick={resetSale} className="flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-slate-500 hover:text-danger-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger-300 dark:text-[#a9bcae]">
                   <RotateCcw size={12} aria-hidden="true" /> Clear
                 </button>
               )}
@@ -732,7 +732,7 @@ export default function PosPage() {
                 <div className="flex flex-col items-center gap-2 py-8 text-center">
                   <ShoppingCart size={26} className="text-slate-300 dark:text-[#4a5650]" aria-hidden="true" />
                   <p className="text-sm font-medium text-slate-600 dark:text-[#b6c2ba]">No items yet</p>
-                  <p className="text-xs text-slate-500 dark:text-[#97a49b]">Tap a product to add it to this sale.</p>
+                  <p className="text-xs text-slate-500 dark:text-[#a9bcae]">Tap a product to add it to this sale.</p>
                 </div>
               ) : (
                 <ul className="space-y-2.5">
@@ -747,8 +747,8 @@ export default function PosPage() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="break-words text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{line.product.name}</p>
-                            <p className={`text-xs ${short ? 'font-semibold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#97a49b]'}`}>
+                            <p className="break-words text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">{line.product.name}</p>
+                            <p className={`text-xs ${short ? 'font-semibold text-danger-600 dark:text-danger-300' : 'text-slate-500 dark:text-[#a9bcae]'}`}>
                               {tzs(line.product.active_price)} each · {short ? `only ${stock} in stock` : `${stock} in stock`}
                             </p>
                           </div>
@@ -767,7 +767,7 @@ export default function PosPage() {
                               type="button"
                               onClick={() => updateQuantity(line.product.id, line.quantity - 1)}
                               aria-label={`Decrease ${line.product.name}`}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#172a21]"
                             >
                               <Minus size={13} />
                             </button>
@@ -776,7 +776,7 @@ export default function PosPage() {
                               type="button"
                               onClick={() => updateQuantity(line.product.id, line.quantity + 1)}
                               aria-label={`Increase ${line.product.name}`}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#17211c]"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:scale-95 dark:border-[rgba(255,255,255,0.14)] dark:text-[#b6c2ba] dark:hover:bg-[#172a21]"
                             >
                               <Plus size={13} />
                             </button>
@@ -788,7 +788,7 @@ export default function PosPage() {
                           >
                             <Tag size={12} aria-hidden="true" /> {disc > 0 ? `-${tzs(disc)}` : 'Discount'}
                           </button>
-                          <span className="font-display text-sm font-bold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(lineSubtotal(line) - disc)}</span>
+                          <span className="font-display text-sm font-bold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(lineSubtotal(line) - disc)}</span>
                         </div>
                       </li>
                     );
@@ -802,7 +802,7 @@ export default function PosPage() {
               role="status"
               className={`flex items-center gap-2 border-t px-5 py-2.5 text-xs ${
                 cart.length === 0
-                  ? 'border-slate-100 text-slate-500 dark:border-[rgba(255,255,255,0.08)] dark:text-[#97a49b]'
+                  ? 'border-slate-100 text-slate-500 dark:border-[rgba(255,255,255,0.08)] dark:text-[#a9bcae]'
                   : shortages.length > 0
                     ? 'border-danger-100 bg-danger-50/60 text-danger-700 dark:border-danger-700/40 dark:bg-danger-900/20 dark:text-danger-300'
                     : 'border-green-100 bg-green-50/60 text-green-700 dark:border-green-900/40 dark:bg-green-900/15 dark:text-green-300'
@@ -827,16 +827,16 @@ export default function PosPage() {
             </div>
 
             <dl className="space-y-1.5 border-t border-slate-100 px-5 py-4 text-sm dark:border-[rgba(255,255,255,0.08)]">
-              <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+              <div className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                 <dt>Subtotal</dt>
                 <dd className="tabular-nums">{tzs(subtotal)}</dd>
               </div>
-              <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+              <div className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                 <dt>Discount</dt>
                 <dd className={`tabular-nums ${totalDiscount > 0 ? 'text-danger-600 dark:text-danger-300' : ''}`}>{totalDiscount > 0 ? `-${tzs(totalDiscount)}` : tzs(0)}</dd>
               </div>
               <div className="flex items-baseline justify-between border-t border-slate-100 pt-2.5 dark:border-[rgba(255,255,255,0.08)]">
-                <dt className="font-semibold text-slate-800 dark:text-[#eef3ef]">Total amount</dt>
+                <dt className="font-semibold text-slate-800 dark:text-[#e9f1eb]">Total amount</dt>
                 <dd className="font-display text-2xl font-extrabold tabular-nums text-slate-900 dark:text-[#f4f8f5]">{tzs(total)}</dd>
               </div>
             </dl>
@@ -845,7 +845,7 @@ export default function PosPage() {
           <Card className="p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <IconChip tone="green" size={30} icon={<CreditCard size={14} />} />
-              <h3 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Payment</h3>
+              <h3 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Payment</h3>
             </div>
 
             {/* Backdated sale entry (2026-09-25, owner's request) —
@@ -892,7 +892,7 @@ export default function PosPage() {
 
             {!isCreditSale && (
               <>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Payment Method</p>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">Payment Method</p>
                 <div className="mb-4 grid grid-cols-3 gap-2" role="group" aria-label="Payment method">
                   {(
                     [
@@ -909,7 +909,7 @@ export default function PosPage() {
                       className={`flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 text-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
                         paymentMethod === m.value
                           ? 'border-green-500 bg-green-50 text-green-800 dark:border-green-500 dark:bg-green-900/30 dark:text-green-200'
-                          : 'border-slate-200 text-slate-500 hover:border-slate-300 dark:border-[rgba(255,255,255,0.14)] dark:text-[#97a49b] dark:hover:border-[rgba(255,255,255,0.25)]'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-300 dark:border-[rgba(255,255,255,0.14)] dark:text-[#a9bcae] dark:hover:border-[rgba(255,255,255,0.25)]'
                       }`}
                     >
                       <m.icon size={17} aria-hidden="true" />
@@ -946,7 +946,7 @@ export default function PosPage() {
                   </div>
                 ) : (
                   <div className="mb-4 flex items-center justify-between text-sm">
-                    <span className="text-slate-500 dark:text-[#97a49b]">Change</span>
+                    <span className="text-slate-500 dark:text-[#a9bcae]">Change</span>
                     <span className="font-semibold tabular-nums text-slate-700 dark:text-[#d2dbd5]">{tzs(change)}</span>
                   </div>
                 )}
@@ -977,10 +977,10 @@ export default function PosPage() {
       {/* Phone only: a pinned summary so the cashier can always jump from the
           product list to the sale panel below. */}
       {cart.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-panel backdrop-blur dark:border-[rgba(255,255,255,0.1)] dark:bg-[#121a16]/95 lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-panel backdrop-blur dark:border-[rgba(255,255,255,0.1)] dark:bg-[#11211a]/95 lg:hidden">
           <a
             href="#pos-cart"
-            className="flex items-center justify-between gap-3 rounded-xl bg-green-600 px-4 py-3 text-white shadow-card transition-colors hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 active:bg-green-800"
+            className="flex items-center justify-between gap-3 rounded-xl bg-green-600 px-4 py-3 text-white shadow-card transition-colors dark:bg-lime-400 dark:text-[#0b1712] hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 active:bg-green-800"
           >
             <span className="flex items-center gap-2 text-sm font-semibold">
               <ShoppingCart size={16} aria-hidden="true" /> {cart.length} item{cart.length === 1 ? '' : 's'} · Review &amp; pay
@@ -990,7 +990,7 @@ export default function PosPage() {
         </div>
       )}
 
-      <p className="mt-5 text-center text-xs text-slate-400 dark:text-[#77857c]">
+      <p className="mt-5 text-center text-xs text-slate-400 dark:text-[#8fa596]">
         Sale #{nextInvoice ?? '…'} · {formatDateTime(new Date())} · Served by {user?.name}
       </p>
 

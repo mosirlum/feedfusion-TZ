@@ -143,7 +143,7 @@ export function CreateProductModal({
         >
           <Input type="number" min={0} value={startingStock} onChange={(e) => setStartingStock(e.target.value)} />
         </FormField>
-        <p className="text-xs text-slate-400 dark:text-[#77857c]">
+        <p className="text-xs text-slate-400 dark:text-[#8fa596]">
           New products have no selling price yet — a price proposal must be approved before this product can be
           sold (BR-27). Starting stock has no purchase cost behind it, so it won't count toward inventory value
           until a real purchase is recorded for this product.

@@ -632,10 +632,10 @@ export default function PurchasesPage() {
           <Card className="p-5">
             <div className="mb-4 flex items-center gap-2.5">
               <IconChip tone="green" icon={<Warehouse size={17} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Supplier</h3>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Supplier</h3>
             </div>
 
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">Choose who delivered this stock</label>
+            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">Choose who delivered this stock</label>
             <Select value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
               <option value="">Select a supplier…</option>
               {suppliers.map((s) => (
@@ -651,8 +651,8 @@ export default function PurchasesPage() {
                   {initials(selectedSupplier.name)}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{selectedSupplier.name}</p>
-                  <p className="flex flex-wrap items-center gap-3 text-xs text-slate-400 dark:text-[#77857c]">
+                  <p className="truncate text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">{selectedSupplier.name}</p>
+                  <p className="flex flex-wrap items-center gap-3 text-xs text-slate-400 dark:text-[#8fa596]">
                     {selectedSupplier.phone && (
                       <span className="flex items-center gap-1">
                         <Phone size={11} /> {selectedSupplier.phone}
@@ -681,11 +681,11 @@ export default function PurchasesPage() {
               <div className="mt-3 rounded-xl border border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50/70 p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[13px] font-bold text-slate-700 dark:text-[#d2dbd5]">New supplier</p>
-                  <button type="button" onClick={() => setAddingSupplier(false)} className="text-slate-400 dark:text-[#77857c] hover:text-slate-600">
+                  <button type="button" onClick={() => setAddingSupplier(false)} className="text-slate-400 dark:text-[#8fa596] hover:text-slate-600">
                     <X size={15} />
                   </button>
                 </div>
-                <p className="mb-2 text-xs text-slate-400 dark:text-[#77857c]">Just the essentials — you can fill in the rest later from Suppliers.</p>
+                <p className="mb-2 text-xs text-slate-400 dark:text-[#8fa596]">Just the essentials — you can fill in the rest later from Suppliers.</p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <Input autoFocus placeholder="Supplier name" value={newSupplierName} onChange={(e) => setNewSupplierName(e.target.value)} />
                   <Input
@@ -711,8 +711,8 @@ export default function PurchasesPage() {
           {/* Reference + date — de-emphasized meta strip */}
           <Card className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3">
             <div className="flex w-full items-center gap-2 sm:w-auto">
-              <FileText size={14} className="text-slate-400 dark:text-[#77857c]" />
-              <span className="text-xs font-medium text-slate-500 dark:text-[#97a49b]">Reference #</span>
+              <FileText size={14} className="text-slate-400 dark:text-[#8fa596]" />
+              <span className="text-xs font-medium text-slate-500 dark:text-[#a9bcae]">Reference #</span>
               <Input
                 value={referenceNumber}
                 onChange={(e) => {
@@ -737,8 +737,8 @@ export default function PurchasesPage() {
             </div>
             <div className="hidden h-5 w-px bg-slate-200 sm:block dark:bg-[rgba(255,255,255,0.08)]" />
             <div className="flex w-full items-center gap-2 sm:w-auto">
-              <Calendar size={14} className="text-slate-400 dark:text-[#77857c]" />
-              <span className="text-xs font-medium text-slate-500 dark:text-[#97a49b]">Date</span>
+              <Calendar size={14} className="text-slate-400 dark:text-[#8fa596]" />
+              <span className="text-xs font-medium text-slate-500 dark:text-[#a9bcae]">Date</span>
               <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} className="min-w-0 flex-1 py-1.5 text-sm sm:w-40 sm:flex-none" />
             </div>
           </Card>
@@ -747,8 +747,8 @@ export default function PurchasesPage() {
           <Card>
             <div className="flex items-center gap-2.5 px-5 pb-3 pt-5">
               <IconChip tone="blue" icon={<Package size={17} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">
-                Product <span className="font-semibold text-slate-400 dark:text-[#77857c]">({allLines.length})</span>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">
+                Product <span className="font-semibold text-slate-400 dark:text-[#8fa596]">({allLines.length})</span>
               </h3>
             </div>
 
@@ -783,7 +783,7 @@ export default function PurchasesPage() {
                           );
                         })}
                       </select>
-                      <ChevronDown size={13} className="text-slate-400 dark:text-[#77857c]" />
+                      <ChevronDown size={13} className="text-slate-400 dark:text-[#8fa596]" />
                     </div>
                     {sections.length > 1 && (
                       <button
@@ -800,7 +800,7 @@ export default function PurchasesPage() {
                   {section.categoryKey && (
                     <>
                       <div
-                        className="hidden pb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-[#77857c] sm:grid"
+                        className="hidden pb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-[#8fa596] sm:grid"
                         style={{ gridTemplateColumns: '24px minmax(0,1fr) 108px 130px 120px 28px', gap: '10px' }}
                       >
                         <span />
@@ -815,10 +815,10 @@ export default function PurchasesPage() {
                         {section.lines.map((line, idx) => (
                           <div
                             key={line.key}
-                            className="grid min-w-[560px] items-center gap-2.5 rounded-lg bg-white dark:bg-[#121a16] py-1"
+                            className="grid min-w-[560px] items-center gap-2.5 rounded-lg bg-white dark:bg-[#11211a] py-1"
                             style={{ gridTemplateColumns: '24px minmax(0,1fr) 108px 130px 120px 28px' }}
                           >
-                            <span className="text-center text-sm font-bold text-slate-400 dark:text-[#77857c]">{idx + 1}</span>
+                            <span className="text-center text-sm font-bold text-slate-400 dark:text-[#8fa596]">{idx + 1}</span>
                             <Select
                               value={line.productId}
                               onChange={(e) => updateLine(section.key, line.key, { productId: e.target.value })}
@@ -839,7 +839,7 @@ export default function PurchasesPage() {
                                 onChange={(e) => updateLine(section.key, line.key, { quantity: e.target.value })}
                                 className="w-full"
                               />
-                              <span className="whitespace-nowrap rounded-md border border-slate-100 dark:border-[rgba(255,255,255,0.08)] bg-slate-50 px-1.5 py-1.5 text-[11px] font-semibold text-slate-400 dark:text-[#77857c]">
+                              <span className="whitespace-nowrap rounded-md border border-slate-100 dark:border-[rgba(255,255,255,0.08)] bg-slate-50 px-1.5 py-1.5 text-[11px] font-semibold text-slate-400 dark:text-[#8fa596]">
                                 {unitFor(line.productId) ?? '—'}
                               </span>
                             </div>
@@ -889,7 +889,7 @@ export default function PurchasesPage() {
                 Add product category
               </Button>
               {!canAddSection && products.length > 0 && (
-                <p className="mt-1 text-[11.5px] text-slate-400 dark:text-[#77857c]">
+                <p className="mt-1 text-[11.5px] text-slate-400 dark:text-[#8fa596]">
                   Every category is already in this purchase — add more items inside it above.
                 </p>
               )}
@@ -901,14 +901,14 @@ export default function PurchasesPage() {
             <div className="flex items-center gap-2.5 px-5 pb-3 pt-5">
               <IconChip tone="amber" icon={<Banknote size={17} />} />
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Cost to land this stock</h3>
-                <p className="text-xs text-slate-400 dark:text-[#77857c]">Spread across the items above — feeds inventory value &amp; profit.</p>
+                <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Cost to land this stock</h3>
+                <p className="text-xs text-slate-400 dark:text-[#8fa596]">Spread across the items above — feeds inventory value &amp; profit.</p>
               </div>
             </div>
 
             {costLines.length === 0 ? (
               <div className="mx-5 mb-2 rounded-xl border border-dashed border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50/70 px-4 py-6 text-center">
-                <p className="text-[13px] text-slate-500 dark:text-[#97a49b]">No extra costs yet — add labour, transport, etc. if this delivery had any.</p>
+                <p className="text-[13px] text-slate-500 dark:text-[#a9bcae]">No extra costs yet — add labour, transport, etc. if this delivery had any.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2 px-5">
@@ -963,8 +963,8 @@ export default function PurchasesPage() {
 
           {/* Notes */}
           <Card className="p-5">
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">
-              Notes <span className="font-normal text-slate-400 dark:text-[#77857c]">(optional)</span>
+            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">
+              Notes <span className="font-normal text-slate-400 dark:text-[#8fa596]">(optional)</span>
             </label>
             <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Anything worth remembering about this delivery…" />
           </Card>
@@ -976,8 +976,8 @@ export default function PurchasesPage() {
               2MB — see readPdfAsDataUrl), either way stored as a base64
               data: URL, same pattern as the user avatar photo. */}
           <Card className="p-5">
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#97a49b]">
-              Supplier invoice / quotation <span className="font-normal text-slate-400 dark:text-[#77857c]">(optional)</span>
+            <label className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-[#a9bcae]">
+              Supplier invoice / quotation <span className="font-normal text-slate-400 dark:text-[#8fa596]">(optional)</span>
             </label>
             {documentDataUrl ? (
               <div className="flex items-center gap-3">
@@ -1006,7 +1006,7 @@ export default function PurchasesPage() {
                 </div>
               </div>
             ) : (
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 px-4 py-4 text-[12.5px] font-medium text-slate-500 hover:border-green-400 hover:text-green-700 dark:border-[rgba(255,255,255,0.14)] dark:text-[#97a49b]">
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 px-4 py-4 text-[12.5px] font-medium text-slate-500 hover:border-green-400 hover:text-green-700 dark:border-[rgba(255,255,255,0.14)] dark:text-[#a9bcae]">
                 {documentProcessing ? (
                   <span>Processing…</span>
                 ) : (
@@ -1032,23 +1032,23 @@ export default function PurchasesPage() {
           <Card className="sticky top-4 p-5 shadow-panel">
             <div className="mb-4 flex items-center gap-2.5">
               <IconChip tone="green" icon={<ClipboardCheck size={17} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Purchase Summary</h3>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Purchase Summary</h3>
             </div>
 
             <div className="space-y-3 text-sm">
               {summarySections.length === 0 ? (
-                <p className="text-[13px] text-slate-400 dark:text-[#77857c]">No items added yet.</p>
+                <p className="text-[13px] text-slate-400 dark:text-[#8fa596]">No items added yet.</p>
               ) : (
                 summarySections.map(({ categoryKey, catIdx, entries }) => (
                   <div key={categoryKey}>
-                    <p className="text-[11.5px] font-bold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">
+                    <p className="text-[11.5px] font-bold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">
                       {catIdx + 1}. {categoryKey}
                     </p>
                     <div className="mt-1 space-y-1">
                       {entries.map(({ line, product }) => (
-                        <div key={line.key} className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+                        <div key={line.key} className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                           <span className="truncate pr-2">
-                            {product.name} <span className="text-slate-400 dark:text-[#77857c]">× {line.quantity || 0}</span>
+                            {product.name} <span className="text-slate-400 dark:text-[#8fa596]">× {line.quantity || 0}</span>
                           </span>
                           <span className="flex-shrink-0 font-medium text-slate-700 dark:text-[#d2dbd5]">
                             {tzs((Number(line.quantity) || 0) * (Number(line.unitCost) || 0))}
@@ -1059,19 +1059,19 @@ export default function PurchasesPage() {
                   </div>
                 ))
               )}
-              <div className="flex justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-2 text-slate-500 dark:text-[#97a49b]">
+              <div className="flex justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-2 text-slate-500 dark:text-[#a9bcae]">
                 <span>Items subtotal</span>
                 <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(itemsSubtotal)}</span>
               </div>
               {activeCostLines.map((c) => (
-                <div key={c.key} className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+                <div key={c.key} className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                   <span>{labelFor(c)}</span>
                   <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(Number(c.amount))}</span>
                 </div>
               ))}
             </div>
 
-            <div className="my-3 h-px bg-slate-100 dark:bg-[#0e1512]" />
+            <div className="my-3 h-px bg-slate-100 dark:bg-[#0d1a14]" />
 
             <div className="flex items-baseline justify-between">
               <span className="text-[13px] font-bold text-slate-700 dark:text-[#d2dbd5]">Grand total</span>
@@ -1081,7 +1081,7 @@ export default function PurchasesPage() {
             <Button type="submit" form="purchase-form" className="mt-4 w-full" loading={submitting} icon={<ShoppingCart size={16} />}>
               Record purchase &amp; update stock
             </Button>
-            <p className="mt-2 text-center text-[11.5px] text-slate-400 dark:text-[#77857c]">Stock updates the moment this is saved.</p>
+            <p className="mt-2 text-center text-[11.5px] text-slate-400 dark:text-[#8fa596]">Stock updates the moment this is saved.</p>
           </Card>
 
           <div className="flex gap-3 rounded-xl bg-blue-50 p-4">
@@ -1100,7 +1100,7 @@ export default function PurchasesPage() {
           subtitle="Last 50, newest first"
           action={
             <div className="relative w-full sm:max-w-[220px]">
-              <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+              <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
               <Input
                 placeholder="Search supplier or ref…"
                 value={recentSearch}
@@ -1134,13 +1134,13 @@ export default function PurchasesPage() {
                 <Tr key={p.id}>
                   <Td>{formatDate(p.purchase_date)}</Td>
                   <Td className="text-slate-600 dark:text-[#b6c2ba]">{p.supplier_name ?? '—'}</Td>
-                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">
+                  <Td className="font-medium text-slate-800 dark:text-[#e9f1eb]">
                     <span className="flex items-center gap-1.5">
                       {p.reference_number}
-                      {p.has_document && <span title="Invoice/quotation attached"><Paperclip size={12} className="text-slate-400 dark:text-[#77857c]" /></span>}
+                      {p.has_document && <span title="Invoice/quotation attached"><Paperclip size={12} className="text-slate-400 dark:text-[#8fa596]" /></span>}
                     </span>
                   </Td>
-                  <Td className="text-slate-400 dark:text-[#77857c]">{p.item_count ?? p.items?.length ?? '—'}</Td>
+                  <Td className="text-slate-400 dark:text-[#8fa596]">{p.item_count ?? p.items?.length ?? '—'}</Td>
                   <Td className="text-right font-medium">{tzs(p.total_cost)}</Td>
                   <Td>
                     <div className="flex items-center gap-1.5">
@@ -1150,13 +1150,13 @@ export default function PurchasesPage() {
                   </Td>
                   <Td>
                     <div className="flex items-center gap-2.5">
-                      <button onClick={() => openPurchase(p.id)} className="text-slate-400 dark:text-[#77857c] hover:text-blue-600" title="View details">
+                      <button onClick={() => openPurchase(p.id)} className="text-slate-400 dark:text-[#8fa596] hover:text-blue-600" title="View details">
                         <Eye size={16} />
                       </button>
                       <button
                         onClick={() => openEditModal(p.id)}
                         disabled={openingEditForId === p.id}
-                        className="text-slate-400 dark:text-[#77857c] hover:text-amber-600 disabled:opacity-40"
+                        className="text-slate-400 dark:text-[#8fa596] hover:text-amber-600 disabled:opacity-40"
                         title="Correct this purchase"
                       >
                         <Pencil size={16} />
@@ -1179,7 +1179,7 @@ export default function PurchasesPage() {
         {viewPurchase && (
           <div>
             <div className="mb-3 flex items-start justify-between gap-3">
-              <p className="text-sm text-slate-500 dark:text-[#97a49b]">
+              <p className="text-sm text-slate-500 dark:text-[#a9bcae]">
                 {formatDate(viewPurchase.purchase_date)} — {viewPurchase.supplier_name}
               </p>
               {viewPurchase.document_data_url && (
@@ -1229,18 +1229,18 @@ export default function PurchasesPage() {
               <div className="w-64 space-y-1 text-sm">
                 {viewPurchase.additional_cost_lines && viewPurchase.additional_cost_lines.length > 0 ? (
                   viewPurchase.additional_cost_lines.map((line) => (
-                    <div key={line.id} className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+                    <div key={line.id} className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                       <span>{line.label}</span>
                       <span>{tzs(line.amount)}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+                  <div className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                     <span>Additional costs</span>
                     <span>{tzs(viewPurchase.additional_costs)}</span>
                   </div>
                 )}
-                <div className="flex justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-1 font-bold text-slate-800 dark:text-[#eef3ef]">
+                <div className="flex justify-between border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-1 font-bold text-slate-800 dark:text-[#e9f1eb]">
                   <span>Total</span>
                   <span>{tzs(viewPurchase.total_cost)}</span>
                 </div>
@@ -1270,13 +1270,13 @@ export default function PurchasesPage() {
       >
         {editingPurchase && (
           <div className="space-y-4">
-            <p className="text-sm text-slate-500 dark:text-[#97a49b]">
+            <p className="text-sm text-slate-500 dark:text-[#a9bcae]">
               {formatDate(editingPurchase.purchase_date)} — {editingPurchase.supplier_name}. Only quantities, unit costs
               and expense amounts can be corrected here — not the supplier, date, or which items/expenses exist.
             </p>
 
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Items</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">Items</p>
               <div className="space-y-2">
                 {editDraftItems.map((item) => (
                   <div key={item.purchaseItemId} className="grid grid-cols-[minmax(0,1fr)_110px_130px] items-center gap-2.5">
@@ -1288,7 +1288,7 @@ export default function PurchasesPage() {
                         value={item.quantity}
                         onChange={(e) => updateEditDraftItem(item.purchaseItemId, { quantity: e.target.value })}
                       />
-                      <span className="whitespace-nowrap text-[11px] font-semibold text-slate-400 dark:text-[#77857c]">{item.unit}</span>
+                      <span className="whitespace-nowrap text-[11px] font-semibold text-slate-400 dark:text-[#8fa596]">{item.unit}</span>
                     </div>
                     <Input
                       type="number"
@@ -1303,7 +1303,7 @@ export default function PurchasesPage() {
 
             {editDraftCostLines.length > 0 && (
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">Expenses</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">Expenses</p>
                 <div className="space-y-2">
                   {editDraftCostLines.map((line) => (
                     <div key={line.costLineId} className="flex items-center gap-2.5">
@@ -1333,7 +1333,7 @@ export default function PurchasesPage() {
             )}
 
             {isOwner && (
-              <p className="text-[12.5px] text-slate-400 dark:text-[#77857c]">Your own corrections apply immediately — no approval needed.</p>
+              <p className="text-[12.5px] text-slate-400 dark:text-[#8fa596]">Your own corrections apply immediately — no approval needed.</p>
             )}
           </div>
         )}

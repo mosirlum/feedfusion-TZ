@@ -223,7 +223,7 @@ function SortableTh({
     <Th className={className}>
       <button type="button" onClick={() => onSort(sortKey)} className="inline-flex items-center gap-1 hover:text-green-700">
         {label}
-        <Icon size={12} className={activeSort === sortKey ? 'text-green-700' : 'text-slate-400 dark:text-[#77857c]'} />
+        <Icon size={12} className={activeSort === sortKey ? 'text-green-700' : 'text-slate-400 dark:text-[#8fa596]'} />
       </button>
     </Th>
   );
@@ -270,16 +270,16 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
   return (
     <>
       <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
-      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col bg-white dark:bg-[#121a16] shadow-panel animate-fade-in sm:w-[420px]">
+      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col bg-white dark:bg-[#11211a] shadow-panel animate-fade-in sm:w-[420px]">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
           <div className="flex items-center gap-3">
             <IconChip tone={meta.tone === 'red' ? 'red' : meta.tone === 'amber' ? 'amber' : meta.tone === 'blue' ? 'blue' : 'green'} size={40} icon={<FeatureIcon size={18} />} />
             <div>
-              <p className="font-bold text-slate-800 dark:text-[#eef3ef]">{meta.label}</p>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">{log.feature}</p>
+              <p className="font-bold text-slate-800 dark:text-[#e9f1eb]">{meta.label}</p>
+              <p className="text-xs text-slate-400 dark:text-[#8fa596]">{log.feature}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 dark:text-[#77857c] hover:text-slate-600">
+          <button onClick={onClose} className="text-slate-400 dark:text-[#8fa596] hover:text-slate-600">
             <X size={20} />
           </button>
         </div>
@@ -287,11 +287,11 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <dl className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-slate-400 dark:text-[#77857c]">Date &amp; Time</dt>
+              <dt className="text-slate-400 dark:text-[#8fa596]">Date &amp; Time</dt>
               <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{formatDateTime(log.created_at)}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-400 dark:text-[#77857c]">User</dt>
+              <dt className="text-slate-400 dark:text-[#8fa596]">User</dt>
               <dd className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-[#d2dbd5]">
                 {log.user_name && <UserAvatar name={log.user_name} />}
                 {log.user_name ?? '—'}
@@ -301,15 +301,15 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
             {sale && (
               <>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Invoice No.</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Invoice No.</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{sale.invoice_number}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Total Amount</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Total Amount</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(sale.total)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Payment Method</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Payment Method</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">Cash</dd>
                 </div>
               </>
@@ -318,15 +318,15 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
             {purchase && (
               <>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Reference No.</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Reference No.</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{purchase.reference_number}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Supplier</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Supplier</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{purchase.supplier_name ?? '—'}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400 dark:text-[#77857c]">Total Cost</dt>
+                  <dt className="text-slate-400 dark:text-[#8fa596]">Total Cost</dt>
                   <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(purchase.total_cost)}</dd>
                 </div>
               </>
@@ -334,7 +334,7 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
 
             {!sale && !purchase && log.entity_type && (
               <div className="flex items-center justify-between">
-                <dt className="text-slate-400 dark:text-[#77857c]">Entity</dt>
+                <dt className="text-slate-400 dark:text-[#8fa596]">Entity</dt>
                 <dd className="font-medium text-slate-700 dark:text-[#d2dbd5]">
                   {log.entity_type} #{log.entity_id}
                 </dd>
@@ -342,16 +342,16 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
             )}
           </dl>
 
-          {loadingEntity && <p className="mt-3 text-xs text-slate-400 dark:text-[#77857c]">Loading full record…</p>}
+          {loadingEntity && <p className="mt-3 text-xs text-slate-400 dark:text-[#8fa596]">Loading full record…</p>}
 
           {sale && (
             <div className="mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Items Sold</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Items Sold</p>
               <div className="space-y-1.5">
                 {sale.items.map((it) => (
                   <div key={it.id} className="flex items-center justify-between text-sm">
                     <span className="text-slate-600 dark:text-[#b6c2ba]">
-                      {it.product_name} <span className="text-slate-400 dark:text-[#77857c]">x{it.quantity}</span>
+                      {it.product_name} <span className="text-slate-400 dark:text-[#8fa596]">x{it.quantity}</span>
                     </span>
                     <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(it.line_total)}</span>
                   </div>
@@ -362,12 +362,12 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
 
           {purchase && purchase.items && purchase.items.length > 0 && (
             <div className="mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Items Purchased</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Items Purchased</p>
               <div className="space-y-1.5">
                 {purchase.items.map((it) => (
                   <div key={it.id} className="flex items-center justify-between text-sm">
                     <span className="text-slate-600 dark:text-[#b6c2ba]">
-                      {it.product_name} <span className="text-slate-400 dark:text-[#77857c]">x{it.quantity}</span>
+                      {it.product_name} <span className="text-slate-400 dark:text-[#8fa596]">x{it.quantity}</span>
                     </span>
                     <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">{tzs(it.total_cost)}</span>
                   </div>
@@ -378,13 +378,13 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
 
           {!sale && !purchase && Object.keys(details).length > 0 && (
             <div className="mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Details</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Details</p>
               <div className="space-y-1.5">
                 {Object.entries(details)
                   .filter(([k]) => !HIDDEN_KEYS.includes(k))
                   .map(([k, v]) => (
                     <div key={k} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400 dark:text-[#77857c]">{labelize(k)}</span>
+                      <span className="text-slate-400 dark:text-[#8fa596]">{labelize(k)}</span>
                       <span className="font-medium text-slate-700 dark:text-[#d2dbd5]">
                         {typeof v === 'boolean' ? (v ? 'Yes' : 'No') : MONEY_KEYS.includes(k) ? tzs(v as any) : String(v)}
                       </span>
@@ -394,7 +394,7 @@ function EventDetailsPanel({ log, onClose }: { log: AuditLog; onClose: () => voi
             </div>
           )}
 
-          <div className="mt-5 rounded-lg bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500 dark:text-[#97a49b]">{description}</div>
+          <div className="mt-5 rounded-lg bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500 dark:text-[#a9bcae]">{description}</div>
 
           <div className="mt-4 flex items-start gap-2 rounded-lg bg-green-50 px-3.5 py-2.5 text-xs text-green-800">
             <ShieldCheck size={14} className="mt-0.5 flex-shrink-0" />
@@ -498,7 +498,7 @@ export default function AuditLogPage() {
       <Card className="mb-5 p-4">
         <div className="grid grid-cols-1 items-center gap-2.5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] [&>*]:min-w-0">
             <Input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} max={draftTo} aria-label="From date" />
-            <span className="hidden text-center text-xs text-slate-400 dark:text-[#77857c] lg:block">to</span>
+            <span className="hidden text-center text-xs text-slate-400 dark:text-[#8fa596] lg:block">to</span>
             <Input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} min={draftFrom} max={todayIso()} aria-label="To date" />
             <Select value={draftUserId} onChange={(e) => setDraftUserId(e.target.value)} >
               <option value="">All Users</option>
@@ -544,7 +544,7 @@ export default function AuditLogPage() {
                   onClick={() => setFeature(f)}
                   className={clsx(
                     'flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors',
-                    feature === f ? 'bg-green-600 text-white shadow-card' : 'bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] border border-slate-200 dark:border-[rgba(255,255,255,0.14)] hover:bg-slate-50'
+                    feature === f ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712] shadow-card' : 'bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] border border-slate-200 dark:border-[rgba(255,255,255,0.14)] hover:bg-slate-50'
                   )}
                 >
                   <Icon size={14} />
@@ -576,8 +576,8 @@ export default function AuditLogPage() {
                     const FeatureIcon = FEATURE_ICON[log.feature] ?? MoreHorizontal;
                     return (
                       <Tr key={log.id} onClick={() => setSelected(log)} className="cursor-pointer">
-                        <Td className="text-slate-400 dark:text-[#77857c]">{(pagination!.page - 1) * pagination!.pageSize + i + 1}</Td>
-                        <Td className="text-xs text-slate-500 dark:text-[#97a49b]">{formatDateTime(log.created_at)}</Td>
+                        <Td className="text-slate-400 dark:text-[#8fa596]">{(pagination!.page - 1) * pagination!.pageSize + i + 1}</Td>
+                        <Td className="text-xs text-slate-500 dark:text-[#a9bcae]">{formatDateTime(log.created_at)}</Td>
                         <Td>
                           <Badge tone={meta.tone}>{meta.label}</Badge>
                         </Td>
@@ -588,12 +588,12 @@ export default function AuditLogPage() {
                           </span>
                         </Td>
                         <Td>
-                          <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#97a49b]">
+                          <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#a9bcae]">
                             <FeatureIcon size={13} />
                             {log.feature}
                           </span>
                         </Td>
-                        <Td className="max-w-xs truncate text-xs text-slate-500 dark:text-[#97a49b]">
+                        <Td className="max-w-xs truncate text-xs text-slate-500 dark:text-[#a9bcae]">
                           <span title={summarizeDetails(log.action, log.details)}>{summarizeDetails(log.action, log.details)}</span>
                         </Td>
                         <Td>
@@ -608,7 +608,7 @@ export default function AuditLogPage() {
 
             {pagination && pagination.totalRows > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3">
-                <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                   Showing {(pagination.page - 1) * pagination.pageSize + 1}–
                   {Math.min(pagination.page * pagination.pageSize, pagination.totalRows)} of {pagination.totalRows} events
                 </p>
@@ -617,7 +617,7 @@ export default function AuditLogPage() {
                     type="button"
                     disabled={pagination.page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50 disabled:opacity-40"
                   >
                     <ChevronLeft size={14} />
                   </button>
@@ -633,7 +633,7 @@ export default function AuditLogPage() {
                         onClick={() => setPage(n)}
                         className={clsx(
                           'flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium',
-                          n === cur ? 'bg-green-600 text-white' : 'border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50'
+                          n === cur ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50'
                         )}
                       >
                         {n}
@@ -644,7 +644,7 @@ export default function AuditLogPage() {
                     type="button"
                     disabled={pagination.page >= pagination.totalPages}
                     onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50 disabled:opacity-40"
                   >
                     <ChevronRight size={14} />
                   </button>

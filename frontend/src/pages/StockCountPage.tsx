@@ -207,17 +207,17 @@ export default function StockCountPage() {
 
       <div className={isOwner ? 'grid grid-cols-1 gap-5 lg:grid-cols-[360px_minmax(0,1fr)_300px]' : 'max-w-md'}>
         <Card className="h-fit p-5">
-          <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#eef3ef]">
+          <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#e9f1eb]">
             <IconChip tone="green" size={28} icon={<ClipboardList size={14} />} />
             Record Physical Count
           </h3>
-          <p className="mb-4 text-xs text-slate-400 dark:text-[#77857c]">Enter the actual quantity counted in the field.</p>
+          <p className="mb-4 text-xs text-slate-400 dark:text-[#8fa596]">Enter the actual quantity counted in the field.</p>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div className="relative">
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-[#d2dbd5]">Product</label>
               <div className="relative">
-                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
                 <Input
                   value={productQuery}
                   onChange={(e) => {
@@ -233,7 +233,7 @@ export default function StockCountPage() {
                 />
               </div>
               {showProductList && filteredProducts.length > 0 && (
-                <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] shadow-panel">
+                <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] shadow-panel">
                   {filteredProducts.map((p) => (
                     <button
                       type="button"
@@ -242,7 +242,7 @@ export default function StockCountPage() {
                       className="flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-green-50"
                     >
                       <span className="text-slate-700 dark:text-[#d2dbd5]">{p.name}</span>
-                      <span className="text-xs text-slate-400 dark:text-[#77857c]">{p.unit}</span>
+                      <span className="text-xs text-slate-400 dark:text-[#8fa596]">{p.unit}</span>
                     </button>
                   ))}
                 </div>
@@ -259,17 +259,17 @@ export default function StockCountPage() {
                   onChange={(e) => setPhysicalQty(e.target.value)}
                   required
                 />
-                <span className="flex-shrink-0 text-sm text-slate-400 dark:text-[#77857c]">{selectedProduct?.unit ?? 'units'}</span>
+                <span className="flex-shrink-0 text-sm text-slate-400 dark:text-[#8fa596]">{selectedProduct?.unit ?? 'units'}</span>
               </div>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-[#d2dbd5]">Expected Stock (from system ledger)</label>
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50 px-3.5 py-2.5 text-sm text-slate-500 dark:text-[#97a49b]">
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-slate-50 px-3.5 py-2.5 text-sm text-slate-500 dark:text-[#a9bcae]">
                 <Lock size={13} className="flex-shrink-0" />
                 {productId != null ? `${expectedQty} ${selectedProduct?.unit ?? 'units'}` : 'Select a product first'}
               </div>
-              <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">Calculated automatically — not editable.</p>
+              <p className="mt-1 text-xs text-slate-400 dark:text-[#8fa596]">Calculated automatically — not editable.</p>
             </div>
 
             {variancePreview !== null && (
@@ -278,7 +278,7 @@ export default function StockCountPage() {
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
                     variancePreview === 0
-                      ? 'bg-slate-100 dark:bg-[#0e1512] text-slate-600 dark:text-[#b6c2ba]'
+                      ? 'bg-slate-100 dark:bg-[#0d1a14] text-slate-600 dark:text-[#b6c2ba]'
                       : variancePreview > 0
                       ? 'bg-green-100 text-green-700'
                       : 'bg-danger-50 text-danger-600'
@@ -299,7 +299,7 @@ export default function StockCountPage() {
                     key={r}
                     onClick={() => setReason(r)}
                     className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      reason === r ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                      reason === r ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                     }`}
                   >
                     {r}
@@ -317,13 +317,13 @@ export default function StockCountPage() {
                 rows={3}
                 placeholder="Add a note or explanation for this count..."
               />
-              <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#77857c]">{notes.length}/500</p>
+              <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#8fa596]">{notes.length}/500</p>
             </div>
 
             <Button type="submit" className="w-full" loading={submitting}>
               Submit Count Proposal
             </Button>
-            <p className="text-center text-xs text-slate-400 dark:text-[#77857c]">
+            <p className="text-center text-xs text-slate-400 dark:text-[#8fa596]">
               Submitting creates a pending proposal — the owner reviews it before stock changes.
             </p>
           </form>
@@ -333,8 +333,8 @@ export default function StockCountPage() {
           <div>
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-slate-800 dark:text-[#eef3ef]">Approval Queue</h3>
-                <p className="text-xs text-slate-400 dark:text-[#77857c]">Review and approve or reject stock count proposals.</p>
+                <h3 className="font-semibold text-slate-800 dark:text-[#e9f1eb]">Approval Queue</h3>
+                <p className="text-xs text-slate-400 dark:text-[#8fa596]">Review and approve or reject stock count proposals.</p>
               </div>
               <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as QueueStatus)} className="w-36">
                 <option value="PENDING">Pending</option>
@@ -362,25 +362,25 @@ export default function StockCountPage() {
                           {initials(c.counted_by_name ?? '?')}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">{c.counted_by_name}</p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">{c.counted_by_role ? roleLabel(c.counted_by_role) : ''}</p>
+                          <p className="text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">{c.counted_by_name}</p>
+                          <p className="text-xs text-slate-400 dark:text-[#8fa596]">{c.counted_by_role ? roleLabel(c.counted_by_role) : ''}</p>
                         </div>
                         {c.status !== 'PENDING' && (
                           <Badge tone={c.status === 'APPROVED' ? 'green' : 'red'}>{c.status}</Badge>
                         )}
                       </div>
-                      <span className="text-xs text-slate-400 dark:text-[#77857c]">{timeAgo(c.created_at)}</span>
+                      <span className="text-xs text-slate-400 dark:text-[#8fa596]">{timeAgo(c.created_at)}</span>
                     </div>
 
-                    <p className="mt-3 text-sm font-semibold text-slate-800 dark:text-[#eef3ef]">
+                    <p className="mt-3 text-sm font-semibold text-slate-800 dark:text-[#e9f1eb]">
                       {c.product_name}
-                      {c.category_name && <span className="font-normal text-slate-400 dark:text-[#77857c]"> — {c.category_name}</span>}
+                      {c.category_name && <span className="font-normal text-slate-400 dark:text-[#8fa596]"> — {c.category_name}</span>}
                     </p>
 
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div className="rounded-lg bg-slate-50 px-3 py-2.5">
-                        <p className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-[#77857c]">Expected</p>
-                        <p className="text-sm font-semibold text-slate-500 dark:text-[#97a49b]">
+                        <p className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">Expected</p>
+                        <p className="text-sm font-semibold text-slate-500 dark:text-[#a9bcae]">
                           {c.expected_qty} {c.unit}
                         </p>
                       </div>
@@ -391,7 +391,7 @@ export default function StockCountPage() {
                       >
                         <p
                           className={`text-[11px] uppercase tracking-wide ${
-                            c.difference === 0 ? 'text-slate-400 dark:text-[#77857c]' : c.difference > 0 ? 'text-green-700' : 'text-danger-600'
+                            c.difference === 0 ? 'text-slate-400 dark:text-[#8fa596]' : c.difference > 0 ? 'text-green-700' : 'text-danger-600'
                           }`}
                         >
                           Physical ({c.difference > 0 ? '+' : ''}
@@ -419,7 +419,7 @@ export default function StockCountPage() {
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] pt-3">
-                      <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                      <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                         {c.status === 'PENDING'
                           ? `Submitted on ${formatDate(c.created_at)}`
                           : `${c.status === 'APPROVED' ? 'Approved' : 'Rejected'} by ${c.approved_by_name ?? 'the owner'} on ${formatDate(c.reviewed_at)}`}
@@ -445,12 +445,12 @@ export default function StockCountPage() {
         {isOwner && (
           <div className="flex flex-col gap-4">
             <Card className="p-5">
-              <h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#eef3ef]">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#e9f1eb]">
                 <IconChip tone="slate" size={28} icon={<Clock size={14} />} />
                 Recent Activity
               </h3>
               {recentActivity.length === 0 ? (
-                <p className="py-6 text-center text-sm text-slate-400 dark:text-[#77857c]">Nothing recorded yet.</p>
+                <p className="py-6 text-center text-sm text-slate-400 dark:text-[#8fa596]">Nothing recorded yet.</p>
               ) : (
                 <ul className="space-y-3">
                   {recentActivity.map((a) => {
@@ -463,10 +463,10 @@ export default function StockCountPage() {
                           <p className="text-sm text-slate-700 dark:text-[#d2dbd5]">
                             {a.action === 'RECORDED' ? 'Count submitted' : a.action === 'APPROVED' ? 'Count approved' : 'Count rejected'}
                           </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-[#97a49b]">
+                          <p className="truncate text-xs text-slate-500 dark:text-[#a9bcae]">
                             {a.productName} · {a.quantity} units
                           </p>
-                          <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                          <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                             {timeAgo(a.at)} · by {a.actorName}
                           </p>
                         </div>

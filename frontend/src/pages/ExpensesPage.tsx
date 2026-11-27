@@ -296,11 +296,11 @@ export default function ExpensesPage() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
         <Card className="h-fit">
           <div className="p-5">
-            <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#eef3ef]">
+            <h3 className="mb-1 flex items-center gap-2 font-semibold text-slate-800 dark:text-[#e9f1eb]">
               <IconChip tone="green" size={28} icon={<ReceiptIcon size={14} />} />
               Add New Expense
             </h3>
-            <p className="mb-4 text-xs text-slate-400 dark:text-[#77857c]">Record a new business expense.</p>
+            <p className="mb-4 text-xs text-slate-400 dark:text-[#8fa596]">Record a new business expense.</p>
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
@@ -312,7 +312,7 @@ export default function ExpensesPage() {
                     </option>
                   ))}
                 </Select>
-                {activeHint && <p className="mt-1 text-xs text-slate-400 dark:text-[#77857c]">{activeHint}</p>}
+                {activeHint && <p className="mt-1 text-xs text-slate-400 dark:text-[#8fa596]">{activeHint}</p>}
               </div>
 
               <div>
@@ -360,13 +360,13 @@ export default function ExpensesPage() {
                   onChange={(e) => setDescription(e.target.value.slice(0, 500))}
                   placeholder="e.g. Electricity bill for December, generator fuel, etc."
                 />
-                <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#77857c]">{description.length}/500</p>
+                <p className="mt-1 text-right text-xs text-slate-400 dark:text-[#8fa596]">{description.length}/500</p>
               </div>
 
               <Button type="submit" className="w-full" loading={submitting} icon={<Plus size={15} />}>
                 Save Expense
               </Button>
-              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400 dark:text-[#77857c]">
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400 dark:text-[#8fa596]">
                 All expenses are recorded immediately and cannot be edited (only added).
               </p>
             </form>
@@ -381,8 +381,8 @@ export default function ExpensesPage() {
         <div className="min-w-0">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-slate-800 dark:text-[#eef3ef]">Expense History</h3>
-              <p className="text-xs text-slate-400 dark:text-[#77857c]">View and manage all recorded expenses.</p>
+              <h3 className="font-semibold text-slate-800 dark:text-[#e9f1eb]">Expense History</h3>
+              <p className="text-xs text-slate-400 dark:text-[#8fa596]">View and manage all recorded expenses.</p>
             </div>
             <Button type="button" variant="outline" size="sm" icon={<Download size={14} />} onClick={exportCsv}>
               Export
@@ -391,7 +391,7 @@ export default function ExpensesPage() {
 
           <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 [&>*]:min-w-0">
             <div className="relative sm:col-span-2">
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search expenses..." className="pl-9" />
             </div>
             <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
@@ -412,7 +412,7 @@ export default function ExpensesPage() {
             </Select>
             <div className="flex items-center gap-1.5 sm:col-span-2">
               <Input type="date" aria-label="From date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} max={dateTo} className="min-w-0" />
-              <span className="text-xs text-slate-400 dark:text-[#77857c]">to</span>
+              <span className="text-xs text-slate-400 dark:text-[#8fa596]">to</span>
               <Input type="date" aria-label="To date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} min={dateFrom} max={todayIso()} className="min-w-0" />
             </div>
           </div>
@@ -445,8 +445,8 @@ export default function ExpensesPage() {
                             <div className="flex items-center gap-2">
                               <IconChip tone={tone} size={26} icon={<CatIcon size={13} />} />
                               <div className="min-w-0">
-                                <span className="font-medium text-slate-800 dark:text-[#eef3ef]">{e.category}</span>
-                                <span className="block max-w-[11rem] truncate text-xs text-slate-400 dark:text-[#77857c] md:hidden">
+                                <span className="font-medium text-slate-800 dark:text-[#e9f1eb]">{e.category}</span>
+                                <span className="block max-w-[11rem] truncate text-xs text-slate-400 dark:text-[#8fa596] md:hidden">
                                   {TYPE_LABEL[e.expense_type]}{e.description ? ` · ${e.description}` : ''}
                                 </span>
                               </div>
@@ -455,8 +455,8 @@ export default function ExpensesPage() {
                           <Td className="hidden md:table-cell">
                             <Badge tone={TYPE_TONE[e.expense_type]}>{TYPE_LABEL[e.expense_type]}</Badge>
                           </Td>
-                          <Td className="hidden max-w-xs truncate text-slate-500 dark:text-[#97a49b] md:table-cell">{e.description ?? '—'}</Td>
-                          <Td className="text-right font-semibold text-slate-800 dark:text-[#eef3ef]">{tzs(e.amount)}</Td>
+                          <Td className="hidden max-w-xs truncate text-slate-500 dark:text-[#a9bcae] md:table-cell">{e.description ?? '—'}</Td>
+                          <Td className="text-right font-semibold text-slate-800 dark:text-[#e9f1eb]">{tzs(e.amount)}</Td>
                           <Td className="hidden lg:table-cell">
                             <div className="flex items-center gap-2">
                               <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-[10px] font-bold text-white">
@@ -464,7 +464,7 @@ export default function ExpensesPage() {
                               </div>
                               <div>
                                 <p className="text-slate-700 dark:text-[#d2dbd5]">{e.created_by_name}</p>
-                                <p className="text-xs text-slate-400 dark:text-[#77857c]">{formatTime(e.created_at)}</p>
+                                <p className="text-xs text-slate-400 dark:text-[#8fa596]">{formatTime(e.created_at)}</p>
                               </div>
                             </div>
                           </Td>
@@ -475,11 +475,11 @@ export default function ExpensesPage() {
                 </Table>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-3">
-                  <p className="text-xs text-slate-400 dark:text-[#77857c]">
+                  <p className="text-xs text-slate-400 dark:text-[#8fa596]">
                     Showing {pageItems.length} of {filtered.length} expenses
                   </p>
                   <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 dark:text-[#77857c]">
+                  <span className="text-xs text-slate-400 dark:text-[#8fa596]">
                     Page {page} of {totalPages}
                   </span>
                   <div className="flex items-center gap-1">
@@ -487,7 +487,7 @@ export default function ExpensesPage() {
                       type="button"
                       disabled={page <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 disabled:opacity-40"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50 disabled:opacity-40"
                     >
                       <ChevronLeft size={14} />
                     </button>
@@ -502,7 +502,7 @@ export default function ExpensesPage() {
                           type="button"
                           onClick={() => setPage(n)}
                           className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium ${
-                            n === page ? 'bg-green-600 text-white' : 'text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
+                            n === page ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712]' : 'text-slate-600 dark:text-[#b6c2ba] hover:bg-slate-50'
                           }`}
                         >
                           {n}
@@ -513,7 +513,7 @@ export default function ExpensesPage() {
                       type="button"
                       disabled={page >= totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#97a49b] hover:bg-slate-50 disabled:opacity-40"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] text-slate-500 dark:text-[#a9bcae] hover:bg-slate-50 disabled:opacity-40"
                     >
                       <ChevronRight size={14} />
                     </button>

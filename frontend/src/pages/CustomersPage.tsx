@@ -87,7 +87,7 @@ export default function CustomersPage() {
 
       <Card className="mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -124,10 +124,10 @@ export default function CustomersPage() {
             <tbody>
               {filtered.map((c) => (
                 <Tr key={c.id}>
-                  <Td className="font-medium text-slate-800 dark:text-[#eef3ef]">
+                  <Td className="font-medium text-slate-800 dark:text-[#e9f1eb]">
                     {c.name}
                     {(c.email || c.address) && (
-                      <span className="mt-0.5 block whitespace-normal text-xs font-normal text-slate-500 dark:text-[#97a49b] md:hidden">
+                      <span className="mt-0.5 block whitespace-normal text-xs font-normal text-slate-500 dark:text-[#a9bcae] md:hidden">
                         {[c.email, c.address].filter(Boolean).join(' · ')}
                       </span>
                     )}
@@ -135,28 +135,28 @@ export default function CustomersPage() {
                       <Badge tone={c.status === 'active' ? 'green' : 'slate'}>{c.status}</Badge>
                     </span>
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">
                     {c.phone ? (
                       <a href={`tel:${c.phone.replace(/\s+/g, '')}`} className="flex items-center gap-1.5 hover:text-green-700 hover:underline" aria-label={`Call ${c.name}`}>
-                        <Phone size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.phone}
+                        <Phone size={13} className="flex-shrink-0 text-slate-400 dark:text-[#8fa596]" /> {c.phone}
                       </a>
                     ) : (
                       '—'
                     )}
                   </Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] md:table-cell">
                     {c.email ? (
                       <span className="flex items-center gap-1.5">
-                        <Mail size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.email}
+                        <Mail size={13} className="flex-shrink-0 text-slate-400 dark:text-[#8fa596]" /> {c.email}
                       </span>
                     ) : (
                       '—'
                     )}
                   </Td>
-                  <Td className="hidden text-slate-500 dark:text-[#97a49b] md:table-cell">
+                  <Td className="hidden text-slate-500 dark:text-[#a9bcae] md:table-cell">
                     {c.address ? (
                       <span className="flex items-center gap-1.5">
-                        <MapPin size={13} className="flex-shrink-0 text-slate-400 dark:text-[#77857c]" /> {c.address}
+                        <MapPin size={13} className="flex-shrink-0 text-slate-400 dark:text-[#8fa596]" /> {c.address}
                       </span>
                     ) : (
                       '—'
@@ -166,7 +166,7 @@ export default function CustomersPage() {
                     <Badge tone={c.status === 'active' ? 'green' : 'slate'}>{c.status}</Badge>
                   </Td>
                   <Td>
-                    <button onClick={() => openEdit(c)} className="text-slate-400 dark:text-[#77857c] hover:text-amber-600" title="Edit customer" aria-label={`Edit ${c.name}`}>
+                    <button onClick={() => openEdit(c)} className="text-slate-400 dark:text-[#8fa596] hover:text-amber-600" title="Edit customer" aria-label={`Edit ${c.name}`}>
                       <Pencil size={16} />
                     </button>
                   </Td>

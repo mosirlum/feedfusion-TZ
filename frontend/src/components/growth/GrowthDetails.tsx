@@ -67,10 +67,10 @@ export function Section({
           <div className="flex items-center gap-3">
             <IconChip tone={tone} icon={icon} size={36} />
             <div>
-              <h2 id={`${id}-title`} className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">
+              <h2 id={`${id}-title`} className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">
                 {title}
               </h2>
-              {subtitle && <p className="mt-0.5 text-sm text-slate-500 dark:text-[#97a49b]">{subtitle}</p>}
+              {subtitle && <p className="mt-0.5 text-sm text-slate-500 dark:text-[#a9bcae]">{subtitle}</p>}
             </div>
           </div>
           {action}
@@ -96,15 +96,15 @@ function Tile({ href, label, value, hint, tone, icon }: { href: string; label: s
   return (
     <a
       href={href}
-      className="group block rounded-card border border-slate-200 bg-white p-4 shadow-card transition duration-150 hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:translate-y-0 dark:border-[rgba(255,255,255,0.08)] dark:bg-[#121a16]"
+      className="group block rounded-card border border-slate-200 bg-white p-4 shadow-card transition duration-150 hover:-translate-y-0.5 hover:shadow-panel focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 active:translate-y-0 dark:border-[rgba(255,255,255,0.08)] dark:bg-[#11211a]"
     >
       <div className="flex items-center justify-between">
         <IconChip tone={tone} icon={icon} size={32} />
         <ArrowRight size={14} className="text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500" aria-hidden="true" />
       </div>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">{label}</p>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">{label}</p>
       <p className={clsx('mt-0.5 font-display text-xl font-extrabold tabular-nums', TILE_TONE[tone])}>{value}</p>
-      <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">{hint}</p>
+      <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">{hint}</p>
     </a>
   );
 }
@@ -170,7 +170,7 @@ function niceMax(dataMax: number): number {
 }
 
 function ChangePill({ pct }: { pct: number | null }) {
-  if (pct === null) return <span className="text-xs text-slate-400 dark:text-[#77857c]">no comparison</span>;
+  if (pct === null) return <span className="text-xs text-slate-400 dark:text-[#8fa596]">no comparison</span>;
   const up = pct >= 0;
   return (
     <span
@@ -219,7 +219,7 @@ function TrendChart({
       {[0, 0.5, 1].map((f) => (
         <g key={f}>
           <line x1={pad.left} x2={width - pad.right} y1={y(max * f)} y2={y(max * f)} stroke="currentColor" className="text-slate-200 dark:text-[rgba(255,255,255,0.1)]" strokeWidth={1} />
-          <text x={pad.left - 8} y={y(max * f)} dominantBaseline="middle" textAnchor="end" fontSize={11} className="fill-slate-400 dark:fill-[#77857c]">
+          <text x={pad.left - 8} y={y(max * f)} dominantBaseline="middle" textAnchor="end" fontSize={11} className="fill-slate-400 dark:fill-[#8fa596]">
             {compactNumber(max * f)}
           </text>
         </g>
@@ -263,11 +263,11 @@ function TrendChart({
       )}
       <polyline className="ff-draw" pathLength={1} style={{ ['--d' as string]: `${700}ms` }} points={linePts} fill="none" stroke="#eb6834" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" pointerEvents="none" />
       {points.map((p, i) => (
-        <circle key={`d-${p.period}`} style={{ ['--d' as string]: `${900 + i * 60}ms` }} cx={cx(i)} cy={y(p.grossProfit)} r={i === selected ? 4.5 : 3} className="ff-dot fill-white dark:fill-[#121a16]" stroke="#eb6834" strokeWidth={2} pointerEvents="none" />
+        <circle key={`d-${p.period}`} style={{ ['--d' as string]: `${900 + i * 60}ms` }} cx={cx(i)} cy={y(p.grossProfit)} r={i === selected ? 4.5 : 3} className="ff-dot fill-white dark:fill-[#11211a]" stroke="#eb6834" strokeWidth={2} pointerEvents="none" />
       ))}
       {points.map((p, i) =>
         i % labelEvery === 0 || i === n - 1 ? (
-          <text key={`l-${p.period}`} x={cx(i)} y={height - 7} textAnchor="middle" fontSize={11} className={clsx(i === selected ? 'fill-slate-700 font-semibold dark:fill-[#d2dbd5]' : 'fill-slate-400 dark:fill-[#77857c]')}>
+          <text key={`l-${p.period}`} x={cx(i)} y={height - 7} textAnchor="middle" fontSize={11} className={clsx(i === selected ? 'fill-slate-700 font-semibold dark:fill-[#d2dbd5]' : 'fill-slate-400 dark:fill-[#8fa596]')}>
             {periodLabel(p.period, kind)}
           </text>
         ) : null
@@ -316,19 +316,19 @@ export function TrendSection({ details, week }: { details: BusinessGrowthDetails
         <div className="p-5">
           <div className="mb-4 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4" aria-live="polite">
             <div className="col-span-2 sm:col-span-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">{sel ? periodTitle(sel, kind) : '—'}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">{sel ? periodTitle(sel, kind) : '—'}</p>
               <div className="mt-1">{sel && <ChangePill pct={sel.revenueChangePct} />}</div>
             </div>
             <div>
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">Revenue</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">Revenue</p>
               <p className="font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{tzs(sel?.revenue)}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">Gross profit</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">Gross profit</p>
               <p className="font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{tzs(sel?.grossProfit)}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 dark:text-[#97a49b]">Margin</p>
+              <p className="text-xs text-slate-500 dark:text-[#a9bcae]">Margin</p>
               <p className="font-display text-lg font-extrabold tabular-nums text-slate-800 dark:text-[#f4f8f5]">{margin === null ? '—' : `${margin}%`}</p>
             </div>
           </div>
@@ -339,7 +339,7 @@ export function TrendSection({ details, week }: { details: BusinessGrowthDetails
             onSelect={(i) => setPicked({ kind, index: i })}
             baselineFullWeek={baselineFullWeek}
           />
-          <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500 dark:text-[#97a49b]">
+          <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500 dark:text-[#a9bcae]">
             <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-green-500" aria-hidden="true" />Revenue</li>
             <li className="inline-flex items-center gap-1.5"><span className="h-0.5 w-4 rounded bg-[#eb6834]" aria-hidden="true" />Gross profit</li>
             {kind === 'weekly' && baselineFullWeek !== null && (
@@ -369,13 +369,13 @@ function ReorderRow({ item }: { item: GrowthReorderSuggestion }) {
   const unit = item.unit ?? 'units';
   const coverText = item.daysOfCover === null ? '—' : item.daysOfCover <= 0 ? 'Out of stock' : `${item.daysOfCover} day${item.daysOfCover === 1 ? '' : 's'} left`;
   return (
-    <li className="grid gap-3 px-5 py-4 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] sm:items-center">
+    <li className="grid gap-3 px-5 py-4 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0d1a14]/40 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] sm:items-center">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{item.name}</span>
+          <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{item.name}</span>
           <Badge tone={item.urgency === 'now' ? 'red' : 'amber'}>{item.urgency === 'now' ? 'Order now' : 'Order soon'}</Badge>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">
           Selling about {item.avgDailySales.toLocaleString('en', { maximumFractionDigits: 1 })} {unit}/day · minimum {item.minimumStock}
         </p>
       </div>
@@ -389,10 +389,10 @@ function ReorderRow({ item }: { item: GrowthReorderSuggestion }) {
         <CoverBar days={item.daysOfCover} urgency={item.urgency} />
       </div>
       <div className="sm:text-right">
-        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#eef3ef]">
+        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#e9f1eb]">
           Order {item.suggestedQty} {unit}
         </p>
-        <p className="text-xs text-slate-500 dark:text-[#97a49b]">{item.estimatedCost !== null ? `≈ ${tzs(item.estimatedCost)}` : 'no purchase cost on record'}</p>
+        <p className="text-xs text-slate-500 dark:text-[#a9bcae]">{item.estimatedCost !== null ? `≈ ${tzs(item.estimatedCost)}` : 'no purchase cost on record'}</p>
       </div>
     </li>
   );
@@ -423,12 +423,12 @@ export function ReorderSection({ data }: { data: BusinessGrowthDetails['reorder'
             ))}
           </ul>
           <div className="flex flex-col gap-1 border-t border-slate-100 px-5 py-3 text-sm dark:border-[rgba(255,255,255,0.08)] sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-slate-500 dark:text-[#97a49b]">
+            <span className="text-slate-500 dark:text-[#a9bcae]">
               {data.totalCount > data.items.length ? `Showing the ${data.items.length} most urgent of ${data.totalCount}. ` : ''}
               Suggested quantities cover about 14 days of sales.
             </span>
             {total > 0 && (
-              <span className="font-semibold tabular-nums text-slate-800 dark:text-[#eef3ef]">Estimated cost: {tzs(total)}</span>
+              <span className="font-semibold tabular-nums text-slate-800 dark:text-[#e9f1eb]">Estimated cost: {tzs(total)}</span>
             )}
           </div>
         </>
@@ -449,17 +449,17 @@ function SlowRow({ item }: { item: GrowthSlowMovingItem }) {
         : `Last sale ${item.daysSinceLastSale} days ago`
       : `${item.daysOfCover ?? '—'} days of stock at the current pace`;
   return (
-    <li className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40">
+    <li className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0d1a14]/40">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{item.name}</span>
+          <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{item.name}</span>
           <Badge tone={item.reason === 'no_recent_sales' ? 'amber' : 'blue'}>{item.reason === 'no_recent_sales' ? 'Not selling' : 'Too much stock'}</Badge>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#97a49b]">{why}</p>
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#a9bcae]">{why}</p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#eef3ef]">{item.stockValueCost !== null ? tzs(item.stockValueCost) : '—'}</p>
-        <p className="text-xs tabular-nums text-slate-500 dark:text-[#97a49b]">
+        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{item.stockValueCost !== null ? tzs(item.stockValueCost) : '—'}</p>
+        <p className="text-xs tabular-nums text-slate-500 dark:text-[#a9bcae]">
           {item.currentStock} {unit}
         </p>
       </div>
@@ -485,7 +485,7 @@ export function SlowMovingSection({ data }: { data: BusinessGrowthDetails['slowM
               <SlowRow key={i.productId} item={i} />
             ))}
           </ul>
-          <p className="border-t border-slate-100 px-5 py-3 text-sm text-slate-500 dark:border-[rgba(255,255,255,0.08)] dark:text-[#97a49b]">
+          <p className="border-t border-slate-100 px-5 py-3 text-sm text-slate-500 dark:border-[rgba(255,255,255,0.08)] dark:text-[#a9bcae]">
             {data.totalCount > data.items.length ? `Showing ${data.items.length} of ${data.totalCount}. ` : ''}
             Try a discount, a bundle with a fast seller, or a visible display spot to turn this stock back into cash.
           </p>
@@ -513,18 +513,18 @@ function CallLink({ phone, name }: { phone: string | null; name: string }) {
 
 function TopCustomerRow({ c, rank, max }: { c: GrowthCustomerRevenue; rank: number; max: number }) {
   return (
-    <li className="px-5 py-3.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40">
+    <li className="px-5 py-3.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0d1a14]/40">
       <div className="flex items-center gap-3">
-        <span className={clsx('flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums', rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-[#0e1512] dark:text-[#97a49b]')}>
+        <span className={clsx('flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums', rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-[#0d1a14] dark:text-[#a9bcae]')}>
           {rank}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="break-words font-semibold text-slate-800 dark:text-[#eef3ef]">{c.name}</p>
-          <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+          <p className="break-words font-semibold text-slate-800 dark:text-[#e9f1eb]">{c.name}</p>
+          <p className="text-xs text-slate-500 dark:text-[#a9bcae]">
             {c.salesCount} purchase{c.salesCount === 1 ? '' : 's'}
           </p>
         </div>
-        <p className="shrink-0 text-sm font-semibold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(c.revenue)}</p>
+        <p className="shrink-0 text-sm font-semibold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(c.revenue)}</p>
         <CallLink phone={c.phone} name={c.name} />
       </div>
       <div className="ml-10 mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-[rgba(255,255,255,0.08)]" aria-hidden="true">
@@ -537,20 +537,20 @@ function TopCustomerRow({ c, rank, max }: { c: GrowthCustomerRevenue; rank: numb
 function DebtRow({ d }: { d: GrowthCustomerDebt }) {
   const overdue = d.overdueBalance > 0;
   return (
-    <li className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0e1512]/40">
+    <li className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-[#0d1a14]/40">
       <div className="min-w-0 flex-1">
-        <p className="break-words font-semibold text-slate-800 dark:text-[#eef3ef]">{d.name}</p>
-        <p className="text-xs text-slate-500 dark:text-[#97a49b]">
+        <p className="break-words font-semibold text-slate-800 dark:text-[#e9f1eb]">{d.name}</p>
+        <p className="text-xs text-slate-500 dark:text-[#a9bcae]">
           {d.invoices} unpaid invoice{d.invoices === 1 ? '' : 's'}
           {d.oldestDueDate ? ` · oldest due ${formatDate(d.oldestDueDate)}` : ''}
         </p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#eef3ef]">{tzs(d.balanceDue)}</p>
+        <p className="text-sm font-semibold tabular-nums text-slate-800 dark:text-[#e9f1eb]">{tzs(d.balanceDue)}</p>
         {overdue ? (
           <p className="text-xs font-semibold tabular-nums text-danger-600 dark:text-danger-300">{tzs(d.overdueBalance)} overdue</p>
         ) : (
-          <p className="text-xs text-slate-500 dark:text-[#97a49b]">not yet due</p>
+          <p className="text-xs text-slate-500 dark:text-[#a9bcae]">not yet due</p>
         )}
       </div>
       <CallLink phone={d.phone} name={d.name} />
@@ -566,8 +566,8 @@ export function CustomersSection({ data }: { data: BusinessGrowthDetails['custom
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
           <IconChip tone="green" icon={<Trophy size={18} />} size={36} />
           <div>
-            <h2 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Best customers</h2>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-[#97a49b]">Most spent in the last {data.windowDays} days</p>
+            <h2 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Best customers</h2>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-[#a9bcae]">Most spent in the last {data.windowDays} days</p>
           </div>
         </div>
         {data.top.length === 0 ? (
@@ -584,8 +584,8 @@ export function CustomersSection({ data }: { data: BusinessGrowthDetails['custom
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-[rgba(255,255,255,0.08)]">
           <IconChip tone="red" icon={<Wallet size={18} />} size={36} />
           <div>
-            <h2 className="font-display font-bold text-slate-800 dark:text-[#eef3ef]">Who owes you</h2>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-[#97a49b]">
+            <h2 className="font-display font-bold text-slate-800 dark:text-[#e9f1eb]">Who owes you</h2>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-[#a9bcae]">
               {data.debts.debtorCount > 0 ? `${tzs(data.debts.totalOutstanding)} across ${data.debts.debtorCount} customer${data.debts.debtorCount === 1 ? '' : 's'}` : 'Credit sales waiting to be paid'}
             </p>
           </div>

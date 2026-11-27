@@ -94,8 +94,8 @@ export default function ForceChangePasswordPage() {
               <KeyRound size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800 dark:text-[#eef3ef]">Set a new password</h1>
-              <p className="text-sm text-slate-500 dark:text-[#97a49b]">
+              <h1 className="text-xl font-bold text-slate-800 dark:text-[#e9f1eb]">Set a new password</h1>
+              <p className="text-sm text-slate-500 dark:text-[#a9bcae]">
                 {user?.name ? `Hi ${user.name.split(' ')[0]}, ` : ''}you need to set your own password before continuing.
               </p>
             </div>
@@ -148,7 +148,7 @@ export default function ForceChangePasswordPage() {
 
           <button
             onClick={logout}
-            className="mt-6 w-full text-center text-xs text-slate-400 dark:text-[#77857c] hover:text-slate-600"
+            className="mt-6 w-full text-center text-xs text-slate-400 dark:text-[#8fa596] hover:text-slate-600"
             type="button"
           >
             Not you? Sign out
@@ -191,7 +191,7 @@ function PasswordField({
       <button
         type="button"
         onClick={onToggleShow}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c] hover:text-slate-600"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596] hover:text-slate-600"
         tabIndex={-1}
       >
         {show ? <EyeOff size={18} /> : <Eye size={18} />}

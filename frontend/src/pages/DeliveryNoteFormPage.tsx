@@ -180,7 +180,7 @@ export default function DeliveryNoteFormPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#77857c]">
+      <div className="flex h-64 items-center justify-center text-slate-400 dark:text-[#8fa596]">
         <PackageCheck size={18} className="mr-2 animate-pulse" /> Loading…
       </div>
     );
@@ -200,13 +200,13 @@ export default function DeliveryNoteFormPage() {
           <Card className="p-5">
             <div className="mb-3 flex items-center gap-2.5">
               <IconChip tone="blue" size={30} icon={<User size={14} />} />
-              <h3 className="font-bold text-slate-800 dark:text-[#eef3ef]">Deliver To</h3>
+              <h3 className="font-bold text-slate-800 dark:text-[#e9f1eb]">Deliver To</h3>
             </div>
 
             <div ref={customerBoxRef} className="relative mb-3">
               <Label>Search saved customers</Label>
               <div className="relative">
-                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
                 <Input
                   className="pl-9"
                   placeholder="Type a name or phone number…"
@@ -219,10 +219,10 @@ export default function DeliveryNoteFormPage() {
                 />
               </div>
               {customerDropdownOpen && (
-                <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#121a16] shadow-panel">
+                <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 dark:border-[rgba(255,255,255,0.14)] bg-white dark:bg-[#11211a] shadow-panel">
                   <div className="max-h-56 overflow-y-auto">
                     {customerResults.length === 0 ? (
-                      <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#77857c]">No saved customers match yet.</p>
+                      <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#8fa596]">No saved customers match yet.</p>
                     ) : (
                       customerResults.map((c) => (
                         <button
@@ -232,8 +232,8 @@ export default function DeliveryNoteFormPage() {
                           className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm hover:bg-slate-50"
                         >
                           <span>
-                            <span className="block font-medium text-slate-800 dark:text-[#eef3ef]">{c.name}</span>
-                            <span className="block text-xs text-slate-400 dark:text-[#77857c]">{c.phone ?? 'No phone'}</span>
+                            <span className="block font-medium text-slate-800 dark:text-[#e9f1eb]">{c.name}</span>
+                            <span className="block text-xs text-slate-400 dark:text-[#8fa596]">{c.phone ?? 'No phone'}</span>
                           </span>
                           {customerId === c.id && <Check size={15} className="text-green-600" />}
                         </button>
@@ -282,9 +282,9 @@ export default function DeliveryNoteFormPage() {
           {/* Item picker + list */}
           <Card>
             <div className="border-b border-slate-100 dark:border-[rgba(255,255,255,0.08)] px-5 py-4">
-              <h3 className="mb-3 font-bold text-slate-800 dark:text-[#eef3ef]">Items</h3>
+              <h3 className="mb-3 font-bold text-slate-800 dark:text-[#e9f1eb]">Items</h3>
               <div className="relative">
-                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
                 <Input
                   className="pl-9"
                   placeholder="Search products to add…"
@@ -295,7 +295,7 @@ export default function DeliveryNoteFormPage() {
               {productQuery.trim() && (
                 <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-slate-100 dark:border-[rgba(255,255,255,0.08)]">
                   {filteredCatalog.length === 0 ? (
-                    <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#77857c]">No products match "{productQuery}".</p>
+                    <p className="px-3.5 py-3 text-sm text-slate-400 dark:text-[#8fa596]">No products match "{productQuery}".</p>
                   ) : (
                     filteredCatalog.map((p) => (
                       <button
@@ -308,8 +308,8 @@ export default function DeliveryNoteFormPage() {
                         className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm hover:bg-green-50/60"
                       >
                         <span>
-                          <span className="block font-medium text-slate-800 dark:text-[#eef3ef]">{p.name}</span>
-                          <span className="block text-xs text-slate-400 dark:text-[#77857c]">
+                          <span className="block font-medium text-slate-800 dark:text-[#e9f1eb]">{p.name}</span>
+                          <span className="block text-xs text-slate-400 dark:text-[#8fa596]">
                             {p.category_name ?? 'Uncategorized'} · {p.unit}
                           </span>
                         </span>
@@ -325,11 +325,11 @@ export default function DeliveryNoteFormPage() {
 
             <div className="p-5">
               {items.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-400 dark:text-[#77857c]">No items yet — search above to add products.</p>
+                <p className="py-8 text-center text-sm text-slate-400 dark:text-[#8fa596]">No items yet — search above to add products.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-[#77857c]">
+                    <thead className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-[#8fa596]">
                       <tr>
                         <th className="pb-2 pr-2">Product</th>
                         <th className="pb-2 px-2 text-right">Qty</th>
@@ -340,8 +340,8 @@ export default function DeliveryNoteFormPage() {
                       {items.map((line) => (
                         <tr key={line.key} className="border-t border-slate-100 dark:border-[rgba(255,255,255,0.08)]">
                           <td className="py-2 pr-2">
-                            <p className="font-medium text-slate-800 dark:text-[#eef3ef]">{line.product.name}</p>
-                            <p className="text-xs text-slate-400 dark:text-[#77857c]">{line.product.unit}</p>
+                            <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">{line.product.name}</p>
+                            <p className="text-xs text-slate-400 dark:text-[#8fa596]">{line.product.unit}</p>
                           </td>
                           <td className="py-2 px-2">
                             <Input
@@ -377,7 +377,7 @@ export default function DeliveryNoteFormPage() {
         {/* Delivery details */}
         <div className="flex flex-col gap-4">
           <Card className="p-5">
-            <h3 className="mb-3 font-bold text-slate-800 dark:text-[#eef3ef]">Delivery Details</h3>
+            <h3 className="mb-3 font-bold text-slate-800 dark:text-[#e9f1eb]">Delivery Details</h3>
             <div className="flex flex-col gap-3">
               <FormField label="Delivery date">
                 <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
@@ -389,18 +389,18 @@ export default function DeliveryNoteFormPage() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="mb-3 font-bold text-slate-800 dark:text-[#eef3ef]">Summary</h3>
+            <h3 className="mb-3 font-bold text-slate-800 dark:text-[#e9f1eb]">Summary</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+              <div className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                 <span>Products</span>
                 <span>{items.length}</span>
               </div>
-              <div className="flex justify-between text-slate-500 dark:text-[#97a49b]">
+              <div className="flex justify-between text-slate-500 dark:text-[#a9bcae]">
                 <span>Total quantity</span>
                 <span>{items.reduce((sum, l) => sum + l.quantity, 0)}</span>
               </div>
             </div>
-            <p className="mt-3 text-xs text-slate-400 dark:text-[#77857c]">No prices are printed and stock is not changed — stock only moves when the sale is completed.</p>
+            <p className="mt-3 text-xs text-slate-400 dark:text-[#8fa596]">No prices are printed and stock is not changed — stock only moves when the sale is completed.</p>
             <Button className="mt-4 w-full" size="lg" loading={submitting} onClick={handleSubmit} disabled={items.length === 0}>
               Create Delivery Note
             </Button>

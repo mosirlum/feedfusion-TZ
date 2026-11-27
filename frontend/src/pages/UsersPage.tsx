@@ -141,7 +141,7 @@ export default function UsersPage() {
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#77857c]" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa596]" />
           <Input placeholder="Search by name, email or phone…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ export default function UsersPage() {
                 onClick={() => setRoleTab(r)}
                 className={clsx(
                   'flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors',
-                  roleTab === r ? 'bg-green-600 text-white shadow-card' : 'bg-white dark:bg-[#121a16] text-slate-600 dark:text-[#b6c2ba] border border-slate-200 dark:border-[rgba(255,255,255,0.14)] hover:bg-slate-50'
+                  roleTab === r ? 'bg-green-600 text-white dark:bg-lime-400 dark:text-[#0b1712] shadow-card' : 'bg-white dark:bg-[#11211a] text-slate-600 dark:text-[#b6c2ba] border border-slate-200 dark:border-[rgba(255,255,255,0.14)] hover:bg-slate-50'
                 )}
               >
                 <Icon size={14} />
@@ -193,26 +193,26 @@ export default function UsersPage() {
                     <div className="flex items-center gap-2.5">
                       <UserAvatar name={u.name} size={32} />
                       <div>
-                        <p className="font-medium text-slate-800 dark:text-[#eef3ef]">
+                        <p className="font-medium text-slate-800 dark:text-[#e9f1eb]">
                           {u.name}
                           {u.id === me?.id && (
-                            <span className="ml-1.5 rounded-full bg-slate-100 dark:bg-[#0e1512] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-[#97a49b]">
+                            <span className="ml-1.5 rounded-full bg-slate-100 dark:bg-[#0d1a14] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-[#a9bcae]">
                               You
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-[#77857c]">USER-{String(u.id).padStart(3, '0')}</p>
+                        <p className="text-xs text-slate-400 dark:text-[#8fa596]">USER-{String(u.id).padStart(3, '0')}</p>
                       </div>
                     </div>
                   </Td>
-                  <Td className="text-slate-500 dark:text-[#97a49b]">
+                  <Td className="text-slate-500 dark:text-[#a9bcae]">
                     <div className="flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5">
-                        <Mail size={12} className="text-slate-400 dark:text-[#77857c]" />
+                        <Mail size={12} className="text-slate-400 dark:text-[#8fa596]" />
                         {u.email ?? '—'}
                       </span>
                       {u.phone && (
-                        <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-[#77857c]">
+                        <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-[#8fa596]">
                           <Phone size={11} />
                           {u.phone}
                         </span>
@@ -241,7 +241,7 @@ export default function UsersPage() {
                       <Badge tone={u.status === 'active' ? 'green' : 'slate'}>{u.status}</Badge>
                     </span>
                   </Td>
-                  <Td className="text-slate-400 dark:text-[#77857c] text-xs">{formatDate(u.created_at)}</Td>
+                  <Td className="text-slate-400 dark:text-[#8fa596] text-xs">{formatDate(u.created_at)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-2">
                       <Button
@@ -257,7 +257,7 @@ export default function UsersPage() {
                         title={u.id === me?.id ? 'Change your own password from My Profile' : `Reset ${u.name}'s password`}
                         disabled={u.id === me?.id}
                         onClick={() => setResetTarget(u)}
-                        className="rounded-lg p-2 text-slate-400 dark:text-[#77857c] transition-colors hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                        className="rounded-lg p-2 text-slate-400 dark:text-[#8fa596] transition-colors hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
                       >
                         <KeyRound size={15} />
                       </button>
@@ -265,7 +265,7 @@ export default function UsersPage() {
                         title={u.id === me?.id ? "You can't delete your own account" : `Delete ${u.name}`}
                         disabled={u.id === me?.id}
                         onClick={() => setDeleteTarget(u)}
-                        className="rounded-lg p-2 text-slate-400 dark:text-[#77857c] transition-colors hover:bg-danger-50 hover:text-danger-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                        className="rounded-lg p-2 text-slate-400 dark:text-[#8fa596] transition-colors hover:bg-danger-50 hover:text-danger-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
                       >
                         <Trash2 size={15} />
                       </button>
@@ -305,10 +305,10 @@ export default function UsersPage() {
             </div>
             <div className="text-sm text-slate-600 dark:text-[#b6c2ba]">
               <p>
-                Delete <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{deleteTarget.name}</span> ({deleteTarget.email})? This permanently
+                Delete <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{deleteTarget.name}</span> ({deleteTarget.email})? This permanently
                 removes the account and cannot be undone.
               </p>
-              <p className="mt-2 text-xs text-slate-400 dark:text-[#77857c]">
+              <p className="mt-2 text-xs text-slate-400 dark:text-[#8fa596]">
                 This only works if the account has no recorded activity yet (no sales, purchases, stock records, etc.). If it does, delete
                 will be blocked — deactivate the account instead.
               </p>
@@ -352,8 +352,8 @@ function ResetPasswordModal({ target, onClose }: { target: PublicUser | null; on
     <Modal open={target !== null} onClose={onClose} title="Reset password" size="sm">
       {target && (
         <form onSubmit={handleSubmit} className="space-y-3">
-          <p className="text-sm text-slate-500 dark:text-[#97a49b]">
-            Type a new temporary password for <span className="font-semibold text-slate-800 dark:text-[#eef3ef]">{target.name}</span>.
+          <p className="text-sm text-slate-500 dark:text-[#a9bcae]">
+            Type a new temporary password for <span className="font-semibold text-slate-800 dark:text-[#e9f1eb]">{target.name}</span>.
             They'll be asked to set their own password the next time they log in.
           </p>
           <FormField label="New temporary password">
