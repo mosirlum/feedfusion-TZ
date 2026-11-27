@@ -84,7 +84,14 @@
   50% { transform: scaleY(0.55); }
 }
 
+/* "thinking" dots */
+.ff-robot-dot { animation: ff-robot-dot 1.2s ease-in-out infinite; }
+.ff-robot-d2 { animation-delay: 0.2s; }
+.ff-robot-d3 { animation-delay: 0.4s; }
+@keyframes ff-robot-dot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .ff-robot-dot,
   .ff-robot,
   .ff-robot-tip,
   .ff-robot-eyes,
